@@ -10,10 +10,10 @@ namespace Sources.Core {
         public Vec3F32 size;
     }
     
-    public abstract class Entity {
-        public int id;
+    [Serializable]
+    public class Entity { // Pas abstract pour avoir une vue générique dans Unity Inspector.
         public Transform transform;
-        public Vec3F32 color;
+        public int id;
         
         // Ne pas utiliser de constructeur sur des classes sérialisées pour éviter des comportements fantômes.
         
@@ -33,7 +33,6 @@ namespace Sources.Core {
             e.id = ++currentId;
             e.transform = new Transform();
             e.transform.size = Vec3F32.one;
-            e.color = Vec3F32.one;
         }
     }
 }

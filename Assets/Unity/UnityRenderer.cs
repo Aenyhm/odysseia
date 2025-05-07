@@ -8,30 +8,15 @@ using Object = UnityEngine.Object;
 
 namespace Unity {
     public class UnityRenderer : IRenderer {
-        private static readonly Shader urpLitShader = Shader.Find("Universal Render Pipeline/Lit");
-        
-        private readonly Dictionary<Type, Type> _entityTypes = new() {
-            { typeof(Camera3D), typeof(CameraView) },
-            { typeof(Boat), typeof(BoatView) },
-            { typeof(Obstacle), typeof(ObstacleView) },
+        private readonly Dictionary<Entity, GameObject> _gosByEntity = new();
+        private readonly Dictionary<Type, Pool<GameObject>> _poolsByType = new() {
+            { typeof(Rock), new Pool<GameObject>(() => CreateGameObjectWithView("Rock")) },
+            { typeof(Trunk), new Pool<GameObject>(() => CreateGameObjectWithView("Trunk")) }
         };
 
-        private readonly Dictionary<Entity, GameObject> _gosByEntity = new();
-        private readonly Pool<GameObject> _obstacleGoPool = new(() =>
-            Object.Instantiate(Resources.Load<GameObject>("Cube"))
-        );
-
         public void Create(Entity entity) {
-            var entityType = entity.GetType();
-            
-            if (!_entityTypes.TryGetValue(entityType, out var viewType)) {
-                throw new Exception($"No view type registered for {entityType.Name}");
-            }
-
-            var go = GetGameObjectForEntity(entity);
-            go.name = $"Entity_{entity.id} ({entity.GetType().Name})";
-            
-            var view = (IView)go.AddComponent(viewType);
+            var go = GetEntityGameObject(entity);
+            var view = go.GetComponent<IView>();
             view.SetEntity(entity);
             
             _gosByEntity.Add(entity, go);
@@ -42,8 +27,8 @@ namespace Unity {
             go.SetActive(false);
             _gosByEntity.Remove(entity);
             
-            if (entity is Obstacle) {
-                _obstacleGoPool.Free(go);
+            if (_poolsByType.TryGetValue(entity.GetType(), out var pool)) {
+                pool.Free(go);
             }
         }
         
@@ -55,26 +40,42 @@ namespace Unity {
             }
         }
         
-        private GameObject GetGameObjectForEntity(Entity entity) {
-            return entity switch {
-                Boat => Object.Instantiate(Resources.Load<GameObject>("Boat")),
-                Camera3D => Camera.main!.gameObject,
-                Obstacle => CreateObstacle(entity),
-                _ => throw new Exception($"No GameObject for entity type: {entity.GetType().Name}")
-            };
+        private GameObject GetEntityGameObject(Entity e) {
+            GameObject go;
+            
+            switch (e) {
+                case Camera3D:
+                    go = Camera.main!.gameObject;
+                    AddViewToGameObject(go);
+                    break;
+                case Boat:
+                    go = CreateGameObjectWithView("Boat", typeof(BoatView));
+                    break;
+                case Rock:
+                case Trunk:
+                    go = GetFromPool(e.GetType());
+                    break;
+                default:
+                    throw new Exception($"No GameObject for entity type: {e.GetType().Name}");
+            }
+            
+            return go;
         }
         
-        private GameObject CreateObstacle(Entity e) {
-            var go = _obstacleGoPool.Get();
-            var renderer = go.GetComponent<MeshRenderer>();
-            if (!renderer) {
-                go = Object.Instantiate(Resources.Load<GameObject>("Cube"));
-                renderer.material = new Material(urpLitShader);
-            }
-            go.SetActive(true);
-
-            renderer.material.color = new Color(e.color.x, e.color.y, e.color.z);
+        private static GameObject CreateGameObjectWithView(string assetName, Type viewType = null) {
+            var go = Object.Instantiate(Resources.Load<GameObject>(assetName));
+            AddViewToGameObject(go, viewType);
             
+            return go;
+        }
+        
+        private static void AddViewToGameObject(GameObject go, Type viewType = null) {
+            go.AddComponent(viewType ?? typeof(GenericView));
+        }
+        
+        private GameObject GetFromPool(Type entityType) {
+            var go = _poolsByType[entityType].Get();
+            go.SetActive(true);
             return go;
         }
     }

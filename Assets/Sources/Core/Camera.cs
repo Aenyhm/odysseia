@@ -1,10 +1,7 @@
-using System;
 using Sources.Toolbox;
 
 namespace Sources.Core {
-    [Serializable]
-    public class Camera3D : Entity {
-    }
+    public class Camera3D : Entity { }
     
     public static class CameraController {
         public static Camera3D Create() {

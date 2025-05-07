@@ -1,14 +1,18 @@
 using System;
+using System.Collections.Generic;
 using Sources.Toolbox;
 
 namespace Sources.Core {
     
-    [Serializable]
-    public class Obstacle : Entity {
-    }
+    public abstract class Obstacle : Entity { }
+    public class Rock : Obstacle { }
+    public class Trunk : Obstacle { }
     
     public class Scenery {
-        public readonly Pool<Obstacle> obstacles = new(() => new Obstacle());
+        public readonly Dictionary<Type, Pool<Obstacle>> obstaclePoolsByType = new() {
+            { typeof(Rock),  new Pool<Obstacle>(() => new Rock())},
+            { typeof(Trunk), new Pool<Obstacle>(() => new Trunk())},
+        };
     }
     
     public static class SceneryController {
@@ -32,9 +36,12 @@ namespace Sources.Core {
                 _lastObstacleSpawnZ = boat.transform.position.z;
             }
             
-            var releasedObstacles = scenery.obstacles.FreeAll(obstacle =>
-                obstacle.transform.position.z < boat.transform.position.z - OBSTACLE_REMOVE_DISTANCE
-            );
+            var releasedObstacles = new List<Obstacle>();
+            foreach (var obstacles in scenery.obstaclePoolsByType.Values) {
+                releasedObstacles.AddRange(obstacles.FreeAll(obstacle =>
+                    obstacle.transform.position.z < boat.transform.position.z - OBSTACLE_REMOVE_DISTANCE
+                ));
+            }
             
             foreach (var obstacle in releasedObstacles) {
                 Services.Get<Platform>().renderer.Destroy(obstacle);
@@ -42,31 +49,15 @@ namespace Sources.Core {
         }
         
         private static void GenerateObstable(Scenery scenery, float atZ) {
-            var obstacle = scenery.obstacles.Get();
-            EntityManager.Reset(obstacle);
+            var obstacleType = _rnd.Next(2) == 0 ? typeof(Rock) : typeof(Trunk);
             
-            if (_rnd.Next(2) == 0) {
-                SetRock(obstacle);
-            } else {
-                SetTrunk(obstacle);
-            }
+            var obstacle = scenery.obstaclePoolsByType[obstacleType].Get();
+            EntityManager.Reset(obstacle);
 
             var lane = _rnd.Next(-1, 2);
             obstacle.transform.position = new Vec3F32(lane*LANE_DISTANCE, 0, atZ);
 
             Services.Get<Platform>().renderer.Create(obstacle);
-         }
-         
-        private static void SetRock(Obstacle obstacle) {
-            obstacle.transform.size = new Vec3F32(2f, 1.8f, 2f);
-            obstacle.transform.position = new Vec3F32(10, 0, 70);
-            obstacle.color = new Vec3F32(0.4f, 0.4f, 0.4f);
-        }
-
-        private static void SetTrunk(Obstacle obstacle) {
-            obstacle.transform.position = new Vec3F32(-10, 0, 40);
-            obstacle.transform.size = new Vec3F32(4, 1, 1);
-            obstacle.color = new Vec3F32(0.55f, 0.27f, 0.075f);
         }
     }
 }

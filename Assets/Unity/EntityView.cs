@@ -11,10 +11,10 @@ namespace Unity {
 
         public void SetEntity(object entity) {
             _entity = (E)entity;
+            name = $"Entity_{_entity.id} ({_entity.GetType().Name})";
         }
     }
     
+    public class GenericView : EntityView<Entity> { }
     public class BoatView : EntityView<Boat> { }
-    public class CameraView : EntityView<Camera3D> { }
-    public class ObstacleView : EntityView<Obstacle> { }
 }
