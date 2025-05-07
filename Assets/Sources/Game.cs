@@ -8,8 +8,8 @@ namespace Sources {
         public Scenery scenery;
     }
     
-    public class Game {
-        public Game(Platform platform) {
+    public class Game : IGame {
+        public Game(IPlatform platform) {
             Services.Register(platform);
             
             var gs = new GameState();
@@ -19,17 +19,11 @@ namespace Sources {
             
             Services.Register(gs);
         }
-
-        public void FixedUpdate(float dt) {
-            
-        }
-
-        public void Update(float dt) {
-            var inputState = InputHandler.Read();
-            BoatController.Update(inputState, dt);
+        
+        public void Update(float dt, GameInput input) {
+            BoatController.Update(dt, input);
             CameraController.Update();
             SceneryController.Update();
-            Services.Get<Platform>().renderer.Update();
         }
     }
 }

@@ -1,20 +1,19 @@
 using System;
 using System.Collections.Generic;
-using Sources;
 using Sources.Core;
 using Sources.Toolbox;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Unity {
-    public class UnityRenderer : IRenderer {
+    public class UnityRenderer {
         private readonly Dictionary<Entity, GameObject> _gosByEntity = new();
         private readonly Dictionary<Type, Pool<GameObject>> _poolsByType = new() {
             { typeof(Rock), new Pool<GameObject>(() => CreateGameObjectWithView("Rock")) },
             { typeof(Trunk), new Pool<GameObject>(() => CreateGameObjectWithView("Trunk")) }
         };
 
-        public void Create(Entity entity) {
+        public void Link(Entity entity) {
             var go = GetEntityGameObject(entity);
             var view = go.GetComponent<IView>();
             view.SetEntity(entity);
@@ -22,7 +21,7 @@ namespace Unity {
             _gosByEntity.Add(entity, go);
         }
         
-        public void Destroy(Entity entity) {
+        public void Unlink(Entity entity) {
             var go = _gosByEntity[entity];
             go.SetActive(false);
             _gosByEntity.Remove(entity);

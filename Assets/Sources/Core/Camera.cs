@@ -10,7 +10,7 @@ namespace Sources.Core {
             camera.transform.position.z = -10;
             camera.transform.rotation.x = 20;
             
-            Services.Get<Platform>().renderer.Create(camera);
+            Services.Get<IPlatform>().AddEntityView(camera);
             
             return camera;
         }

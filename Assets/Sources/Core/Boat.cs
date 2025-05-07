@@ -20,24 +20,23 @@ namespace Sources.Core {
             boat.velocity.z = boat.speed;
             boat.transform.size = Vec3F32.one*0.2f;
             
-            Services.Get<Platform>().renderer.Create(boat);
+            Services.Get<IPlatform>().AddEntityView(boat);
             
             return boat;
         }
 
-        public static void Update(InputState inputState, float dt) {
+        public static void Update(float dt, GameInput input) {
             var gs = Services.Get<GameState>();
 
             var boat = gs.boat;
             
-            CheckHorizontalMove(boat, inputState);
+            CheckHorizontalMove(boat, Convert.ToInt32(input.HorizontalAxis));
 
             boat.transform.position += boat.velocity*dt;
         }
         
-        private static void CheckHorizontalMove(Boat boat, InputState inputState) {
+        private static void CheckHorizontalMove(Boat boat, int deltaX) {
             if (boat.velocity.x == 0f) {
-                var deltaX = Convert.ToInt32(inputState.Horizontal);
                 var targetLane = boat.lane + deltaX;
 
                 if (targetLane is >= -1 and <= 1) {

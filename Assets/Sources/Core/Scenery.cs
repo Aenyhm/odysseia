@@ -44,7 +44,7 @@ namespace Sources.Core {
             }
             
             foreach (var obstacle in releasedObstacles) {
-                Services.Get<Platform>().renderer.Destroy(obstacle);
+                Services.Get<IPlatform>().RemoveEntityView(obstacle);
             }
         }
         
@@ -57,7 +57,7 @@ namespace Sources.Core {
             var lane = _rnd.Next(-1, 2);
             obstacle.transform.position = new Vec3F32(lane*LANE_DISTANCE, 0, atZ);
 
-            Services.Get<Platform>().renderer.Create(obstacle);
+            Services.Get<IPlatform>().AddEntityView(obstacle);
         }
     }
 }
