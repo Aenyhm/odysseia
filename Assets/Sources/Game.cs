@@ -1,3 +1,4 @@
+using System;
 using Sources.Core;
 using Sources.Toolbox;
 
@@ -6,16 +7,19 @@ namespace Sources {
         public Camera3D camera;
         public Boat boat;
         public Scenery scenery;
+        public Wind wind;
     }
     
     public class Game {
         public Game(IPlatform platform) {
             Services.Register(platform);
+            Services.Register(new Random());
             
             var gs = new GameState();
             gs.camera = CameraController.Create();
             gs.boat = BoatController.Create();
             gs.scenery = new Scenery();
+            gs.wind = new Wind();
             
             Services.Register(gs);
         }
@@ -24,6 +28,7 @@ namespace Sources {
             BoatController.Update(dt, input);
             CameraController.Update();
             SceneryController.Update();
+            WindController.Update();
         }
     }
 }

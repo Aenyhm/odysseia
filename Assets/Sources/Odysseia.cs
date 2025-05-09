@@ -10,6 +10,8 @@ namespace Sources {
     
     // Services that the game provides to the platform layer/game engine.
     public struct GameInput {
+        public bool MouseButtonLeftDown;
+        public float MouseDeltaX;
         public float HorizontalAxis;
     }
 }

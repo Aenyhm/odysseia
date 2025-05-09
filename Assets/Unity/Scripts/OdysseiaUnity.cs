@@ -33,6 +33,8 @@ namespace Unity.Scripts {
         private static GameInput ReadInput() {
             GameInput input;
             input.HorizontalAxis = Input.GetAxisRaw("Horizontal");
+            input.MouseDeltaX = Input.mousePositionDelta.x;
+            input.MouseButtonLeftDown = Input.GetMouseButton(0);
             return input;
         }
     }

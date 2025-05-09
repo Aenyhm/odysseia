@@ -9,18 +9,19 @@ namespace Sources.Core {
         public float speed;
         public int lane;
         public int health;
+        public float sailAngle;
     }
 
     public static class BoatController {
         public const int HEALTH_MAX = 10;
-        private const float SPEED_MIN = 1f;
         private const float SPEED_MAX = 30f;
-        
+        private const float SAIL_ANGLE_MAX = 30f;
+
         private static readonly HashSet<int> _collisionIds = new();
 
         public static Boat Create() {
             var boat = EntityManager.Create<Boat>();
-            boat.speed = SPEED_MAX;
+            boat.speed = 10;
             boat.transform.position.y = 1f;
             boat.velocity.z = boat.speed;
             boat.health = HEALTH_MAX;
@@ -38,6 +39,12 @@ namespace Sources.Core {
 			CheckCollisions(boat, gs.scenery.activeObstacles);
             
             CheckHorizontalMove(boat, Convert.ToInt32(input.HorizontalAxis));
+            
+            // Sail angle
+            if (input.MouseButtonLeftDown) {
+                var targetSailAngle = boat.sailAngle + input.MouseDeltaX;
+                boat.sailAngle = Math.Clamp(targetSailAngle, -SAIL_ANGLE_MAX, +SAIL_ANGLE_MAX);
+            }
 
             boat.transform.position += boat.velocity*dt;
         }

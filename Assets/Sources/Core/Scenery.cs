@@ -30,7 +30,6 @@ namespace Sources.Core {
         private const int OBSTACLE_SPAWN_Z = 100;
         private const int OBSTACLE_REMOVE_DISTANCE = 20;
 
-        private static readonly Random _rnd = new();
         private static float _lastObstacleSpawnZ;
         
         public static void Update() {
@@ -57,12 +56,12 @@ namespace Sources.Core {
         }
         
         private static void GenerateObstable(Scenery scenery, float atZ) {
-            var obstacleType = _rnd.Next(2) == 0 ? typeof(Rock) : typeof(Trunk);
+            var obstacleType = Services.Get<Random>().Next(2) == 0 ? typeof(Rock) : typeof(Trunk);
             
             var obstacle = scenery.obstaclePoolsByType[obstacleType].Get();
             EntityManager.Reset(obstacle);
 
-            var lane = _rnd.Next(-1, 2);
+            var lane = Services.Get<Random>().Next(-1, 2);
             obstacle.transform.position = new Vec3F32(lane*LANE_DISTANCE, 0, atZ);
 
             Services.Get<IPlatform>().AddEntityView(obstacle);
