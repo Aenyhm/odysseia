@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sources.Toolbox;
 
 namespace Sources.Core {
@@ -7,18 +8,22 @@ namespace Sources.Core {
         public Vec3F32 velocity;
         public float speed;
         public int lane;
+        public int health;
     }
 
     public static class BoatController {
+        public const int HEALTH_MAX = 10;
         private const float SPEED_MIN = 1f;
         private const float SPEED_MAX = 30f;
         
+        private static readonly HashSet<int> _collisionIds = new();
+
         public static Boat Create() {
             var boat = EntityManager.Create<Boat>();
-            boat.speed = 200f;
-            boat.transform.position.y = 2f;
+            boat.speed = SPEED_MAX;
+            boat.transform.position.y = 1f;
             boat.velocity.z = boat.speed;
-            boat.transform.size = Vec3F32.one*0.2f;
+            boat.health = HEALTH_MAX;
             
             Services.Get<IPlatform>().AddEntityView(boat);
             
@@ -29,11 +34,26 @@ namespace Sources.Core {
             var gs = Services.Get<GameState>();
 
             var boat = gs.boat;
+
+			CheckCollisions(boat, gs.scenery.activeObstacles);
             
             CheckHorizontalMove(boat, Convert.ToInt32(input.HorizontalAxis));
 
             boat.transform.position += boat.velocity*dt;
         }
+
+		private static void CheckCollisions(Boat boat, List<Entity> obstacles) {
+            foreach (var obstacle in obstacles) {
+                if (Collisions.CheckAabb(boat.transform, obstacle.transform)) {
+                    if (_collisionIds.Add(obstacle.id)) {
+                        //Services.Get<IPlatform>().Log($"collision with {obstacle.id}");
+                        boat.health -= 1;
+                    }
+                } else {
+                    _collisionIds.Remove(obstacle.id);
+                }
+            }
+		}
         
         private static void CheckHorizontalMove(Boat boat, int deltaX) {
             if (boat.velocity.x == 0f) {

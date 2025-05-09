@@ -3,23 +3,31 @@ using System.Collections.Generic;
 using Sources.Toolbox;
 
 namespace Sources.Core {
-    
-    public abstract class Obstacle : Entity { }
-    public class Rock : Obstacle { }
-    public class Trunk : Obstacle { }
+    public class Rock : Entity { }
+    public class Trunk : Entity { }
     
     public class Scenery {
-        public readonly Dictionary<Type, Pool<Obstacle>> obstaclePoolsByType = new() {
-            { typeof(Rock),  new Pool<Obstacle>(() => new Rock())},
-            { typeof(Trunk), new Pool<Obstacle>(() => new Trunk())},
+        public readonly Dictionary<Type, Pool<Entity>> obstaclePoolsByType = new() {
+            { typeof(Rock),  new Pool<Entity>(() => new Rock())},
+            { typeof(Trunk), new Pool<Entity>(() => new Trunk())},
         };
+        
+        public List<Entity> activeObstacles {
+            get {
+                var result = new List<Entity>();
+                foreach (var pool in obstaclePoolsByType.Values) {
+                    result.AddRange(pool.used);
+                }
+                return result;
+            }
+        }
     }
     
     public static class SceneryController {
         public const int LANE_DISTANCE = 4;
         
-        private const int OBSTACLE_SPAWN_DISTANCE = 10; //20;
-        private const int OBSTACLE_SPAWN_Z = 80;
+        private const int OBSTACLE_SPAWN_DISTANCE = 20;
+        private const int OBSTACLE_SPAWN_Z = 100;
         private const int OBSTACLE_REMOVE_DISTANCE = 20;
 
         private static readonly Random _rnd = new();
@@ -36,7 +44,7 @@ namespace Sources.Core {
                 _lastObstacleSpawnZ = boat.transform.position.z;
             }
             
-            var releasedObstacles = new List<Obstacle>();
+            var releasedObstacles = new List<Entity>();
             foreach (var obstacles in scenery.obstaclePoolsByType.Values) {
                 releasedObstacles.AddRange(obstacles.FreeAll(obstacle =>
                     obstacle.transform.position.z < boat.transform.position.z - OBSTACLE_REMOVE_DISTANCE

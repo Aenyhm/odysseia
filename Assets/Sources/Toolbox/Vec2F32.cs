@@ -7,14 +7,19 @@ namespace Sources.Toolbox {
         public float y;
         public float z;
         
+        public static Vec3F32 zero = new(0, 0, 0);
         public static Vec3F32 one = new(1, 1, 1);
-        
+
         public Vec3F32(float x, float y, float z) {
             this.x = x;
             this.y = y;
             this.z = z;
         }
-        
+
+        public override string ToString() {
+            return $"Vec3F32({x}, {y}, {z})";
+        }
+
         public static Vec3F32 operator +(Vec3F32 a, Vec3F32 b) => new(a.x + b.x, a.y + b.y, a.z + b.z);
         public static Vec3F32 operator -(Vec3F32 a, Vec3F32 b) => new(a.x - b.x, a.y - b.y, a.z - b.z);
         public static Vec3F32 operator *(Vec3F32 a, Vec3F32 b) => new(a.x*b.x, a.y*b.y, a.z*b.z);

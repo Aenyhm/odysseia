@@ -2,10 +2,10 @@ using Sources;
 using Sources.Core;
 using UnityEngine;
 
-namespace Unity {
+namespace Unity.Scripts {
     public class OdysseiaUnity : MonoBehaviour, IPlatform {
         private readonly UnityRenderer _renderer = new();
-        private IGame _game;
+        private Game _game;
         
         public void Log(string message) {
             Debug.Log(message);
@@ -22,8 +22,11 @@ namespace Unity {
             _game = new Game(this);
         }
 
+        private void FixedUpdate() {
+            _game.Update(Time.fixedDeltaTime, ReadInput());
+        }
+        
         private void Update() {
-            _game.Update(Time.deltaTime, ReadInput());
             _renderer.Update();
         }
         

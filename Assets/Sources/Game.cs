@@ -8,7 +8,7 @@ namespace Sources {
         public Scenery scenery;
     }
     
-    public class Game : IGame {
+    public class Game {
         public Game(IPlatform platform) {
             Services.Register(platform);
             

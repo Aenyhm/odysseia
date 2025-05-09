@@ -5,7 +5,7 @@ using Sources.Toolbox;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Unity {
+namespace Unity.Scripts {
     public class UnityRenderer {
         private readonly Dictionary<Entity, GameObject> _gosByEntity = new();
         private readonly Dictionary<Type, Pool<GameObject>> _poolsByType = new() {
@@ -17,6 +17,7 @@ namespace Unity {
             var go = GetEntityGameObject(entity);
             var view = go.GetComponent<IView>();
             view.SetEntity(entity);
+            entity.transform.size = GetVisualSize(go);
             
             _gosByEntity.Add(entity, go);
         }
@@ -35,7 +36,6 @@ namespace Unity {
             foreach (var (e, go) in _gosByEntity) {
                 go.transform.localPosition = e.transform.position.ToUnityVector3();
                 go.transform.localRotation = Quaternion.Euler(e.transform.rotation.ToUnityVector3());
-                go.transform.localScale = e.transform.size.ToUnityVector3();
             }
         }
         
@@ -76,6 +76,20 @@ namespace Unity {
             var go = _poolsByType[entityType].Get();
             go.SetActive(true);
             return go;
+        }
+        
+        private static Vec3F32 GetVisualSize(GameObject go) {
+            var meshRenderers = go.GetComponentsInChildren<MeshRenderer>();
+
+            if (meshRenderers.Length == 0)
+                return Vec3F32.zero;
+
+            var bounds = meshRenderers[0].bounds;
+            foreach (var mr in meshRenderers) {
+                bounds.Encapsulate(mr.bounds);
+            }
+
+            return new Vec3F32(bounds.size.x, bounds.size.y, bounds.size.z);
         }
     }
 }

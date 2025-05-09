@@ -12,8 +12,4 @@ namespace Sources {
     public struct GameInput {
         public float HorizontalAxis;
     }
-    
-    public interface IGame {
-        void Update(float dt, GameInput input);
-    }
 }

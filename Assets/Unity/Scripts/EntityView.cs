@@ -1,13 +1,13 @@
 using Sources.Core;
 using UnityEngine;
 
-namespace Unity {
+namespace Unity.Scripts {
     public interface IView {
         void SetEntity(object entity);
     }
     
     public class EntityView<E> : MonoBehaviour, IView where E : Entity {
-        [SerializeField] private E _entity;
+        [SerializeField] protected E _entity;
 
         public void SetEntity(object entity) {
             _entity = (E)entity;
