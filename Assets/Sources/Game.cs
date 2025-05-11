@@ -19,7 +19,7 @@ namespace Sources {
             gs.camera = CameraController.Create();
             gs.boat = BoatController.Create();
             gs.scenery = new Scenery();
-            gs.wind = new Wind();
+            gs.wind = WindController.Create();
             
             Services.Register(gs);
         }
@@ -28,7 +28,7 @@ namespace Sources {
             BoatController.Update(dt, input);
             CameraController.Update();
             SceneryController.Update();
-            WindController.Update();
+            WindController.Update(dt);
         }
     }
 }

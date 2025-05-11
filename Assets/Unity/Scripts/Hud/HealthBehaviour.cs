@@ -6,11 +6,11 @@ using UnityEngine;
 namespace Unity.Scripts.Hud {
     public class HealthBehaviour : MonoBehaviour {
         private RectTransform _rectTransform;
-        private float _healthBarFullWidth;
+        private float _fullWidth;
         
         private void Start() {
             _rectTransform = GetComponent<RectTransform>();
-            _healthBarFullWidth = _rectTransform.sizeDelta.x;
+            _fullWidth = _rectTransform.sizeDelta.x;
         }
 
         private void Update() {
@@ -18,7 +18,7 @@ namespace Unity.Scripts.Hud {
             
             if (gs.boat.health >= 0) {
                 var size = _rectTransform.sizeDelta;
-                size.x = (float)gs.boat.health/BoatController.HEALTH_MAX*_healthBarFullWidth;
+                size.x = (float)gs.boat.health/BoatController.HEALTH_MAX*_fullWidth;
                 _rectTransform.sizeDelta = size;
             }
         }
