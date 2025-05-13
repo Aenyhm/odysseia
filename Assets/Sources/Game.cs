@@ -6,7 +6,7 @@ namespace Sources {
     public class GameState {
         public Camera3D camera;
         public Boat boat;
-        public Scenery scenery;
+        public Region region;
         public Wind wind;
     }
     
@@ -14,11 +14,13 @@ namespace Sources {
         public Game(IPlatform platform) {
             Services.Register(platform);
             Services.Register(new Random());
-            
+            Services.Register(new UiConfig());
+
             var gs = new GameState();
             gs.camera = CameraController.Create();
             gs.boat = BoatController.Create();
-            gs.scenery = new Scenery();
+            gs.region = new Region();
+            gs.region.type = (RegionType)Services.Get<Random>().Next(5); //RegionType.Aegis;
             gs.wind = WindController.Create();
             
             Services.Register(gs);

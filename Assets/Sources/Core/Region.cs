@@ -3,14 +3,23 @@ using System.Collections.Generic;
 using Sources.Toolbox;
 
 namespace Sources.Core {
+    public enum RegionType {
+        Aegis,
+        Styx,
+        Olympia,
+        Hephaestus,
+        Artemis
+    }
+
     public class Rock : Entity { }
     public class Trunk : Entity { }
     
-    public class Scenery {
+    public class Region {
         public readonly Dictionary<Type, Pool<Entity>> obstaclePoolsByType = new() {
             { typeof(Rock),  new Pool<Entity>(() => new Rock())},
             { typeof(Trunk), new Pool<Entity>(() => new Trunk())},
         };
+        public RegionType type;
         
         public List<Entity> activeObstacles {
             get {
@@ -27,14 +36,14 @@ namespace Sources.Core {
         public const int LANE_DISTANCE = 4;
         
         private const int OBSTACLE_SPAWN_DISTANCE = 20;
-        private const int OBSTACLE_SPAWN_Z = 100;
+        private const int OBSTACLE_SPAWN_Z = 150;
         private const int OBSTACLE_REMOVE_DISTANCE = 20;
 
         private static float _lastObstacleSpawnZ;
         
         public static void Update() {
             var gs = Services.Get<GameState>();
-            var scenery = gs.scenery;
+            var scenery = gs.region;
 
             var boat = gs.boat;
             
@@ -55,10 +64,10 @@ namespace Sources.Core {
             }
         }
         
-        private static void GenerateObstable(Scenery scenery, float atZ) {
+        private static void GenerateObstable(Region region, float atZ) {
             var obstacleType = Services.Get<Random>().Next(2) == 0 ? typeof(Rock) : typeof(Trunk);
             
-            var obstacle = scenery.obstaclePoolsByType[obstacleType].Get();
+            var obstacle = region.obstaclePoolsByType[obstacleType].Get();
             EntityManager.Reset(obstacle);
 
             var lane = Services.Get<Random>().Next(-1, 2);

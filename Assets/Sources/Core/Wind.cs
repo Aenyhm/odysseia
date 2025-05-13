@@ -6,7 +6,6 @@ namespace Sources.Core {
     public class Wind {
         public float angle;
         public float lastChangeDistance;
-        public float changeSpeed;
     }
 
     public static class WindController {
@@ -17,7 +16,6 @@ namespace Sources.Core {
         
         public static Wind Create() {
             var wind = new Wind();
-            wind.changeSpeed = 15f;
             return wind;
         }
         
@@ -52,12 +50,8 @@ namespace Sources.Core {
                 
                 gs.wind.lastChangeDistance = gs.boat.transform.position.z;
             } else {
-                gs.wind.angle = MoveTowards(gs.wind.angle, targetAngle, dt*gs.wind.changeSpeed);
+                gs.wind.angle = Maths.MoveTowards(gs.wind.angle, targetAngle, dt*gs.boat.speed);
             }
-        }
-        
-        private static float MoveTowards(float current, float target, float maxDelta) {
-            return Math.Abs(target - current) <= maxDelta ? target : current + Math.Sign(target - current)*maxDelta;
         }
     }
 }
