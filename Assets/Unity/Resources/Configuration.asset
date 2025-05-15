@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b70b53c4344d394c9029a4e027fd569, type: 3}
+  m_Name: Configuration
+  m_EditorClassIdentifier: 
+  CollidingObjects:
+  - entityType: 0
+    gameObject: {fileID: 2845908737484421325, guid: 3bed261d3fbc0eb4d97f65f5c4869386, type: 3}
+  - entityType: 1
+    gameObject: {fileID: 2906525678676855405, guid: 16572d94ec9a5944282ee6b234c21954, type: 3}
+  - entityType: 2
+    gameObject: {fileID: 1422751471624816764, guid: 5938709c07154ad48961f5e17afaafe3, type: 3}

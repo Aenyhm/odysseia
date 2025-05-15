@@ -2,18 +2,18 @@ using System.Collections.Generic;
 using System.Drawing;
 using Sources.Core;
 
-namespace Sources {
-    public class UiConfig {
+namespace Sources.View {
+    public struct RegionTheme {
+        public Color SkyColor;
+        public Color WaterColor;
+        public Color LightColor;
+        public float LightIntensity;
+    }
+        
+    public static class ViewConfig {
         public const float FOG_DENSITY = 0.01f;
         
-        public struct RegionTheme {
-            public Color SkyColor;
-            public Color WaterColor;
-            public Color LightColor;
-            public float LightIntensity;
-        }
-        
-        public readonly Dictionary<RegionType, RegionTheme> regionThemes = new() {
+        public static readonly Dictionary<RegionType, RegionTheme> regionThemesByType = new() {
             { RegionType.Aegis, new RegionTheme {
                 WaterColor = Color.FromArgb(0x0f, 0xa0, 0x9f),
                 SkyColor   = Color.FromArgb(0x37, 0xa0, 0xcf),

@@ -1,10 +1,8 @@
-using Sources;
-using Sources.Core;
-using Sources.Toolbox;
+using Sources.View;
 using UnityEngine;
 
 namespace Unity.Scripts.Hud {
-    public class HealthBehaviour : MonoBehaviour {
+    public class HealthBehaviour : MonoBehaviour, IViewRenderer {
         private RectTransform _rectTransform;
         private float _fullWidth;
         
@@ -13,12 +11,10 @@ namespace Unity.Scripts.Hud {
             _fullWidth = _rectTransform.sizeDelta.x;
         }
 
-        private void Update() {
-            var gs = Services.Get<GameState>();
-            
-            if (gs.boat.health >= 0) {
+        public void Render(in ViewState viewState) {
+            if (viewState.BoatView.HealthRatio >= 0) {
                 var size = _rectTransform.sizeDelta;
-                size.x = (float)gs.boat.health/BoatController.HEALTH_MAX*_fullWidth;
+                size.x = viewState.BoatView.HealthRatio*_fullWidth;
                 _rectTransform.sizeDelta = size;
             }
         }

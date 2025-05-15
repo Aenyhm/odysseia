@@ -10,29 +10,20 @@ namespace Sources.Core {
         Hephaestus,
         Artemis
     }
-
-    public class Rock : Entity { }
-    public class Trunk : Entity { }
     
-    public class Region {
-        public readonly Dictionary<Type, Pool<Entity>> obstaclePoolsByType = new() {
-            { typeof(Rock),  new Pool<Entity>(() => new Rock())},
-            { typeof(Trunk), new Pool<Entity>(() => new Trunk())},
-        };
-        public RegionType type;
-        
-        public List<Entity> activeObstacles {
-            get {
-                var result = new List<Entity>();
-                foreach (var pool in obstaclePoolsByType.Values) {
-                    result.AddRange(pool.used);
-                }
-                return result;
-            }
-        }
+    public struct Obstacle {
+        public Vec3F32 Position;
+        public Vec3F32 Size;
+        public EntityType Type;
+        public int Id;
     }
     
-    public static class SceneryController {
+    public struct Region {
+        public RegionType Type;
+        public List<Obstacle> Obstacles;
+    }
+
+    public static class RegionSystem {
         public const int LANE_DISTANCE = 4;
         
         private const int OBSTACLE_SPAWN_DISTANCE = 20;
@@ -40,40 +31,37 @@ namespace Sources.Core {
         private const int OBSTACLE_REMOVE_DISTANCE = 20;
 
         private static float _lastObstacleSpawnZ;
+        private static Conf _conf;
         
-        public static void Update() {
-            var gs = Services.Get<GameState>();
-            var scenery = gs.region;
-
-            var boat = gs.boat;
-            
-            if (boat.transform.position.z - _lastObstacleSpawnZ > OBSTACLE_SPAWN_DISTANCE) {
-                GenerateObstable(scenery, boat.transform.position.z + OBSTACLE_SPAWN_Z);
-                _lastObstacleSpawnZ = boat.transform.position.z;
-            }
-            
-            var releasedObstacles = new List<Entity>();
-            foreach (var obstacles in scenery.obstaclePoolsByType.Values) {
-                releasedObstacles.AddRange(obstacles.FreeAll(obstacle =>
-                    obstacle.transform.position.z < boat.transform.position.z - OBSTACLE_REMOVE_DISTANCE
-                ));
-            }
-            
-            foreach (var obstacle in releasedObstacles) {
-                Services.Get<IPlatform>().RemoveEntityView(obstacle);
-            }
+        public static void Init(in Conf conf, out Region region) {
+            _conf = conf;
+            region = new Region();
+            region.Type = (RegionType)Services.Get<Random>().Next(5); //RegionType.Aegis;
+            region.Obstacles = new List<Obstacle>();
         }
         
-        private static void GenerateObstable(Region region, float atZ) {
-            var obstacleType = Services.Get<Random>().Next(2) == 0 ? typeof(Rock) : typeof(Trunk);
+        public static void Update(ref Region region, float boatDistance) {
+            if (boatDistance - _lastObstacleSpawnZ > OBSTACLE_SPAWN_DISTANCE) {
+                var obstacle = GenerateObstable(boatDistance + OBSTACLE_SPAWN_Z);
+                region.Obstacles.Add(obstacle);
+                
+                _lastObstacleSpawnZ = boatDistance;
+            }
+
+            region.Obstacles.RemoveAll(o => o.Position.Z < boatDistance - OBSTACLE_REMOVE_DISTANCE);
+        }
+        
+        private static Obstacle GenerateObstable(float atZ) {
+            var result = new Obstacle();
+            result.Id = EntityManager.NextId;
             
-            var obstacle = region.obstaclePoolsByType[obstacleType].Get();
-            EntityManager.Reset(obstacle);
-
             var lane = Services.Get<Random>().Next(-1, 2);
-            obstacle.transform.position = new Vec3F32(lane*LANE_DISTANCE, 0, atZ);
+            result.Position = new Vec3F32(lane*LANE_DISTANCE, 0, atZ);
+            
+            result.Type = Services.Get<Random>().Next(2) == 0 ? EntityType.Rock : EntityType.Trunk;
+            result.Size = _conf.Sizes[result.Type];
 
-            Services.Get<IPlatform>().AddEntityView(obstacle);
+            return result;
         }
     }
 }
