@@ -8,14 +8,15 @@ using UnityEngine;
 
 namespace Unity.Scripts {
     public class GameBehaviour : MonoBehaviour, IPlatform {
-        [SerializeField] private ConfigurationScriptable _configuration;
+        [SerializeField] private ConfigurationScriptable _config;
         [SerializeField] private Camera _camera;
         [SerializeField] private Light _light;
         [SerializeField] private Renderer _waterRenderer;
         [SerializeField] private GameObject[] _rendererObjects;
-    
+        [SerializeField] private float _distance;
+
         [Header("Debug")]
-        [SerializeField] private float _frameRate = 1f;
+        [SerializeField][Range(0, 10)] private float _frameRate = 1f;
 
         private IEnumerable<IViewRenderer> _viewRenderers;
         private Game _game;
@@ -29,12 +30,13 @@ namespace Unity.Scripts {
             _viewRenderers = viewRenderersByGameObject.Values;
             
             var conf = new Conf();
-            conf.Sizes = new Dictionary<EntityType, Vec3F32>();
+            conf.CameraZ = _camera.transform.position.z;
             
-            foreach (var item in _configuration.CollidingObjects) {
+            conf.Sizes = new Dictionary<EntityType, Vec3F32>();
+            foreach (var item in _config.CollidingObjects) {
                 conf.Sizes.Add(item.entityType, GetVisualSize(item.gameObject));
             }
-            
+
             _game = new Game(this, conf);
         }
 
@@ -44,6 +46,8 @@ namespace Unity.Scripts {
         
         private void Update() {
             _game.ViewUpdate(Time.deltaTime*_frameRate, out var viewState);
+            
+            _distance = viewState.BoatView.Distance;
 
             ApplyRegionTheme(viewState.RegionTheme);
             

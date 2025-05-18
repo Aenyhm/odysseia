@@ -7,6 +7,7 @@ namespace Sources.View {
         public BoatView BoatView;
         public EntityView CameraView;
         public WindView WindView;
+        public PortalView PortalView;
         public RegionTheme RegionTheme;
         public List<EntityView> RockViews;
         public List<EntityView> TrunkViews;
@@ -14,8 +15,6 @@ namespace Sources.View {
     
     public struct EntityView {
         public Vec3F32 Position;
-        public Vec3F32 Rotation;
-        public Vec3F32 Scale;
         public int Id;
         public EntityType Type;
     }

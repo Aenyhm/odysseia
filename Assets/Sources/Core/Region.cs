@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Sources.Toolbox;
 
 namespace Sources.Core {
-    public enum RegionType {
+    public enum RegionType : byte {
         Aegis,
         Styx,
         Olympia,
@@ -11,57 +11,86 @@ namespace Sources.Core {
         Artemis
     }
     
-    public struct Obstacle {
-        public Vec3F32 Position;
-        public Vec3F32 Size;
-        public EntityType Type;
-        public int Id;
+    public struct Portal {
+        public RegionType RegionType;
+        public LaneType LaneType;
     }
     
     public struct Region {
-        public RegionType Type;
         public List<Obstacle> Obstacles;
+        public Portal Portal;
+        public RegionType Type;
     }
-
+    
     public static class RegionSystem {
-        public const int LANE_DISTANCE = 4;
+        private const int SEGMENT_LENGTH = 100;
+        private const RegionType START_REGION_TYPE = RegionType.Aegis;
         
-        private const int OBSTACLE_SPAWN_DISTANCE = 20;
-        private const int OBSTACLE_SPAWN_Z = 150;
-        private const int OBSTACLE_REMOVE_DISTANCE = 20;
-
-        private static float _lastObstacleSpawnZ;
-        private static Conf _conf;
+        private static SimpleArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1, false);
         
-        public static void Init(in Conf conf, out Region region) {
-            _conf = conf;
-            region = new Region();
-            region.Type = (RegionType)Services.Get<Random>().Next(5); //RegionType.Aegis;
-            region.Obstacles = new List<Obstacle>();
+        public static void Init(ref CoreState coreState) {
+            Enter(ref coreState, START_REGION_TYPE);
         }
         
-        public static void Update(ref Region region, float boatDistance) {
-            if (boatDistance - _lastObstacleSpawnZ > OBSTACLE_SPAWN_DISTANCE) {
-                var obstacle = GenerateObstable(boatDistance + OBSTACLE_SPAWN_Z);
-                region.Obstacles.Add(obstacle);
-                
-                _lastObstacleSpawnZ = boatDistance;
+        public static void Update(ref CoreState coreState) {
+            var boat = coreState.Boat;
+            var portal = coreState.Region.Portal;
+            
+            if (boat.Position.Z >= CoreConfig.PORTAL_DISTANCE) {
+                var regionType = coreState.Region.Type;
+                if (boat.LaneType == portal.LaneType) regionType = portal.RegionType;
+                Enter(ref coreState, regionType);
             }
-
-            region.Obstacles.RemoveAll(o => o.Position.Z < boatDistance - OBSTACLE_REMOVE_DISTANCE);
         }
         
-        private static Obstacle GenerateObstable(float atZ) {
-            var result = new Obstacle();
-            result.Id = EntityManager.NextId;
+        private static void Enter(ref CoreState coreState, RegionType regionType) {
+            var obstacles = new List<Obstacle>();
             
-            var lane = Services.Get<Random>().Next(-1, 2);
-            result.Position = new Vec3F32(lane*LANE_DISTANCE, 0, atZ);
+            var availableSegments = CoreConfig.SegmentsByRegion[regionType];
             
-            result.Type = Services.Get<Random>().Next(2) == 0 ? EntityType.Rock : EntityType.Trunk;
-            result.Size = _conf.Sizes[result.Type];
-
+            // On génère des tronçons d'obstacles entre 100 et 800 mètres
+            for (var i = 1; i < 9; i++) {
+                var segmentIndex = Rnd.Next(availableSegments.Length);
+                var segment = availableSegments[segmentIndex];
+                var newObstacles = ObstacleSystem.GenerateObstacles(segment, i*SEGMENT_LENGTH);
+                obstacles.AddRange(newObstacles);
+            }
+            
+            var newRegion = new Region {
+                Type = regionType,
+                Obstacles = obstacles,
+                Portal = GeneratePortal(regionType)
+            };
+            coreState.Region = newRegion;
+            coreState.Boat.Position.Z = 0;
+        }
+                
+        private static Portal GeneratePortal(RegionType currentRegionType) {
+            var result = new Portal();
+            result.RegionType = PickRegionType(currentRegionType);
+            result.LaneType = Enums.GetRandom<LaneType>();
             return result;
+        }
+        
+        private static RegionType PickRegionType(RegionType currentRegionType) {
+            if (_regionTypePool.Count == 0) {
+                _makeRegionTypePool(currentRegionType);
+            }
+            
+            var index = Rnd.Next(_regionTypePool.Count);
+            var result = _regionTypePool.Items[index];
+            _regionTypePool.RemoveAt(index);
+            
+            return result;
+        }
+        
+        private static void _makeRegionTypePool(RegionType currentRegionType) {
+            _regionTypePool.Reset();
+            
+            // On évite d'avoir la même région dans le portail suivant.
+            foreach (RegionType rt in Enum.GetValues(typeof(RegionType))) {
+                if (rt != currentRegionType) _regionTypePool.Add(rt);
+            }
         }
     }
 }

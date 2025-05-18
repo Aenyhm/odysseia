@@ -5,13 +5,12 @@ using Sources.Toolbox;
 
 namespace Sources.Core {
     public struct Boat {
-        public Vec3F32 Position;
         public Vec3F32 Size;
-        public float Speed;
+        public Vec3F32 Position;
+        public float Distance;
+        public float SpeedZ;
         public float SailAngle;
-        public int Id;
-        public EntityType Type;
-        public Lane Lane;
+        public LaneType LaneType;
         public byte Health;
     }
 
@@ -19,6 +18,7 @@ namespace Sources.Core {
         // TODO: Config
         private const float SPEED_MIN = 10f;
         private const float SPEED_MAX = 30f;
+        private const float SPEED_X = 30f;
         private const float SAIL_ANGLE_MAX = 30f;
         private const float SPEED_VARIATION = 1f;
         private const float COLLISION_SPEED_DECREASE = 5f;
@@ -30,22 +30,17 @@ namespace Sources.Core {
         
         public static void Init(in Conf conf, out Boat boat) {
             boat = new Boat();
-            boat.Id = EntityManager.NextId;
-            boat.Type = EntityType.Boat;
             boat.Position.Y = 0.5f;
             boat.Size = conf.Sizes[EntityType.Boat];
-            boat.Speed = 10f;
+            boat.SpeedZ = SPEED_MIN;
             boat.SailAngle = 0f;
             boat.Health = HEALTH_MAX;
-            boat.Lane = Lane.Center;
+            boat.LaneType = LaneType.Center;
         }
         
-        public static void Update(ref Boat boat, in GameInput input, in Wind wind, List<Obstacle> obstacles, float dt) {
+        public static void Update(ref Boat boat, in GameInput input, in Wind wind, IEnumerable<Obstacle> obstacles, float dt) {
             CheckCollisions(ref boat, obstacles);
-            
-            // Change Lane
-            CheckHorizontalMove(ref boat, Convert.ToInt32(input.HorizontalAxis));
-            
+
             // Voile
             if (input.MouseButtonLeftDown) {
                 var targetSailAngle = boat.SailAngle + input.MouseDeltaX;
@@ -55,21 +50,25 @@ namespace Sources.Core {
             // Vitesse
             var sailWindward = IsSailWindward(boat.SailAngle, wind.Angle);
             var speedDirection = sailWindward ? 1 : -1;
-            var targetSpeed = boat.Speed + speedDirection*SPEED_VARIATION*dt;
-            boat.Speed = Math.Clamp(targetSpeed, SPEED_MIN, SPEED_MAX);
+            var targetSpeed = boat.SpeedZ + speedDirection*SPEED_VARIATION*dt;
+            boat.SpeedZ = Math.Clamp(targetSpeed, SPEED_MIN, SPEED_MAX);
             
             // Déplacement
-            boat.Position.X += _changingLaneSign*boat.Speed*dt;
-            boat.Position.Z += boat.Speed*dt;
+            boat.Position.X += _changingLaneSign*SPEED_X*dt;
+            boat.Position.Z += boat.SpeedZ*dt; // Reset tous les 1000m pour changement de région
+            boat.Distance += boat.SpeedZ*dt;
+            
+            // Change Lane
+            CheckHorizontalMove(ref boat, Convert.ToInt32(input.HorizontalAxis));
         }
 
-        private static void CheckCollisions(ref Boat boat, List<Obstacle> obstacles) {
+        private static void CheckCollisions(ref Boat boat, IEnumerable<Obstacle> obstacles) {
             foreach (var obstacle in obstacles) {
                 if (Collisions.CheckAabb(boat.Position, boat.Size, obstacle.Position, obstacle.Size)) {
                     if (_collisionIds.Add(obstacle.Id)) {
                         boat.Health = (byte)Math.Max(0, boat.Health - 1);
-                        var targetSpeed = boat.Speed - COLLISION_SPEED_DECREASE;
-                        boat.Speed = Math.Max(SPEED_MIN, targetSpeed);
+                        var targetSpeed = boat.SpeedZ - COLLISION_SPEED_DECREASE;
+                        boat.SpeedZ = Math.Max(SPEED_MIN, targetSpeed);
                     }
                 } else {
                     _collisionIds.Remove(obstacle.Id);
@@ -79,14 +78,10 @@ namespace Sources.Core {
 
         private static void CheckHorizontalMove(ref Boat boat, int deltaX) {
             if (_changingLaneSign == 0) {
-                var targetLane = (int)boat.Lane + deltaX;
-
-                if (targetLane is >= -1 and <= +1) {
-                    boat.Lane = (Lane)targetLane;
-                    _changingLaneSign = deltaX;
-                }
+                boat.LaneType = LaneHelper.GetDelta(boat.LaneType, deltaX);
+                _changingLaneSign = deltaX;
             } else {
-                var targetX = (int)boat.Lane*RegionSystem.LANE_DISTANCE;
+                var targetX = LaneHelper.GetPosition(boat.LaneType);
 
                 var moveLaneCompleted = (
                     _changingLaneSign == -1 && boat.Position.X <= targetX ||
