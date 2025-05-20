@@ -1,8 +1,8 @@
 using Sources.States;
 using UnityEngine;
 
-namespace Unity.Scripts {
-    public class CameraBehaviour : MonoBehaviour, IViewRenderer {
+namespace Unity.Scripts.Views {
+    public class CameraView : MonoBehaviour, IView {
         private Vector3 _initialPosition;
         private Vector3 _lastPosition;
         

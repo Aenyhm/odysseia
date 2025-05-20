@@ -5,9 +5,10 @@ namespace Sources {
     // Services that the platform/engine provides to the game.
     
     public struct GameInput {
-        public bool MouseButtonLeftDown;
         public float MouseDeltaX;
         public float HorizontalAxis;
+        public bool MouseButtonLeftDown;
+        public bool Escape;
     }
     
     public struct RendererConf {

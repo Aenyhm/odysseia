@@ -1,8 +1,8 @@
 using Sources.States;
 using UnityEngine;
 
-namespace Unity.Scripts {
-    public class LanesBehaviour : MonoBehaviour, IViewRenderer {
+namespace Unity.Scripts.Views {
+    public class LanesView : MonoBehaviour, IView {
         private float _defaultZ;
         
         private void Awake() {

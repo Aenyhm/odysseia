@@ -1,10 +1,9 @@
-using Sources;
 using Sources.States;
 using Sources.Toolbox;
 using UnityEngine;
 
-namespace Unity.Scripts {
-    public class BoatBehaviour : MonoBehaviour, IViewRenderer {
+namespace Unity.Scripts.Views {
+    public class BoatView : MonoBehaviour, IView {
         private const float _minSailBow = 0.35f;
         private const float _maxSailBow = 0.75f;
         

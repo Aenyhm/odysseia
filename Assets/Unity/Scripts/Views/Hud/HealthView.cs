@@ -1,9 +1,8 @@
-using Sources;
 using Sources.States;
 using UnityEngine;
 
-namespace Unity.Scripts.Hud {
-    public class HealthBehaviour : MonoBehaviour, IViewRenderer {
+namespace Unity.Scripts.Views.Hud {
+    public class HealthView : MonoBehaviour, IView {
         private RectTransform _rectTransform;
         private float _fullWidth;
         

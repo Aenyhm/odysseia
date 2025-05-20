@@ -34,33 +34,41 @@ namespace Sources.Systems {
         }
         
         private static void Enter(ref GameState gameState, RegionType regionType) {
-            var obstacles = new List<Obstacle>();
-            
+            var obstaclesByType = new Dictionary<EntityType, List<Entity>> {
+                { EntityType.Rock, new List<Entity>() },
+                { EntityType.Trunk, new List<Entity>() },
+            };
+            var coins = new List<Entity>();
+
             var availableSegments = CoreConfig.SegmentsByRegion[regionType];
             
-            // On génère des tronçons d'obstacles entre 100 et 800 mètres
+            // On génère des tronçons de 100m d'obstacles entre 100 et 800 mètres
             for (var i = 1; i < 9; i++) {
                 var segmentIndex = Rnd.Next(availableSegments.Length);
                 var segment = availableSegments[segmentIndex];
-                var newObstacles = GenerateObstacles(segment, i*CoreConfig.SegmentLength);
-                obstacles.AddRange(newObstacles);
+                var segmentZ = i*CoreConfig.SegmentLength;
+                
+                GenerateObstacles(segment, segmentZ, obstaclesByType);
+                if (Rnd.Next(100) <= CoreConfig.CoinSpawnPercentage) {
+                    coins.AddRange(GenerateCoins(segmentZ));
+                }
             }
             
             var newRegion = new Region {
                 Type = regionType,
-                Obstacles = obstacles,
+                ObstaclesByType = obstaclesByType,
+                Coins = coins,
                 Portals = GeneratePortals(regionType)
             };
             gameState.Region = newRegion;
             gameState.Boat.Position.Z = 0;
         }
         
-        private static List<Obstacle> GenerateObstacles(SegmentInfo segment, int segmentZ) {
-            var result = new List<Obstacle>();
-            
+        private static void GenerateObstacles(
+            SegmentInfo segment, int segmentZ, Dictionary<EntityType, List<Entity>> obstaclesByType
+        ) {
             foreach (var obstacleInfo in segment.ObstacleInfos) {
-                var obstacle = new Obstacle();
-                obstacle.Type = obstacleInfo.EntityType;
+                var obstacle = new Entity();
                 obstacle.Id = EntityManager.NextId;
                 
                 var x = LaneMechanics.GetPosition(obstacleInfo.LaneType, CoreConfig.LaneDistance);
@@ -69,7 +77,22 @@ namespace Sources.Systems {
                 obstacle.Position = new Vec3F32(x, 0, segmentZ + obstacleInfo.Z);
                 obstacle.Size = _rendererConf.Sizes[obstacleInfo.EntityType];
                 
-                result.Add(obstacle);
+                obstaclesByType[obstacleInfo.EntityType].Add(obstacle);
+            }
+        }
+        
+        private static List<Entity> GenerateCoins(int segmentZ) {
+            var result = new List<Entity>();
+            
+            var laneType = Enums.GetRandom<LaneType>();
+            var x = LaneMechanics.GetPosition(laneType, CoreConfig.LaneDistance);
+            
+            for (var i = 0; i < CoreConfig.CoinLineCount; i++) {
+                var coin = new Entity();
+                coin.Size = _rendererConf.Sizes[EntityType.Coin];
+                coin.Position = new Vec3F32(x, 0, segmentZ + i*CoreConfig.CoinDistance);
+                coin.Id = EntityManager.NextId;
+                result.Add(coin);
             }
             
             return result;

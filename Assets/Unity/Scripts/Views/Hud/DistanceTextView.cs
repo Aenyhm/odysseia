@@ -3,8 +3,8 @@ using Sources.States;
 using TMPro;
 using UnityEngine;
 
-namespace Unity.Scripts.Hud {
-    public class DistanceTextBehaviour : MonoBehaviour, IViewRenderer {
+namespace Unity.Scripts.Views.Hud {
+    public class DistanceTextView : MonoBehaviour, IView {
         private TextMeshProUGUI _textComponent;
         
         private void Awake() {

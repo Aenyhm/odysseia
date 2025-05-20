@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Sources.Mechanics;
 using Sources.States;
 using Sources.Toolbox;
@@ -11,8 +10,10 @@ namespace Sources.Systems {
             boat = Blueprints.CreateBoat(rendererConf.Sizes[EntityType.Boat]);
         }
         
-        public static void Update(ref Boat boat, in GameInput input, in Wind wind, IEnumerable<Obstacle> obstacles, float dt) {
-            CheckCollisions(ref boat, obstacles);
+        public static void Update(ref GameState gameState, in GameInput input, in Wind wind, in Region region, float dt) {
+            ref var boat = ref gameState.Boat;
+
+            CheckCollisions(ref gameState, in region);
 
             // Voile
             if (input.MouseButtonLeftDown) {
@@ -38,19 +39,31 @@ namespace Sources.Systems {
             CheckHorizontalMove(ref boat, Convert.ToInt32(input.HorizontalAxis));
         }
 
-        private static void CheckCollisions(ref Boat boat, IEnumerable<Obstacle> obstacles) {
-            foreach (var obstacle in obstacles) {
-                if (Collisions.CheckAabb(boat.Position, boat.Size, obstacle.Position, obstacle.Size)) {
-                    if (boat.CollisionIds.Add(obstacle.Id)) {
-                        boat.Health.Value = BoatMechanics.TakeDamage(boat.Health);
-                        var targetSpeed = boat.SpeedZ*boat.SpeedCollisionFactor;
-                        boat.SpeedZ = Math.Max(boat.SpeedZMin, targetSpeed);
+        private static void CheckCollisions(ref GameState gameState, in Region region) {
+            ref var boat = ref gameState.Boat;
+            
+            foreach (var obstacles in region.ObstaclesByType.Values) {
+                foreach (var obstacle in obstacles) {
+                    if (Collisions.CheckAabb(boat.Position, boat.Size, obstacle.Position, obstacle.Size)) {
+                        if (boat.CollisionIds.Add(obstacle.Id)) {
+                            boat.Health.Value = BoatMechanics.TakeDamage(boat.Health);
+                            var targetSpeed = boat.SpeedZ*boat.SpeedCollisionFactor;
+                            boat.SpeedZ = Math.Max(boat.SpeedZMin, targetSpeed);
+                        }
+                    } else {
+                        boat.CollisionIds.Remove(obstacle.Id);
                     }
-                } else {
-                    boat.CollisionIds.Remove(obstacle.Id);
                 }
             }
-		}
+
+            for (var i = region.Coins.Count - 1; i >= 0; i--) {
+                var coin = region.Coins[i];
+                if (Collisions.CheckAabb(boat.Position, boat.Size, coin.Position, coin.Size)) {
+                    gameState.CoinCount++;
+                    region.Coins.RemoveAt(i);
+                }
+            }
+        }
 
         private static void CheckHorizontalMove(ref Boat boat, int deltaX) {
             if (boat.xSign == 0) {

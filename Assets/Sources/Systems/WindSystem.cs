@@ -23,7 +23,7 @@ namespace Sources.Systems {
                 }
             } else {
                 if (boat.Distance > wind.LastChangeDistance + wind.Conf.ChangeDistance) {
-                    _targetAngle = GetNewAngle(wind.Angle, wind.Conf.ChangeDistance);
+                    _targetAngle = GetNewAngle(wind.Angle, wind.Conf.AngleMax);
                     _changingAngle = true;
                 }
             }

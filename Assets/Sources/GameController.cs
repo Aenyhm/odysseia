@@ -2,12 +2,12 @@ using Sources.States;
 using Sources.Systems;
 
 namespace Sources {
-    public class Game {
+    public class GameController {
         private GameState _gameState;
         
         public GameState GameState => _gameState;
 
-        public Game(RendererConf rendererConf) {
+        public GameController(RendererConf rendererConf) {
             _gameState = new GameState();
 
             BoatSystem.Init(in rendererConf, out _gameState.Boat);
@@ -16,9 +16,13 @@ namespace Sources {
         }
         
         public void CoreUpdate(float dt, in GameInput input) {
-            BoatSystem.Update(ref _gameState.Boat, in input, in _gameState.Wind, _gameState.Region.Obstacles, dt);
-            RegionSystem.Update(ref _gameState);
-            WindSystem.Update(ref _gameState.Wind, in _gameState.Boat, dt);
+            PauseSystem.Update(ref _gameState, in input);
+
+            if (!_gameState.Pause) {
+                BoatSystem.Update(ref _gameState, in input, in _gameState.Wind, in _gameState.Region, dt);
+                RegionSystem.Update(ref _gameState);
+                WindSystem.Update(ref _gameState.Wind, in _gameState.Boat, dt);
+            }
         }
     }
 }

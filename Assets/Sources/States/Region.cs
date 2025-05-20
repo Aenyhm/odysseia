@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Sources.Toolbox;
 
 namespace Sources.States {
     public enum RegionType : byte {
@@ -13,19 +12,12 @@ namespace Sources.States {
 
     [Serializable]
     public struct Region {
-        public List<Obstacle> Obstacles;
+        public Dictionary<EntityType, List<Entity>> ObstaclesByType;
+        public List<Entity> Coins;
         public Portal[] Portals;
         public RegionType Type;
     }
-    
-    [Serializable]
-    public struct Obstacle {
-        public Vec3F32 Position;
-        public Vec3F32 Size;
-        public int Id;
-        public EntityType Type;
-    }
-    
+
     [Serializable]
     public struct Portal {
         public RegionType RegionType;

@@ -3,26 +3,26 @@ using System.Diagnostics.Contracts;
 using Sources;
 using Sources.States;
 using Sources.Toolbox;
+using Unity.Scripts.Views;
 using UnityEngine;
 
 namespace Unity.Scripts {
-    public class GameBehaviour : MonoBehaviour {
+    public class GameControllerBehaviour : MonoBehaviour {
         [SerializeField] private ConfigurationScriptable _config;
         [SerializeField] private Camera _camera;
         [SerializeField] private Light _light;
         [SerializeField] private Renderer _waterRenderer;
-        [SerializeField] private GameObject[] _rendererObjects;
+        [SerializeField] private GameObject[] _viewsObjects;
 
         [Header("Debug")]
-        [SerializeField][Range(0, 10)] private float _frameRate = 1f;
+        [SerializeField][Range(0, 15)] private float _frameRate = 1f;
         [SerializeField] private GameState _gameState;
 
-        private IEnumerable<IViewRenderer> _viewRenderers;
-        private Game _game;
+        private IEnumerable<IView> _views;
+        private GameController _gameController;
 
         private void Awake() {
-            var viewRenderersByGameObject = GetViewRenderersByGameObject(_rendererObjects);
-            _viewRenderers = viewRenderersByGameObject.Values;
+            _views = GetViewsByGameObject(_viewsObjects);
             
             var conf = new RendererConf();
             conf.Sizes = new Dictionary<EntityType, Vec3F32>();
@@ -30,23 +30,23 @@ namespace Unity.Scripts {
                 conf.Sizes.Add(item.entityType, GetVisualSize(item.gameObject));
             }
 
-            _game = new Game(conf);
+            _gameController = new GameController(conf);
         }
 
         private void FixedUpdate() {
-            _game.CoreUpdate(Time.fixedDeltaTime*_frameRate, ReadInput());
+            _gameController.CoreUpdate(Time.fixedDeltaTime*_frameRate, ReadInput());
         }
         
         private void Update() {
-            _gameState = _game.GameState;
-            
-            var dt = Time.deltaTime*_frameRate;
+            _gameState = _gameController.GameState;
             
             var regionTheme = ViewConfig.regionThemesByType[_gameState.Region.Type];
             ApplyRegionTheme(regionTheme);
             
-            foreach (var viewRenderer in _viewRenderers) {
-                viewRenderer.Render(in _gameState, dt);
+            var dt = Time.deltaTime*_frameRate;
+
+            foreach (var view in _views) {
+                view.Render(in _gameState, dt);
             }
         }
         
@@ -55,19 +55,20 @@ namespace Unity.Scripts {
             input.HorizontalAxis = Input.GetAxisRaw("Horizontal");
             input.MouseDeltaX = Input.mousePositionDelta.x;
             input.MouseButtonLeftDown = Input.GetMouseButton(0);
+            input.Escape = Input.GetKey(KeyCode.Escape);
             return input;
         }
         
         [Pure]
-        private static Dictionary<GameObject, IViewRenderer> GetViewRenderersByGameObject(GameObject[] gameObjects) {
-            var result = new Dictionary<GameObject, IViewRenderer>();
+        private static List<IView> GetViewsByGameObject(GameObject[] gameObjects) {
+            var result = new List<IView>();
 
             foreach (var go in gameObjects) {
-                var renderer = go.GetComponent<IViewRenderer>();
-                if (renderer != null) {
-                    result.Add(go, renderer);
+                var view = go.GetComponent<IView>();
+                if (view != null) {
+                    result.Add(view);
                 } else {
-                    Debug.LogWarning($"{go.name} n'a pas de composant qui implémente IViewRenderer");
+                    Debug.LogWarning($"{go.name} n'a pas de composant qui implémente IView");
                 }
             }
 

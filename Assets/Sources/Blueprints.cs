@@ -14,7 +14,7 @@ namespace Sources {
             boat.Size = size;
             boat.SailAngle = 0f;
             boat.SpeedCollisionFactor = 0.5f;
-            boat.SpeedZ = 10f;
+            boat.SpeedZ = CoreConfig.BoatSpeedZStart;
             boat.SpeedZMin = 10;
             boat.SpeedX = 30;
             boat.Health = new Health { Max = 3, Value = 3 };

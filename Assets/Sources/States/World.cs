@@ -12,5 +12,7 @@ namespace Sources.States {
         public Boat Boat;
         public Region Region;
         public Wind Wind;
+        public int CoinCount;
+        public bool Pause;
     }
 }

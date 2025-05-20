@@ -20,10 +20,15 @@ namespace Sources.States {
 
     public static class CoreConfig {
         public const float LaneDistance = 6f;
+        public const float CoinDistance = 1.5f;
+        public const int CoinLineCount = 10;
+        public const int CoinSpawnPercentage = 50;
+        public const int BoatSpeedZStart = 10;
+
         public const int SegmentLength = 100;
         public const int PortalDistance = 1000;
         public const int PortalCount = 2;
-        
+
         public static readonly SailConf SailConf = new(){ AngleMax = 30f, WindwardAngleRange = 20f };
         public static readonly SpeedMaxConf SpeedMaxConf = new(){ DistanceStep = 500, Multiplier = 1.1f, Min = 20, Max = 40 };
         public static readonly WindConf WindConf = new(){ AngleMax = 30, ChangeDistance = 60 };
@@ -32,13 +37,32 @@ namespace Sources.States {
             { RegionType.Aegis, new[] {
                 new SegmentInfo { ObstacleInfos = new[] {
                     new ObstacleInfo(EntityType.Rock, LaneType.Center, 20),
-                    new ObstacleInfo(EntityType.Rock, LaneType.Right, 40),
-                    new ObstacleInfo(EntityType.Rock, LaneType.Center, 60),
-                    new ObstacleInfo(EntityType.Rock, LaneType.Left, 80),
+                    new ObstacleInfo(EntityType.Rock, LaneType.Right, 50),
+                    new ObstacleInfo(EntityType.Rock, LaneType.Center, 80),
                 }},
                 new SegmentInfo { ObstacleInfos = new[] {
-                    new ObstacleInfo(EntityType.Trunk, LaneType.Left, 30),
+                    new ObstacleInfo(EntityType.Rock, LaneType.Center, 20),
+                    new ObstacleInfo(EntityType.Rock, LaneType.Left, 50),
+                    new ObstacleInfo(EntityType.Rock, LaneType.Center, 80),
+                }},
+                new SegmentInfo { ObstacleInfos = new[] {
+                    new ObstacleInfo(EntityType.Trunk, LaneType.Left, 20),
                     new ObstacleInfo(EntityType.Trunk, LaneType.Right, 50),
+                    new ObstacleInfo(EntityType.Trunk, LaneType.Left, 80),
+                }},
+                new SegmentInfo { ObstacleInfos = new[] {
+                    new ObstacleInfo(EntityType.Trunk, LaneType.Right, 20),
+                    new ObstacleInfo(EntityType.Trunk, LaneType.Left, 50),
+                    new ObstacleInfo(EntityType.Trunk, LaneType.Right, 80),
+                }},
+                new SegmentInfo { ObstacleInfos = new[] {
+                    new ObstacleInfo(EntityType.Trunk, LaneType.Right, 20),
+                    new ObstacleInfo(EntityType.Rock, LaneType.Left, 50),
+                    new ObstacleInfo(EntityType.Rock, LaneType.Center, 80),
+                }},
+                new SegmentInfo { ObstacleInfos = new[] {
+                    new ObstacleInfo(EntityType.Trunk, LaneType.Left, 20),
+                    new ObstacleInfo(EntityType.Rock, LaneType.Right, 50),
                     new ObstacleInfo(EntityType.Trunk, LaneType.Left, 80),
                 }},
             }},

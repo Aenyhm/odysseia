@@ -1,18 +1,17 @@
 using System;
 using System.Collections.Generic;
-using Sources;
 using Sources.Mechanics;
 using Sources.States;
 using UnityEngine;
 
-namespace Unity.Scripts {
+namespace Unity.Scripts.Views {
     [Serializable]
     public struct RegionPortal {
         public RegionType RegionType;
         public GameObject GameObject;
     }
     
-    public class PortalManagerBehaviour : MonoBehaviour, IViewRenderer {
+    public class PortalManagerView : MonoBehaviour, IView {
         [SerializeField] private RegionPortal[] _regionPortals;
         
         private readonly Dictionary<RegionType, GameObject> _gosByRegionType = new();
