@@ -1,7 +1,7 @@
-using Sources.View;
+using Sources.States;
 
 namespace Unity.Scripts {
     public interface IViewRenderer {
-        void Render(in ViewState viewState);
+        void Render(in GameState gameState, float dt);
     }
 }

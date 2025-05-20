@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Sources.Toolbox;
-using Sources.View;
 using UnityEngine;
 
 namespace Unity.Scripts {

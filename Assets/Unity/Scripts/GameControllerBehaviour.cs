@@ -1,43 +1,36 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using Sources;
-using Sources.Core;
+using Sources.States;
 using Sources.Toolbox;
-using Sources.View;
 using UnityEngine;
 
 namespace Unity.Scripts {
-    public class GameBehaviour : MonoBehaviour, IPlatform {
+    public class GameBehaviour : MonoBehaviour {
         [SerializeField] private ConfigurationScriptable _config;
         [SerializeField] private Camera _camera;
         [SerializeField] private Light _light;
         [SerializeField] private Renderer _waterRenderer;
         [SerializeField] private GameObject[] _rendererObjects;
-        [SerializeField] private float _distance;
 
         [Header("Debug")]
         [SerializeField][Range(0, 10)] private float _frameRate = 1f;
+        [SerializeField] private GameState _gameState;
 
         private IEnumerable<IViewRenderer> _viewRenderers;
         private Game _game;
-        
-        public void Log(string message) {
-            Debug.Log(message);
-        }
 
         private void Awake() {
             var viewRenderersByGameObject = GetViewRenderersByGameObject(_rendererObjects);
             _viewRenderers = viewRenderersByGameObject.Values;
             
-            var conf = new Conf();
-            conf.CameraZ = _camera.transform.position.z;
-            
+            var conf = new RendererConf();
             conf.Sizes = new Dictionary<EntityType, Vec3F32>();
             foreach (var item in _config.CollidingObjects) {
                 conf.Sizes.Add(item.entityType, GetVisualSize(item.gameObject));
             }
 
-            _game = new Game(this, conf);
+            _game = new Game(conf);
         }
 
         private void FixedUpdate() {
@@ -45,14 +38,15 @@ namespace Unity.Scripts {
         }
         
         private void Update() {
-            _game.ViewUpdate(Time.deltaTime*_frameRate, out var viewState);
+            _gameState = _game.GameState;
             
-            _distance = viewState.BoatView.Distance;
-
-            ApplyRegionTheme(viewState.RegionTheme);
+            var dt = Time.deltaTime*_frameRate;
+            
+            var regionTheme = ViewConfig.regionThemesByType[_gameState.Region.Type];
+            ApplyRegionTheme(regionTheme);
             
             foreach (var viewRenderer in _viewRenderers) {
-                viewRenderer.Render(in viewState);
+                viewRenderer.Render(in _gameState, dt);
             }
         }
         

@@ -1,4 +1,4 @@
-using Sources.View;
+using Sources.States;
 using UnityEngine;
 
 namespace Unity.Scripts {
@@ -9,8 +9,8 @@ namespace Unity.Scripts {
             _defaultZ = transform.position.z;
         }
         
-        public void Render(in ViewState viewState) {
-            transform.MoveOnAxis(Axis.Z, viewState.BoatView.Position.Z + _defaultZ);
+        public void Render(in GameState gameState, float dt) {
+            transform.MoveOnAxis(Axis.Z, gameState.Boat.Position.Z + _defaultZ);
         }
     }
 }
