@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using Sources;
 using Sources.States;
 
-namespace Unity.Scripts.Views {
-    public class TrunkManagerView : EntityManagerBehaviour, IView {
-        public void Render(in GameState gameState, float dt) {
+namespace Unity.Scripts.Views.Gameplay {
+    public class TrunkManagerViewView : AbstractEntityManagerView {
+        public override void Render(in GameState gameState, float dt) {
             var views = new List<EntityView>();
             
             foreach (var obstacle in gameState.Region.ObstaclesByType[EntityType.Trunk]) {

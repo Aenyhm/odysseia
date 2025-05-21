@@ -2,8 +2,8 @@ using Sources.States;
 using Sources.Toolbox;
 using UnityEngine;
 
-namespace Unity.Scripts.Views {
-    public class BoatView : MonoBehaviour, IView {
+namespace Unity.Scripts.Views.Gameplay {
+    public class BoatView : AbstractView {
         private const float _minSailBow = 0.35f;
         private const float _maxSailBow = 0.75f;
         
@@ -11,7 +11,7 @@ namespace Unity.Scripts.Views {
         
         private float _sailBow = _minSailBow;
 
-        public void Render(in GameState gameState, float dt) {
+        public override void Render(in GameState gameState, float dt) {
             var boat = gameState.Boat;
             
             var targetSailBow = boat.SailWindward ? _maxSailBow : _minSailBow;

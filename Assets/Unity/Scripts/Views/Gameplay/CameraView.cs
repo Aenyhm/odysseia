@@ -1,8 +1,8 @@
 using Sources.States;
 using UnityEngine;
 
-namespace Unity.Scripts.Views {
-    public class CameraView : MonoBehaviour, IView {
+namespace Unity.Scripts.Views.Gameplay {
+    public class CameraView : AbstractView {
         private Vector3 _initialPosition;
         private Vector3 _lastPosition;
         
@@ -13,7 +13,7 @@ namespace Unity.Scripts.Views {
             _lastPosition = _initialPosition;
         }
         
-        public void Render(in GameState gameState, float dt) {
+        public override void Render(in GameState gameState, float dt) {
             var boat = gameState.Boat;
             
             if (boat.Position.Z < _lastPosition.z) {

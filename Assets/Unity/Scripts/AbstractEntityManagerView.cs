@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using Sources.Toolbox;
+using Unity.Scripts.Views;
 using UnityEngine;
 
 namespace Unity.Scripts {
-    public abstract class EntityManagerBehaviour : MonoBehaviour {
+    public abstract class AbstractEntityManagerView : AbstractView {
         [SerializeField] protected GameObject _prefab;
         
         private Pool<GameObject> _pool;

@@ -1,8 +1,8 @@
 using Sources.States;
 using UnityEngine;
 
-namespace Unity.Scripts.Views.Hud {
-    public class HealthView : MonoBehaviour, IView {
+namespace Unity.Scripts.Views.Gameplay.Hud {
+    public class HealthView : AbstractView {
         private RectTransform _rectTransform;
         private float _fullWidth;
         
@@ -11,7 +11,7 @@ namespace Unity.Scripts.Views.Hud {
             _fullWidth = _rectTransform.sizeDelta.x;
         }
 
-        public void Render(in GameState gameState, float dt) {
+        public override void Render(in GameState gameState, float dt) {
             var boat = gameState.Boat;
             
             var healthRatio = (float)boat.Health.Value/boat.Health.Max;
