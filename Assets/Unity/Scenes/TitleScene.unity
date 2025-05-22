@@ -417,7 +417,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 909036476434db04d9249b8ef771e375, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sceneIndex: 1
+  _sceneType: 1
 --- !u!1 &696495437
 GameObject:
   m_ObjectHideFlags: 0
@@ -711,6 +711,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1916069155987766334, guid: 73e75385d8b0ece45a044e055e32c4e7, type: 3}
+      propertyPath: SceneType
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3020043478235657607, guid: 73e75385d8b0ece45a044e055e32c4e7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1149,12 +1153,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
+  m_ScaleFactor: 2
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96

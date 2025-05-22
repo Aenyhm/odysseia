@@ -1,14 +1,23 @@
 using Sources.States;
 
 namespace Sources.Systems {
-    public static class PauseSystem {
+    public class PauseSystem : AbstractSystem {
         private static bool _lastEscape;
+        private static GameMode _previousMode;
 
-        public static void Update(ref GameState gameState, in GameInput input) {
+        public override void Init(ref GameState gameState) {
+        }
+        
+        public override void Update(ref GameState gameState, in GameInput input, float dt) {
             if (_lastEscape != input.Escape) {
                 _lastEscape = input.Escape;
                 if (input.Escape) {
-                    gameState.Pause = !gameState.Pause;
+                    if (gameState.GameMode == GameMode.Pause) {
+                        gameState.GameMode = _previousMode;
+                    } else {
+                        _previousMode = gameState.GameMode;
+                        gameState.GameMode = GameMode.Pause;
+                    }
                 }
             }
         }

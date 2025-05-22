@@ -3,15 +3,20 @@ using Sources.States;
 using Sources.Toolbox;
 
 namespace Sources.Systems {
-    public static class WindSystem {
+    public class WindSystem : AbstractSystem {
         private static bool _changingAngle;
         private static int _targetAngle;
         
-        public static void Init(out Wind wind) {
-            wind = Blueprints.CreateWind();
+        public override void Init(ref GameState gameState) {
+            gameState.Wind = Blueprints.CreateWind();
         }
         
-        public static void Update(ref Wind wind, in Boat boat, float dt) {
+        public override void Update(ref GameState gameState, in GameInput input, float dt) {
+            if (gameState.GameMode != GameMode.Run) return;
+            
+            ref var wind = ref gameState.Wind;
+            var boat = gameState.Boat;
+
             if (_changingAngle) {
                 if (Math.Abs(wind.Angle - _targetAngle) < float.Epsilon) {
                     wind.Angle = _targetAngle;

@@ -3,12 +3,18 @@ using UnityEngine;
 
 namespace Unity.Scripts.Views.Gameplay {
     public class CameraView : AbstractView {
+        private const float _defaultFov = 60f;
+        private const float _gameOverSpeed = 5f;
+        private Camera _camera;
         private Vector3 _initialPosition;
         private Vector3 _lastPosition;
         
         [SerializeField] private int _cameraSpeed = 4;
 
         private void Awake() {
+            _camera = GetComponent<Camera>();
+            _camera.fieldOfView = _defaultFov;
+            
             _initialPosition = transform.localPosition;
             _lastPosition = _initialPosition;
         }
@@ -27,6 +33,10 @@ namespace Unity.Scripts.Views.Gameplay {
             }
             
             _lastPosition = transform.localPosition;
+            
+            if (gameState.GameMode == GameMode.GameOver) {
+                _camera.fieldOfView -= dt*_gameOverSpeed;
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using Sources.States;
 using Unity.Scripts.Views;
 using UnityEngine;
@@ -5,9 +6,12 @@ using UnityEngine;
 namespace Unity.Scripts {
     public class SceneBehaviour : MonoBehaviour {
         [SerializeField] private GameControllerBehaviour _gameControllerScript;
-        
+        [SerializeField] private SceneType _sceneType;
+
         private static GameControllerBehaviour _gameControllerInstance;
         private AbstractView[] _views;
+        
+        public SceneType SceneType => _sceneType;
 
         private void Awake() {
             if (!_gameControllerInstance) {

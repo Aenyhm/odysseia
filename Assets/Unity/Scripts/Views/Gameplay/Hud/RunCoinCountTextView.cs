@@ -1,8 +1,8 @@
 using Sources.States;
 using TMPro;
 
-namespace Unity.Scripts.Views {
-    public class CoinCountTextView : AbstractView {
+namespace Unity.Scripts.Views.Gameplay.Hud {
+    public class RunCoinCountTextView : AbstractView {
         private TextMeshProUGUI _textComponent;
         
         private void Awake() {
@@ -10,7 +10,7 @@ namespace Unity.Scripts.Views {
         }
         
         public override void Render(in GameState gameState, float dt) {
-            _textComponent.text = gameState.CoinCount.ToString();
+            _textComponent.text = gameState.RunCoinCount.ToString();
         }
     }
 }

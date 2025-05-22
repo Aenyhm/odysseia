@@ -3,7 +3,7 @@ using Sources;
 using Sources.States;
 
 namespace Unity.Scripts.Views.Gameplay {
-    public class RockManagerViewView : AbstractEntityManagerView {
+    public class RockManagerView : AbstractEntityManagerView {
         public override void Render(in GameState gameState, float dt) {
             var views = new List<EntityView>();
             
@@ -15,7 +15,7 @@ namespace Unity.Scripts.Views.Gameplay {
                 views.Add(entityView);
             }
             
-            Sync(views);
+            Sync(views, dt);
         }
     }
 }

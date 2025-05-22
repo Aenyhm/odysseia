@@ -1,5 +1,5 @@
+using Sources.Scenes;
 using Sources.States;
-using Sources.Systems;
 
 namespace Sources {
     public class GameController {
@@ -7,22 +7,23 @@ namespace Sources {
         
         public GameState GameState => _gameState;
 
-        public GameController(RendererConf rendererConf) {
-            _gameState = new GameState();
-
-            BoatSystem.Init(in rendererConf, out _gameState.Boat);
-            RegionSystem.Init(in rendererConf, ref _gameState);
-            WindSystem.Init(out _gameState.Wind);
+        public GameController(SceneType sceneType, in RendererConf rendererConf) {
+            SceneManager.Register(SceneType.Title, new TitleScene());
+            SceneManager.Register(SceneType.Gameplay, new GameplayScene(in rendererConf));
+            
+            foreach (var scene in SceneManager.All) {
+                scene.Init(ref _gameState);
+            }
+            
+            SceneManager.GoTo(sceneType, ref _gameState);
         }
         
-        public void CoreUpdate(float dt, in GameInput input) {
-            PauseSystem.Update(ref _gameState, in input);
-
-            if (!_gameState.Pause) {
-                BoatSystem.Update(ref _gameState, in input, in _gameState.Wind, in _gameState.Region, dt);
-                RegionSystem.Update(ref _gameState);
-                WindSystem.Update(ref _gameState.Wind, in _gameState.Boat, dt);
+        public void CoreUpdate(SceneType sceneType, in GameInput input, float dt) {
+            if (sceneType != _gameState.CurrentSceneType) {
+                SceneManager.GoTo(sceneType, ref _gameState);
             }
+            
+            SceneManager.Get(_gameState.CurrentSceneType).Update(ref _gameState, in input, dt);
         }
     }
 }

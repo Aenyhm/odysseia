@@ -5,17 +5,21 @@ using Sources.States;
 using Sources.Toolbox;
 
 namespace Sources.Systems {
-    public static class RegionSystem {
-        private static SimpleArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1, false);
-        private static RendererConf _rendererConf;
-
-        public static void Init(in RendererConf rendererConf, ref GameState gameState) {
+    public class RegionSystem : AbstractSystem {
+        private SimpleArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1, false);
+        private readonly RendererConf _rendererConf;
+        
+        public RegionSystem(in RendererConf rendererConf) {
             _rendererConf = rendererConf;
-
+        }
+        
+        public override void Init(ref GameState gameState) {
             Enter(ref gameState, RegionType.Aegis);
         }
         
-        public static void Update(ref GameState gameState) {
+        public override void Update(ref GameState gameState, in GameInput input, float dt) {
+            if (gameState.GameMode != GameMode.Run) return;
+
             var boat = gameState.Boat;
             
             if (boat.Position.Z >= CoreConfig.PortalDistance) {
@@ -33,7 +37,7 @@ namespace Sources.Systems {
             }
         }
         
-        private static void Enter(ref GameState gameState, RegionType regionType) {
+        private void Enter(ref GameState gameState, RegionType regionType) {
             var obstaclesByType = new Dictionary<EntityType, List<Entity>> {
                 { EntityType.Rock, new List<Entity>() },
                 { EntityType.Trunk, new List<Entity>() },
@@ -64,7 +68,7 @@ namespace Sources.Systems {
             gameState.Boat.Position.Z = 0;
         }
         
-        private static void GenerateObstacles(
+        private void GenerateObstacles(
             SegmentInfo segment, int segmentZ, Dictionary<EntityType, List<Entity>> obstaclesByType
         ) {
             foreach (var obstacleInfo in segment.ObstacleInfos) {
@@ -81,7 +85,7 @@ namespace Sources.Systems {
             }
         }
         
-        private static List<Entity> GenerateCoins(int segmentZ) {
+        private List<Entity> GenerateCoins(int segmentZ) {
             var result = new List<Entity>();
             
             var laneType = Enums.GetRandom<LaneType>();
@@ -98,7 +102,7 @@ namespace Sources.Systems {
             return result;
         }
                 
-        private static Portal[] GeneratePortals(RegionType currentRegionType) {
+        private Portal[] GeneratePortals(RegionType currentRegionType) {
             var result = new Portal[CoreConfig.PortalCount];
             
             var lanePool = new SimpleArray<LaneType>(Enums.Count<LaneType>(), false);
@@ -121,7 +125,7 @@ namespace Sources.Systems {
             return result;
         }
         
-        private static RegionType PickRegionType(RegionType currentRegionType) {
+        private RegionType PickRegionType(RegionType currentRegionType) {
             if (_regionTypePool.Count == 0) {
                 MakeRegionTypePool(currentRegionType);
             }
@@ -133,7 +137,7 @@ namespace Sources.Systems {
             return result;
         }
         
-        private static void MakeRegionTypePool(RegionType currentRegionType) {
+        private void MakeRegionTypePool(RegionType currentRegionType) {
             _regionTypePool.Reset();
             
             // On évite d'avoir la même région dans le portail suivant.

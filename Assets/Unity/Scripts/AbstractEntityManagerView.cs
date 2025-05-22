@@ -14,7 +14,7 @@ namespace Unity.Scripts {
              _pool = new Pool<GameObject>(() => Instantiate(_prefab, transform));
         }
         
-        protected void Sync(List<EntityView> entityViews) {
+        protected void Sync(List<EntityView> entityViews, float dt) {
             // Remove
             var gosToRemove = new Dictionary<int, GameObject>();
             foreach (var (id, go) in _gosById) {
@@ -46,7 +46,7 @@ namespace Unity.Scripts {
                 }
                 
                 // Update
-                go.GetComponent<IEntityBehaviour>().Draw(entityView); // @perf
+                go.GetComponent<IEntityBehaviour>().Draw(entityView, dt); // @perf
             }
         }
     }

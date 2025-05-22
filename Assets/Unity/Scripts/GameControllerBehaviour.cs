@@ -19,18 +19,21 @@ namespace Unity.Scripts {
 
         private void Awake() {
             DontDestroyOnLoad(gameObject);
-            
+        }
+        
+        private void Start() {
             var conf = new RendererConf();
             conf.Sizes = new Dictionary<EntityType, Vec3F32>();
             foreach (var item in _config.CollidingObjects) {
                 conf.Sizes.Add(item.entityType, GetVisualSize(item.gameObject));
             }
-
-            _gameController = new GameController(conf);
+            
+            // Doit être fait après le Awake pour que le SceneController passe avant.
+            _gameController = new GameController(CurrentScene.SceneType, conf);
         }
 
         private void FixedUpdate() {
-            _gameController.CoreUpdate(Time.fixedDeltaTime*_frameRate, ReadInput());
+            _gameController.CoreUpdate(CurrentScene.SceneType, ReadInput(), Time.fixedDeltaTime*_frameRate);
             
             _gameState = _gameController.GameState;
         }
