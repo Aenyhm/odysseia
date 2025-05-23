@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Sources;
+using Sources.Configuration;
+using Sources.Core;
 using Sources.Mechanics;
-using Sources.States;
 using UnityEngine;
 
 namespace Unity.Scripts.Views.Gameplay {
@@ -26,7 +28,7 @@ namespace Unity.Scripts.Views.Gameplay {
         public override void Render(in GameState gameState, float dt) {
             foreach (var (regionType, go) in _gosByRegionType) {
                 var found = false;
-                foreach (var portal in gameState.Region.Portals) {
+                foreach (var portal in gameState.PlayState.Region.Portals) {
                     if (regionType == portal.RegionType) {
                         found = true;
                         var posX = LaneMechanics.GetPosition(portal.LaneType, CoreConfig.LaneDistance);

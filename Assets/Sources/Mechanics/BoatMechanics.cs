@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.Contracts;
-using Sources.States;
+using Sources.Configuration;
+using Sources.Toolbox;
 
 namespace Sources.Mechanics {
     public static class BoatMechanics {
@@ -20,8 +21,8 @@ namespace Sources.Mechanics {
             var min = Math.Max(-sailConf.AngleMax, windAngle - halfRange);
             var max = Math.Min(+sailConf.AngleMax, windAngle + halfRange);
             if (max - min < sailConf.WindwardAngleRange) {
-                if (Math.Abs(min - -sailConf.AngleMax) < float.Epsilon) max = min + sailConf.WindwardAngleRange;
-                if (Math.Abs(max - +sailConf.AngleMax) < float.Epsilon) min = max - sailConf.WindwardAngleRange;
+                if (Maths.FloatEquals(min, -sailConf.AngleMax)) max = min + sailConf.WindwardAngleRange;
+                if (Maths.FloatEquals(max, +sailConf.AngleMax)) min = max - sailConf.WindwardAngleRange;
             }
             
             return sailAngle >= min && sailAngle <= max;
@@ -30,11 +31,6 @@ namespace Sources.Mechanics {
         [Pure]
         public static float MoveSailAngle(in SailConf sailConf, float angle) {
             return Math.Clamp(angle, -sailConf.AngleMax, +sailConf.AngleMax);
-        }
-        
-        [Pure]
-        public static byte TakeDamage(in Health health) {
-            return (byte)Math.Clamp(health.Value - 1, 0, health.Max);
         }
     }
 }

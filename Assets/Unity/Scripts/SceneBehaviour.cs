@@ -1,5 +1,4 @@
-using System;
-using Sources.States;
+using Sources;
 using Unity.Scripts.Views;
 using UnityEngine;
 

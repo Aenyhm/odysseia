@@ -1,5 +1,3 @@
-using Sources.States;
-
 namespace Sources.Scenes {
     public abstract class AbstractScene {
         public abstract void Init(ref GameState gameState);

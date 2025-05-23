@@ -1,33 +1,29 @@
-using System.Collections.Generic;
-using Sources.States;
-using Sources.Systems;
+using Sources.Core;
 
 namespace Sources.Scenes {
     public class GameplayScene : AbstractScene {
-        private readonly List<AbstractSystem> _systems = new();
-        
-        public GameplayScene(in RendererConf rendererConf) {
-            _systems.Add(new BoatSystem(rendererConf));
-            _systems.Add(new RegionSystem(rendererConf));
-            _systems.Add(new WindSystem());
-            _systems.Add(new PauseSystem());
-        }
-        
         public override void Init(ref GameState gameState) {
-            foreach (var system in _systems) {
-                system.Init(ref gameState);
-            }
         }
 
         public override void Update(ref GameState gameState, in GameInput input, float dt) {
-            foreach (var system in _systems) {
-                system.Update(ref gameState, in input, dt);
+            if (gameState.PlayState.Mode != PlayMode.GameOver) {
+                PauseSystem.Execute(ref gameState.PlayState, in input);
+            }
+            
+            if (gameState.PlayState.Mode == PlayMode.Play) {
+                BoatSystem.Execute(ref gameState.PlayState, input, dt);
+                RegionSystem.Execute(ref gameState.PlayState);
+                WindSystem.Execute(ref gameState.PlayState, dt);
+                CoinSystem.Execute(ref gameState.PlayState);
+                GameOverSystem.Execute(ref gameState);
             }
         }
         
         public override void Enter(ref GameState gameState) {
-            Init(ref gameState);
-            gameState.GameMode = GameMode.Run;
+            gameState.PlayState.Boat = BoatSystem.CreateBoat();
+            gameState.PlayState.Wind = WindSystem.CreateWind();
+            RegionSystem.Enter(ref gameState.PlayState, RegionType.Aegis);
+            gameState.PlayState.Mode = PlayMode.Play;
         }
         
         public override void Exit(ref GameState gameState) {

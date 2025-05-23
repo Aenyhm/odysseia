@@ -1,48 +1,36 @@
 using System;
 using System.Collections.Generic;
+using Sources.Configuration;
 using Sources.Mechanics;
-using Sources.States;
 using Sources.Toolbox;
 
-namespace Sources.Systems {
-    public class RegionSystem : AbstractSystem {
-        private SimpleArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1, false);
-        private readonly RendererConf _rendererConf;
-        
-        public RegionSystem(in RendererConf rendererConf) {
-            _rendererConf = rendererConf;
-        }
-        
-        public override void Init(ref GameState gameState) {
-            Enter(ref gameState, RegionType.Aegis);
-        }
-        
-        public override void Update(ref GameState gameState, in GameInput input, float dt) {
-            if (gameState.GameMode != GameMode.Run) return;
+namespace Sources.Core {
+    public enum RegionType : byte { Aegis, Styx, Olympia, Hephaestus, Artemis }
 
-            var boat = gameState.Boat;
-            
-            if (boat.Position.Z >= CoreConfig.PortalDistance) {
-                var portals = gameState.Region.Portals;
-                var nextRegionType = gameState.Region.Type;
-                
-                foreach (var portal in portals) {
-                    if (boat.LaneType == portal.LaneType) {
-                        nextRegionType = portal.RegionType;
-                        break;
-                    }
-                }
-                
-                Enter(ref gameState, nextRegionType);
-            }
-        }
-        
-        private void Enter(ref GameState gameState, RegionType regionType) {
+    [Serializable]
+    public struct Region {
+        public Dictionary<EntityType, List<Entity>> ObstaclesByType;
+        public SwapbackArray<SwapbackArray<Entity>> CoinLines;
+        public Portal[] Portals;
+        public RegionType Type;
+    }
+
+    [Serializable]
+    public struct Portal {
+        public RegionType RegionType;
+        public LaneType LaneType;
+    }
+    
+    public static class RegionSystem {
+ 
+        private static SwapbackArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1);
+
+        public static void Enter(ref PlayState playState, RegionType regionType) {
             var obstaclesByType = new Dictionary<EntityType, List<Entity>> {
                 { EntityType.Rock, new List<Entity>() },
                 { EntityType.Trunk, new List<Entity>() },
             };
-            var coins = new List<Entity>();
+            var coinLines = new SwapbackArray<SwapbackArray<Entity>>(8);
 
             var availableSegments = CoreConfig.SegmentsByRegion[regionType];
             
@@ -54,24 +42,44 @@ namespace Sources.Systems {
                 
                 GenerateObstacles(segment, segmentZ, obstaclesByType);
                 if (Rnd.Next(100) <= CoreConfig.CoinSpawnPercentage) {
-                    coins.AddRange(GenerateCoins(segmentZ));
+                    coinLines.Add(CoinMechanics.GenerateCoinLine(segmentZ));
                 }
             }
             
             var newRegion = new Region {
                 Type = regionType,
                 ObstaclesByType = obstaclesByType,
-                Coins = coins,
+                CoinLines = coinLines,
                 Portals = GeneratePortals(regionType)
             };
-            gameState.Region = newRegion;
-            gameState.Boat.Position.Z = 0;
+            playState.Region = newRegion;
+            playState.Boat.Position.Z = 0;
+        }
+
+        public static void Execute(ref PlayState playState) {
+            var boat = playState.Boat;
+            
+            if (boat.Position.Z >= CoreConfig.PortalDistance) {
+                var portals = playState.Region.Portals;
+                var nextRegionType = playState.Region.Type;
+                
+                foreach (var portal in portals) {
+                    if (boat.LaneType == portal.LaneType) {
+                        nextRegionType = portal.RegionType;
+                        break;
+                    }
+                }
+                
+                Enter(ref playState, nextRegionType);
+            }
         }
         
-        private void GenerateObstacles(
-            SegmentInfo segment, int segmentZ, Dictionary<EntityType, List<Entity>> obstaclesByType
+        private static void GenerateObstacles(
+            SegmentConf segment, int segmentZ, Dictionary<EntityType, List<Entity>> obstaclesByType
         ) {
-            foreach (var obstacleInfo in segment.ObstacleInfos) {
+            var sizes = Services.Get<RendererConf>().Sizes;
+            
+            foreach (var obstacleInfo in segment.ObstacleConfs) {
                 var obstacle = new Entity();
                 obstacle.Id = EntityManager.NextId;
                 
@@ -79,33 +87,16 @@ namespace Sources.Systems {
                 if (obstacleInfo.EntityType == EntityType.Trunk) x /= 2;
                 
                 obstacle.Position = new Vec3F32(x, 0, segmentZ + obstacleInfo.Z);
-                obstacle.Size = _rendererConf.Sizes[obstacleInfo.EntityType];
+                obstacle.Size = sizes[obstacleInfo.EntityType];
                 
                 obstaclesByType[obstacleInfo.EntityType].Add(obstacle);
             }
         }
         
-        private List<Entity> GenerateCoins(int segmentZ) {
-            var result = new List<Entity>();
-            
-            var laneType = Enums.GetRandom<LaneType>();
-            var x = LaneMechanics.GetPosition(laneType, CoreConfig.LaneDistance);
-            
-            for (var i = 0; i < CoreConfig.CoinLineCount; i++) {
-                var coin = new Entity();
-                coin.Size = _rendererConf.Sizes[EntityType.Coin];
-                coin.Position = new Vec3F32(x, 0, segmentZ + i*CoreConfig.CoinDistance);
-                coin.Id = EntityManager.NextId;
-                result.Add(coin);
-            }
-            
-            return result;
-        }
-                
-        private Portal[] GeneratePortals(RegionType currentRegionType) {
+        private static Portal[] GeneratePortals(RegionType currentRegionType) {
             var result = new Portal[CoreConfig.PortalCount];
             
-            var lanePool = new SimpleArray<LaneType>(Enums.Count<LaneType>(), false);
+            var lanePool = new SwapbackArray<LaneType>(Enums.Count<LaneType>());
             foreach (LaneType laneType in Enum.GetValues(typeof(LaneType))) {
                 lanePool.Add(laneType);
             }
@@ -125,7 +116,7 @@ namespace Sources.Systems {
             return result;
         }
         
-        private RegionType PickRegionType(RegionType currentRegionType) {
+        private static RegionType PickRegionType(RegionType currentRegionType) {
             if (_regionTypePool.Count == 0) {
                 MakeRegionTypePool(currentRegionType);
             }
@@ -137,7 +128,7 @@ namespace Sources.Systems {
             return result;
         }
         
-        private void MakeRegionTypePool(RegionType currentRegionType) {
+        private static void MakeRegionTypePool(RegionType currentRegionType) {
             _regionTypePool.Reset();
             
             // On évite d'avoir la même région dans le portail suivant.

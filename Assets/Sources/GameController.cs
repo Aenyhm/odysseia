@@ -1,5 +1,5 @@
 using Sources.Scenes;
-using Sources.States;
+using Sources.Toolbox;
 
 namespace Sources {
     public class GameController {
@@ -8,8 +8,10 @@ namespace Sources {
         public GameState GameState => _gameState;
 
         public GameController(SceneType sceneType, in RendererConf rendererConf) {
+            Services.Register(rendererConf);
+            
             SceneManager.Register(SceneType.Title, new TitleScene());
-            SceneManager.Register(SceneType.Gameplay, new GameplayScene(in rendererConf));
+            SceneManager.Register(SceneType.Gameplay, new GameplayScene());
             
             foreach (var scene in SceneManager.All) {
                 scene.Init(ref _gameState);

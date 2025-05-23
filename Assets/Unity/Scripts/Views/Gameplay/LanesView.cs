@@ -1,4 +1,4 @@
-using Sources.States;
+using Sources;
 
 namespace Unity.Scripts.Views.Gameplay {
     public class LanesView : AbstractView {
@@ -9,7 +9,9 @@ namespace Unity.Scripts.Views.Gameplay {
         }
         
         public override void Render(in GameState gameState, float dt) {
-            transform.MoveOnAxis(Axis.Z, gameState.Boat.Position.Z + _defaultZ);
+            var boat = gameState.PlayState.Boat;
+
+            transform.MoveOnAxis(Axis.Z, boat.Position.Z + _defaultZ);
         }
     }
 }

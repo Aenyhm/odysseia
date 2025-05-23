@@ -1,5 +1,5 @@
 using System;
-using Sources.States;
+using Sources;
 using TMPro;
 
 namespace Unity.Scripts.Views.Gameplay.Hud {
@@ -11,8 +11,7 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
         }
         
         public override void Render(in GameState gameState, float dt) {
-            var boat = gameState.Boat;
-            var distance = Convert.ToInt64(boat.Distance);
+            var distance = Convert.ToInt64(gameState.PlayState.Distance);
             
             _textComponent.text = $"{distance} m";
         }

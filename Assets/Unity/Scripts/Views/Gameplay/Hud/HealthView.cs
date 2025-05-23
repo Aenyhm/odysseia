@@ -1,4 +1,4 @@
-using Sources.States;
+using Sources;
 using UnityEngine;
 
 namespace Unity.Scripts.Views.Gameplay.Hud {
@@ -12,9 +12,9 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
         }
 
         public override void Render(in GameState gameState, float dt) {
-            var boat = gameState.Boat;
+            var boat = gameState.PlayState.Boat;
             
-            var healthRatio = (float)boat.Health.Value/boat.Health.Max;
+            var healthRatio = (float)boat.Health/boat.Conf.HealthMax;
             var size = _rectTransform.sizeDelta;
             size.x = healthRatio*_fullWidth;
             _rectTransform.sizeDelta = size;

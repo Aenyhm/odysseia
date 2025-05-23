@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Drawing;
-using Sources.States;
+using Sources.Core;
 
 namespace Sources {
     public struct RegionTheme {

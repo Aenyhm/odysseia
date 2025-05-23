@@ -1,6 +1,7 @@
-using Sources.States;
+using Sources;
 using Sources.Toolbox;
 using UnityEngine;
+using PlayMode = Sources.PlayMode;
 
 namespace Unity.Scripts.Views.Gameplay {
     public class BoatView : AbstractView {
@@ -14,16 +15,16 @@ namespace Unity.Scripts.Views.Gameplay {
         private float _sailBow = _minSailBow;
 
         public override void Render(in GameState gameState, float dt) {
-            var boat = gameState.Boat;
+            var boat = gameState.PlayState.Boat;
             
             var targetSailBow = boat.SailWindward ? _maxSailBow : _minSailBow;
             _sailBow = Maths.MoveTowards(_sailBow, targetSailBow, dt);
             _sailTransform.RotateOnAxis(Axis.Y, boat.SailAngle);
             _sailTransform.ScaleOnAxis(Axis.Z, _sailBow);
             
-            if (gameState.GameMode == GameMode.Run) {
+            if (gameState.PlayState.Mode == PlayMode.Play) {
                 transform.localPosition = boat.Position.ToUnityVector3();
-            } else if (gameState.GameMode == GameMode.GameOver) {
+            } else if (gameState.PlayState.Mode == PlayMode.GameOver) {
                 transform.Translate(0, 0, _gameOverMoveSpeed*dt);
                 transform.Rotate(_gameOverRotateSpeed*dt, 0, 0);
                 _gameOverRotateSpeed -= dt;

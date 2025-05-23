@@ -1,5 +1,3 @@
-using Sources.States;
-
 namespace Sources.Scenes {
 	public class TitleScene : AbstractScene {
         public override void Init(ref GameState gameState) {
@@ -9,7 +7,6 @@ namespace Sources.Scenes {
         }
         
         public override void Enter(ref GameState gameState) {
-            gameState.RunCoinCount = 0;
         }
         
         public override void Exit(ref GameState gameState) {

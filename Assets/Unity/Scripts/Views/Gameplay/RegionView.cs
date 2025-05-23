@@ -1,5 +1,5 @@
 using Sources;
-using Sources.States;
+using Sources.Core;
 using UnityEngine;
 
 namespace Unity.Scripts.Views.Gameplay {
@@ -11,10 +11,12 @@ namespace Unity.Scripts.Views.Gameplay {
         private RegionType? _regionType;
         
         public override void Render(in GameState gameState, float dt) {
-            if (_regionType == null || _regionType != gameState.Region.Type) {
-                _regionType = gameState.Region.Type;
+            var region = gameState.PlayState.Region;
+            
+            if (_regionType == null || _regionType != region.Type) {
+                _regionType = region.Type;
                 
-                var regionTheme = ViewConfig.regionThemesByType[gameState.Region.Type];
+                var regionTheme = ViewConfig.regionThemesByType[region.Type];
                 ApplyRegionTheme(regionTheme);
             }
         }

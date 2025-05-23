@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Sources.States;
 
 namespace Sources.Scenes {
     public static class SceneManager {

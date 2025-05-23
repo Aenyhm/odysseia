@@ -1,10 +1,10 @@
-using System;
 using System.Collections;
-using Sources.States;
+using Sources;
 using Sources.Toolbox;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using PlayMode = Sources.PlayMode;
 
 namespace Unity.Scripts.Views.Gameplay {
     public class GameOverBackgroundView : AbstractView {
@@ -18,9 +18,9 @@ namespace Unity.Scripts.Views.Gameplay {
         }
         
         public override void Render(in GameState gameState, float dt) {
-            if (gameState.GameMode == GameMode.GameOver) {
+            if (gameState.PlayState.Mode == PlayMode.GameOver) {
                 var targetAlpha = Maths.MoveTowards(_image.color.a, 1f, dt*_gameOverSpeed);
-                if (Math.Abs(targetAlpha - 1) < float.Epsilon) {
+                if (Maths.FloatEquals(targetAlpha, 1)) {
                     targetAlpha = 1;
                     StartCoroutine(EndOfRun());
                 }
@@ -30,6 +30,7 @@ namespace Unity.Scripts.Views.Gameplay {
                 _image.color = color;
             }
         }
+        
         private static IEnumerator EndOfRun() {
             yield return new WaitForSeconds(_endWait);
             SceneManager.LoadScene((int)SceneType.Title);

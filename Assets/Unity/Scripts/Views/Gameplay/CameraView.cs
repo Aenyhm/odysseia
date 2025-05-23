@@ -1,5 +1,6 @@
-using Sources.States;
+using Sources;
 using UnityEngine;
+using PlayMode = Sources.PlayMode;
 
 namespace Unity.Scripts.Views.Gameplay {
     public class CameraView : AbstractView {
@@ -20,21 +21,21 @@ namespace Unity.Scripts.Views.Gameplay {
         }
         
         public override void Render(in GameState gameState, float dt) {
-            var boat = gameState.Boat;
+            var boat = gameState.PlayState.Boat;
             
-            if (boat.Position.Z < _lastPosition.z) {
-                transform.localPosition = _initialPosition;
-            } else {
-                var targetPosition = _lastPosition;
-                targetPosition.z = boat.Position.Z + _initialPosition.z - boat.SpeedZ/_cameraSpeed;
+            if (gameState.PlayState.Mode != PlayMode.GameOver) {
+                if (boat.Position.Z < _lastPosition.z) {
+                    transform.localPosition = _initialPosition;
+                } else {
+                    var targetPosition = _lastPosition;
+                    targetPosition.z = boat.Position.Z + _initialPosition.z - boat.SpeedZ/_cameraSpeed;
+                    
+                    var velocity = boat.SpeedZ*_cameraSpeed*dt;
+                    transform.localPosition = Vector3.MoveTowards(_lastPosition, targetPosition, velocity);
+                }
                 
-                var velocity = boat.SpeedZ*_cameraSpeed*dt;
-                transform.localPosition = Vector3.MoveTowards(_lastPosition, targetPosition, velocity);
-            }
-            
-            _lastPosition = transform.localPosition;
-            
-            if (gameState.GameMode == GameMode.GameOver) {
+                _lastPosition = transform.localPosition;
+            } else {
                 _camera.fieldOfView -= dt*_gameOverSpeed;
             }
         }
