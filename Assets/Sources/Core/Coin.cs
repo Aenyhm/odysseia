@@ -1,3 +1,4 @@
+using Sources.Configuration;
 using Sources.Toolbox;
 
 namespace Sources.Core {
@@ -8,21 +9,26 @@ namespace Sources.Core {
             var region = playState.Region;
 
             for (var i = region.CoinLines.Count - 1; i >= 0; i--) {
-                var coinLine = region.CoinLines.Items[i];
+                ref var coinLine = ref region.CoinLines.Items[i];
                 
+                var found = false;
                 for (var j = coinLine.Count - 1; j >= 0; j--) {
                     var coin = coinLine.Items[j];
                     if (Collisions.CheckAabb(boat.Position, boat.Size, coin.Position, coin.Size)) {
-                        coinLine.RemoveAt(j);
                         playState.CoinCount++;
-                        playState.Score += 1;
+                        coinLine.RemoveAtSwapback(j);
+                        playState.Score += CoreConfig.EntityScoreValues[EntityType.Coin];
+                        found = true;
                         break;
                     }
                 }
 
-                if (coinLine.Count == 0) {
-                    region.CoinLines.RemoveAt(i);
-                    playState.Score += 10;
+                if (found) {
+                    if (coinLine.Count == 0) {
+                        region.CoinLines.RemoveAtSwapback(i);
+                        playState.Score += 10;
+                    }
+                    break;
                 }
             }
         }

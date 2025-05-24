@@ -3,6 +3,8 @@ using Sources;
 
 namespace Unity.Scripts.Views.Gameplay {
     public class CoinManagerView : AbstractEntityManagerView {
+        protected override EntityType Type => EntityType.Coin;
+
         public override void Render(in GameState gameState, float dt) {
             var views = new List<EntityView>();
             
@@ -13,7 +15,6 @@ namespace Unity.Scripts.Views.Gameplay {
                     var coin = coinLine.Items[i];
                     var entityView = new EntityView();
                     entityView.Id = coin.Id;
-                    entityView.Type = EntityType.Coin;
                     entityView.Position = coin.Position.ToUnityVector3();
                     views.Add(entityView);
                 }

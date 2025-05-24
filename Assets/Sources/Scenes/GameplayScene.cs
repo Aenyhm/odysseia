@@ -11,7 +11,8 @@ namespace Sources.Scenes {
             }
             
             if (gameState.PlayState.Mode == PlayMode.Play) {
-                BoatSystem.Execute(ref gameState.PlayState, input, dt);
+                ChangeLaneSystem.Execute(ref gameState.PlayState, in input, dt);
+                BoatSystem.Execute(ref gameState.PlayState, in input, dt);
                 RegionSystem.Execute(ref gameState.PlayState);
                 WindSystem.Execute(ref gameState.PlayState, dt);
                 CoinSystem.Execute(ref gameState.PlayState);

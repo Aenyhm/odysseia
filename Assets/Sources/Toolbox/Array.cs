@@ -3,12 +3,12 @@ using System;
 namespace Sources.Toolbox {
     
     [Serializable]
-    public struct SwapbackArray<T> {
-        public readonly T[] Items;
-        public readonly int Capacity;
-        public int Count { get; private set; }
+    public struct SimpleArray<T> {
+        public T[] Items;
+        public int Capacity;
+        public int Count;
 
-        public SwapbackArray(int capacity) {
+        public SimpleArray(int capacity) {
             Items = new T[capacity];
             Count = 0;
             Capacity = capacity;
@@ -18,8 +18,15 @@ namespace Sources.Toolbox {
         public void Reset() => Count = 0;
         public void Add(T item) => Items[Count++] = item;
 
-        public void RemoveAt(int index) {
+        public void RemoveAtSwapback(int index) {
             Items[index] = Items[Count - 1];
+            Count--;
+        }
+        
+        public void RemoveAtOrdered(int index) {
+            for (var i = index; i < Count - 1; i++) {
+                Items[i] = Items[i + 1];
+            }
             Count--;
         }
     }

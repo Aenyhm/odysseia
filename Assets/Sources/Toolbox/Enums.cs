@@ -11,7 +11,7 @@ namespace Sources.Toolbox {
 
         public static T GetRandom<T>() where T : Enum {
             var count = Count<T>();
-            var index = Rnd.Next(count);
+            var index = Prng.Roll(count);
             return (T)Enum.ToObject(typeof(T), index);
         }
     }

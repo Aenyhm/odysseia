@@ -2,7 +2,6 @@ using System;
 using Sources.Core;
 
 namespace Sources {
-    public enum LaneType : byte { Left, Center, Right }
     public enum SceneType : byte { Title, Gameplay }
     public enum PlayMode : byte { Play, Pause, GameOver }
 

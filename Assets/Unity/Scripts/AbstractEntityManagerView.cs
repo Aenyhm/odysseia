@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sources;
 using Sources.Toolbox;
 using Unity.Scripts.Views;
 using UnityEngine;
@@ -13,6 +14,8 @@ namespace Unity.Scripts {
         private void Awake() {
              _pool = new Pool<GameObject>(() => Instantiate(_prefab, transform));
         }
+        
+        protected abstract EntityType Type { get; }
         
         protected void Sync(List<EntityView> entityViews, float dt) {
             // Remove
@@ -39,7 +42,7 @@ namespace Unity.Scripts {
                 if (!_gosById.TryGetValue(entityView.Id, out var go)) {
                     // Create
                     go = _pool.Get();
-                    go.name = $"{entityView.Type}_{entityView.Id}";
+                    go.name = $"{Type}_{entityView.Id}";
                     go.SetActive(true);
                     
                     _gosById[entityView.Id] = go;

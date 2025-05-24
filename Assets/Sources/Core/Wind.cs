@@ -37,7 +37,7 @@ namespace Sources.Core {
             var result = 0;
             
             if (currentAngle == 0) {
-                var sign = Rnd.Next(2) == 0 ? -1 : 1;
+                var sign = Prng.Roll(2) == 0 ? -1 : 1;
                 result = maxAngle*sign;
             }
             

@@ -1,10 +1,11 @@
 using Sources.Configuration;
+using Sources.Core;
 using Sources.Toolbox;
 
 namespace Sources.Mechanics {
     public static class CoinMechanics {
-        public static SwapbackArray<Entity> GenerateCoinLine(int segmentZ) {
-            var result = new SwapbackArray<Entity>(CoreConfig.CoinLineCount);
+        public static SimpleArray<Entity> GenerateCoinLine(int segmentZ) {
+            var result = new SimpleArray<Entity>(CoreConfig.CoinLineCount);
             
             var laneType = Enums.GetRandom<LaneType>();
             var x = LaneMechanics.GetPosition(laneType, CoreConfig.LaneDistance);
@@ -15,6 +16,7 @@ namespace Sources.Mechanics {
                 coin.Size = coinSize;
                 coin.Position = new Vec3F32(x, 0, segmentZ + i*CoreConfig.CoinDistance);
                 coin.Id = EntityManager.NextId;
+                coin.Type = EntityType.Coin;
                 result.Add(coin);
             }
             
