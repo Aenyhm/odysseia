@@ -1,12 +1,19 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.IO;
 using Sources;
+using Sources.Core;
 using Sources.Toolbox;
+using Unity.Scripts.Scriptables;
+using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Unity.Scripts {
     public class GameControllerBehaviour : MonoBehaviour {
-        [SerializeField] private ConfigurationScriptable _config;
+        [SerializeField] private TweaksScriptable _tweaksScriptable;
+        [SerializeField] private CollidingScriptable _collidingScriptable;
 
         [Header("Debug")]
         [SerializeField][Range(0, 15)] private float _frameRate = 1f;
@@ -21,14 +28,25 @@ namespace Unity.Scripts {
         }
         
         private void Start() {
-            var conf = new RendererConf();
-            conf.Sizes = new Dictionary<EntityType, Vec3F32>();
-            foreach (var item in _config.CollidingObjects) {
-                conf.Sizes.Add(item.entityType, GetVisualSize(item.gameObject));
+            var rendererConf = new RendererConf();
+
+            rendererConf.Sizes = new Dictionary<EntityType, Vec3F32>();
+            foreach (var item in _collidingScriptable.CollidingObjects) {
+                rendererConf.Sizes.Add(item.entityType, GetVisualSize(item.gameObject));
             }
             
+            rendererConf.SegmentsByRegion = new Dictionary<RegionType, List<Segment>>();
+            foreach (RegionType regionType in Enum.GetValues(typeof(RegionType))) {
+                rendererConf.SegmentsByRegion.Add(regionType, new List<Segment>());
+                
+                var segmentScriptables = LoadAssetsAt<SegmentScriptable>($"Unity/Configuration/Segments/{regionType}/");
+                foreach (var item in segmentScriptables) {
+                    rendererConf.SegmentsByRegion[regionType].Add(item.Segment);
+                }
+            }
+
             // Doit être fait après le Awake pour que le SceneController passe avant.
-            _gameController = new GameController(CurrentScene.SceneType, conf);
+            _gameController = new GameController(CurrentScene.SceneType, _tweaksScriptable.GameConf, rendererConf);
         }
 
         private void FixedUpdate() {
@@ -49,6 +67,29 @@ namespace Unity.Scripts {
             input.Escape = Input.GetKey(KeyCode.Escape);
             return input;
         }
+        
+        private static List<T> LoadAssetsAt<T>(string path) where T: Object {
+		    var result = new List<T>();
+            
+            if (path[^1] != '/') path += '/';
+            
+            var dirPath = Application.dataPath + "/" + path;
+            if (Directory.Exists(dirPath)) {
+		        var fileEntries = Directory.GetFiles(dirPath);
+                
+                foreach (var fileName in fileEntries) {
+			        var index = fileName.LastIndexOf("/", StringComparison.Ordinal);
+			        var localPath = "Assets/" + path + fileName.Substring(index);
+                    
+			        var t = (T)AssetDatabase.LoadAssetAtPath(localPath, typeof(T));
+			        if (t) {
+                        result.Add(t);
+                    }
+		        }
+            }
+
+		    return result;
+	    }
 
         [Pure]
         private static Vec3F32 GetVisualSize(GameObject go) {

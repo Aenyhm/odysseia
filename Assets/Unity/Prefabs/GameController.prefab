@@ -44,48 +44,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80ef1d2aaec840dfadbe71f9eae97e81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _config: {fileID: 11400000, guid: 0cb1613fa4ff32e45b538db09938a22f, type: 2}
+  _tweaksScriptable: {fileID: 11400000, guid: 0cb1613fa4ff32e45b538db09938a22f, type: 2}
+  _collidingScriptable: {fileID: 11400000, guid: 96da8d5ae1bd9004e8a7602a2958edbf, type: 2}
   _frameRate: 1
   _gameState:
-    Boat:
-      SpeedMaxConf:
-        Multiplier: 0
-        DistanceStep: 0
-        Min: 0
-        Max: 0
-      SailConf:
-        AngleMax: 0
-        WindwardAngleRange: 0
-      Size:
-        X: 0
-        Y: 0
-        Z: 0
-      Position:
-        X: 0
-        Y: 0
-        Z: 0
+    PlayState:
+      Boat:
+        Position:
+          X: 0
+          Y: 0
+          Z: 0
+        SailAngle: 0
+        SpeedZ: 0
+        XSign: 0
+        Health: 0
+        LaneType: 0
+        SailWindward: 0
+      Region:
+        Entities: []
+        Coins:
+          Items: []
+          Capacity: 0
+          Count: 0
+        Portals: []
+        Type: 0
+      Wind:
+        CurrentAngle: 0
+        TargetAngle: 0
+        LastChangeDistance: 0
       Distance: 0
-      SailAngle: 0
-      SpeedCollisionFactor: 0
-      xSign: 0
-      SpeedZ: 0
-      SpeedZMin: 0
-      SpeedX: 0
-      Health:
-        Max: 0
-        Value: 0
-      LaneType: 0
-      SailWindward: 0
-    Region:
-      Coins: []
-      Portals: []
-      Type: 0
-    Wind:
-      Conf:
-        AngleMax: 0
-        ChangeDistance: 0
-      Angle: 0
-      LastChangeDistance: 0
-    CoinCount: 0
-    CurrentScene: 0
-    Pause: 0
+      Score: 0
+      CoinCount: 0
+      Mode: 0
+    TotalCoinCount: 0
+    CurrentSceneType: 0

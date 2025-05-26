@@ -1,31 +1,32 @@
 using System;
-using Sources.Configuration;
 using Sources.Toolbox;
 
 namespace Sources.Core {
     
     [Serializable]
+    public struct WindConf {
+        public int AngleMax;
+        public int ChangeDistance;
+    }
+    
+    [Serializable]
     public struct Wind {
-        public WindConf Conf;
         public float CurrentAngle;
         public float TargetAngle;
         public float LastChangeDistance;
     }
     
     public static class WindSystem {
-        public static Wind CreateWind() {
-            var wind = new Wind();
-            wind.Conf = CoreConfig.WindConf;
-            return wind;
-        }
-        
-        public static void Execute(ref PlayState playState, float dt) {
+        public static void Execute(ref GameState gameState, float dt) {
+            ref var playState = ref gameState.PlayState;
             ref var wind = ref playState.Wind;
             var boat = playState.Boat;
 
             if (Maths.FloatEquals(wind.CurrentAngle, wind.TargetAngle)) {
-                if (playState.Distance > wind.LastChangeDistance + wind.Conf.ChangeDistance) {
-                    wind.TargetAngle = GetNewAngle(wind.CurrentAngle, wind.Conf.AngleMax);
+                var windConf = Services.Get<GameConf>().WindConf;
+
+                if (playState.Distance > wind.LastChangeDistance + windConf.ChangeDistance) {
+                    wind.TargetAngle = GetNewAngle(wind.CurrentAngle, windConf.AngleMax);
                     wind.LastChangeDistance = playState.Distance;
                 }
             } else {

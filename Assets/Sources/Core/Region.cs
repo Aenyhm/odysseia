@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Sources.Configuration;
 using Sources.Mechanics;
 using Sources.Toolbox;
 
@@ -8,9 +7,16 @@ namespace Sources.Core {
     public enum RegionType : byte { Aegis, Styx, Olympia, Hephaestus, Artemis }
 
     [Serializable]
+    public struct RegionConf {
+        public int ZenDistance;
+        public int RegionDistance;
+        public int PortalCount;
+    }
+    
+    [Serializable]
     public struct Region {
         public List<Entity> Entities;
-        public SimpleArray<SimpleArray<Entity>> CoinLines;
+        public SimpleArray<Coin> Coins;
         public Portal[] Portals;
         public RegionType Type;
     }
@@ -23,39 +29,64 @@ namespace Sources.Core {
     
     public static class RegionSystem {
  
-        // TODO: explain -1
+        // -1 car on ne met pas dans le pool la région actuelle
         private static SimpleArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1);
 
-        public static void Enter(ref PlayState playState, RegionType regionType) {
-            var segmentConfs = GenerateSegmentConfs(regionType);
-            var entities = new List<Entity>();
-            var coinLines = new SimpleArray<SimpleArray<Entity>>(8);
+        public static void Enter(ref GameState gameState, RegionType regionType) {
+            ref var playState = ref gameState.PlayState;
+            var gameConf = Services.Get<GameConf>();
+            var regionConf = gameConf.RegionConf;
+            var coinConf = gameConf.CoinConf;
             
-            var segmentZ = CoreConfig.ZenDistance;
-            foreach (var segmentConf in segmentConfs) {
-                entities.AddRange(GenerateSegmentEntities(segmentConf, segmentZ));
-                
-                if (Prng.Chance(CoreConfig.CoinSpawnPercentage, 100)) {
-                    coinLines.Add(CoinMechanics.GenerateCoinLine(segmentZ));
+            var rendererConf = Services.Get<RendererConf>();
+
+            var entities = new List<Entity>();
+            var coins = new SimpleArray<Coin>(4*8*coinConf.CoinLineCount); // max 4 coin lines / segment
+            
+            var filledSegmentsDistance = regionConf.RegionDistance - 2*regionConf.ZenDistance;
+            var availableSegments = rendererConf.SegmentsByRegion[regionType];
+            var segments = GenerateSegments(availableSegments, filledSegmentsDistance);
+            
+            var segmentZ = regionConf.ZenDistance;
+            foreach (var segment in segments) {
+                foreach (var entityCell in segment.EntityCells) {
+                    var spawnPct = 100;
+                    if (CoreConfig.EntitySpawnPcts.TryGetValue(entityCell.Type, out var pct)) {
+                        spawnPct = pct;
+                    }
+                    
+                    if (Prng.Chance(spawnPct, 100)) {
+                        if (entityCell.Type == EntityType.Coin) {
+                            var coinLine = CoinMechanics.GenerateCoinLine(in coinConf, entityCell, segmentZ);
+                            if (!coins.CanAdd(coinLine.Length)) coins.Resize(coins.Capacity*2);
+                            coins.AddRange(coinLine);
+                        } else {
+                             entities.Add(GenerateEntity(entityCell, segmentZ));
+                        }
+                    }
                 }
-                
-                segmentZ += segmentConf.Distance;
+   
+                segmentZ += (int)segment.Length;
             }
 
             var newRegion = new Region {
                 Type = regionType,
                 Entities = entities,
-                CoinLines = coinLines,
-                Portals = GeneratePortals(regionType)
+                Coins = coins,
+                Portals = GeneratePortals(regionType, regionConf.PortalCount)
             };
             playState.Region = newRegion;
             playState.Boat.Position.Z = 0;
         }
 
-        public static void Execute(ref PlayState playState) {
+        public static void Execute(ref GameState gameState) {
+            ref var playState = ref gameState.PlayState;
+            var gameConf = Services.Get<GameConf>();
+            var regionConf = gameConf.RegionConf;
+            
             var boat = playState.Boat;
             
-            if (boat.Position.Z >= CoreConfig.RegionDistance) {
+            if (boat.Position.Z >= regionConf.RegionDistance) {
                 var portals = playState.Region.Portals;
                 var nextRegionType = playState.Region.Type;
                 
@@ -66,81 +97,59 @@ namespace Sources.Core {
                     }
                 }
                 
-                Enter(ref playState, nextRegionType);
+                Enter(ref gameState, nextRegionType);
             }
         }
         
         // On génère des tronçons de 100m d'obstacles et 50m d'ennemis
         // en laissant une zone tranquille entre les portails.
-        private static List<SegmentConf> GenerateSegmentConfs(RegionType regionType) {
-            var result = new List<SegmentConf>();
+        private static List<Segment> GenerateSegments(List<Segment> availableSegments, int filledSegmentsDistance) {
+            var result = new List<Segment>();
             
-            var availableSegments = CoreConfig.SegmentsByRegion[regionType];
-            
-            var generatedDistance = 0;
-            
-            const int filledSegmentsDistance = CoreConfig.RegionDistance - 2*CoreConfig.ZenDistance;
-            
-            while (generatedDistance < filledSegmentsDistance) {
-                SegmentConf segmentConf;
-                if (
-                    generatedDistance == filledSegmentsDistance - 50 ||
-                    Prng.Chance(CoreConfig.EnemySpawnPercentage, 100)
-                ) {
-                    segmentConf = GenerateEnemySegmentConf();
-                } else {
-                    var segmentIndex = Prng.Roll(availableSegments.Length);
-                    segmentConf = availableSegments[segmentIndex];
+            if (availableSegments.Count != 0) {
+                var generatedDistance = 0;
+                
+                while (generatedDistance < filledSegmentsDistance - (int)SegmentLength.L50) {
+                    var segmentIndex = Prng.Roll(availableSegments.Count);
+                    var segment = availableSegments[segmentIndex];
+         
+                    result.Add(segment);
+                    generatedDistance += (int)segment.Length;
                 }
                 
-                result.Add(segmentConf);
-                generatedDistance += segmentConf.Distance;
+                if (generatedDistance != filledSegmentsDistance) {
+                    throw new Exception(
+                        $"Wrong segment distance generated: {generatedDistance}; must be {filledSegmentsDistance}."
+                    );
+                }
+                
+                Prng.Shuffle(result);
             }
             
-            if (generatedDistance != filledSegmentsDistance) {
-                throw new Exception($"Wrong segment distance generated: {generatedDistance}; must be {filledSegmentsDistance}.");
-            }
-            Prng.Shuffle(result);
-
             return result;
         }
         
-        private static SegmentConf GenerateEnemySegmentConf() {
-            var laneType = Enums.GetRandom<LaneType>();
-            
-            return new SegmentConf {
-                Distance = 50,
-                EntityConfs = new[] {
-                    new SegmentEntityConf(EntityType.Mermaid, laneType, CoreConfig.MermaidEffectDistance),
-                },
-            };
-        }
-
-        private static List<Entity> GenerateSegmentEntities(SegmentConf segmentConf, int segmentZ) {
-            var result = new List<Entity>();
-            
+        private static Entity GenerateEntity(EntityCell entityCell, int segmentZ) {
             var sizes = Services.Get<RendererConf>().Sizes;
-            
-            foreach (var obstacleInfo in segmentConf.EntityConfs) {
-                var e = new Entity();
-                e.Id = EntityManager.NextId;
-                
-                var x = LaneMechanics.GetPosition(obstacleInfo.LaneType, CoreConfig.LaneDistance);
-                if (obstacleInfo.EntityType == EntityType.Trunk) x /= 2;
-                
-                e.Position = new Vec3F32(x, 0, segmentZ + obstacleInfo.Z);
-                e.Size = sizes[obstacleInfo.EntityType];
-                e.Type = obstacleInfo.EntityType;
-                e.LaneType = obstacleInfo.LaneType;
 
-                result.Add(e);
+            var e = new Entity();
+            e.Id = EntityManager.NextId;
+            e.Type = entityCell.Type;
+            e.LaneType = (LaneType)entityCell.X; // FIXME: trunk on 2 lanes
+            e.Size = sizes[entityCell.Type];
+
+            var coords = new Vec3F32(LaneMechanics.GetSign(e.LaneType), 0, entityCell.Y);
+            var dimensions = EntityDefinitions.DimensionByEntityType[entityCell.Type];
+            if (dimensions.X == 2) {
+                coords.X += 0.5f;
             }
+            e.Position = new Vec3F32(coords.X*CoreConfig.LaneDistance, 0, segmentZ + entityCell.Y*CoreConfig.GridScale);
             
-            return result;
+            return e;
         }
         
-        private static Portal[] GeneratePortals(RegionType currentRegionType) {
-            var result = new Portal[CoreConfig.PortalCount];
+        private static Portal[] GeneratePortals(RegionType currentRegionType, int portalCount) {
+            var result = new Portal[portalCount];
             
             var lanePool = new SimpleArray<LaneType>(Enums.Count<LaneType>());
             foreach (LaneType laneType in Enum.GetValues(typeof(LaneType))) {

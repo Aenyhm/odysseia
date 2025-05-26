@@ -1,5 +1,4 @@
 using System;
-using Sources.Configuration;
 using Sources.Mechanics;
 using Sources.Toolbox;
 
@@ -7,7 +6,8 @@ namespace Sources.Core {
     public enum LaneType : byte { Left, Center, Right }
 
     public static class ChangeLaneSystem {
-        public static void Execute(ref PlayState playState, in GameInput input, float dt) {
+        public static void Execute(ref GameState gameState, in GameInput input, float dt) {
+            ref var playState = ref gameState.PlayState;
             ref var boat = ref playState.Boat;
             
             if (boat.XSign == 0) {
@@ -21,7 +21,9 @@ namespace Sources.Core {
             } else {
                 var targetX = LaneMechanics.GetPosition(boat.LaneType, CoreConfig.LaneDistance);
                 
-                boat.Position.X = Maths.MoveTowards(boat.Position.X, targetX, boat.Conf.SpeedX*dt);
+                var boatConf = Services.Get<GameConf>().BoatConf;
+
+                boat.Position.X = Maths.MoveTowards(boat.Position.X, targetX, boatConf.SpeedX*dt);
                 
                 var moveLaneCompleted = (
                     boat.XSign == -1 && boat.Position.X <= targetX ||

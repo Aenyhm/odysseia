@@ -9,7 +9,7 @@ namespace Unity.Scripts {
         [SerializeField] protected GameObject _prefab;
         
         private Pool<GameObject> _pool;
-        private readonly Dictionary<int, GameObject> _gosById = new();
+        protected readonly Dictionary<int, GameObject> _gosById = new();
 
         private void Awake() {
              _pool = new Pool<GameObject>(() => Instantiate(_prefab, transform));
@@ -17,13 +17,15 @@ namespace Unity.Scripts {
         
         protected abstract EntityType Type { get; }
         
-        protected void Sync(List<EntityView> entityViews, float dt) {
+        protected virtual void Init(GameObject go) {}
+
+        protected void Sync(ICollection<int> entityIds) {
             // Remove
-            var gosToRemove = new Dictionary<int, GameObject>();
+            var gosToRemove = new Dictionary<int, GameObject>(entityIds.Count);
             foreach (var (id, go) in _gosById) {
                 var found = false;
-                foreach (var entityView in entityViews) {
-                    if (entityView.Id == id) {
+                foreach (var entityId in entityIds) {
+                    if (entityId == id) {
                         found = true;
                         break;
                     }
@@ -37,19 +39,17 @@ namespace Unity.Scripts {
                 _pool.Free(go);
                 _gosById.Remove(id);
             }
-
-            foreach (var entityView in entityViews) {
-                if (!_gosById.TryGetValue(entityView.Id, out var go)) {
+            
+            foreach (var entityId in entityIds) {
+                if (!_gosById.TryGetValue(entityId, out var go)) {
                     // Create
                     go = _pool.Get();
-                    go.name = $"{Type}_{entityView.Id}";
+                    go.name = $"{Type}_{entityId}";
                     go.SetActive(true);
+                    Init(go);
                     
-                    _gosById[entityView.Id] = go;
+                    _gosById[entityId] = go;
                 }
-                
-                // Update
-                go.GetComponent<IEntityBehaviour>().Draw(entityView, dt); // @perf
             }
         }
     }

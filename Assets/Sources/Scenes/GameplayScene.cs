@@ -11,19 +11,18 @@ namespace Sources.Scenes {
             }
             
             if (gameState.PlayState.Mode == PlayMode.Play) {
-                ChangeLaneSystem.Execute(ref gameState.PlayState, in input, dt);
-                BoatSystem.Execute(ref gameState.PlayState, in input, dt);
-                RegionSystem.Execute(ref gameState.PlayState);
-                WindSystem.Execute(ref gameState.PlayState, dt);
-                CoinSystem.Execute(ref gameState.PlayState);
+                ChangeLaneSystem.Execute(ref gameState, in input, dt);
+                BoatSystem.Execute(ref gameState, in input, dt);
+                RegionSystem.Execute(ref gameState);
+                WindSystem.Execute(ref gameState, dt);
+                CoinSystem.Execute(ref gameState);
                 GameOverSystem.Execute(ref gameState);
             }
         }
         
         public override void Enter(ref GameState gameState) {
             gameState.PlayState.Boat = BoatSystem.CreateBoat();
-            gameState.PlayState.Wind = WindSystem.CreateWind();
-            RegionSystem.Enter(ref gameState.PlayState, RegionType.Aegis);
+            RegionSystem.Enter(ref gameState, RegionType.Aegis);
             gameState.PlayState.Mode = PlayMode.Play;
         }
         

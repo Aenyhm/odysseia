@@ -1,35 +1,65 @@
-using Sources.Configuration;
+using System;
+using System.Collections.Generic;
 using Sources.Toolbox;
 
 namespace Sources.Core {
+    
+    [Serializable]
+    public struct CoinConf {
+        public float CoinDistance;
+        public int CoinLineCount;
+        public int CoinLineBonus;
+    }
+    
+    [Serializable]
+    public struct Coin {
+        public Vec3F32 Position;
+        public int Id;
+        public int LineId;
+    }
+    
     public static class CoinSystem {
-        
-        public static void Execute(ref PlayState playState) {
+        private static int _currentLineId;
+        private static int _currentLineLooted;
+
+        public static void Execute(ref GameState gameState) {
+            var gameConf = Services.Get<GameConf>();
+            var coinConf = gameConf.CoinConf;
+            
+            var sizes = Services.Get<RendererConf>().Sizes;
+            var coinSize = sizes[EntityType.Coin];
+            var boatSize = sizes[EntityType.Boat];
+            
+            ref var playState = ref gameState.PlayState;
+            ref var region = ref playState.Region;
             var boat = playState.Boat;
-            var region = playState.Region;
+            
+            var toRemoveIndices = new List<int>(coinConf.CoinLineCount);
 
-            for (var i = region.CoinLines.Count - 1; i >= 0; i--) {
-                ref var coinLine = ref region.CoinLines.Items[i];
+            for (var i = 0; i < region.Coins.Count; i++) {
+                var coin = region.Coins.Items[i];
                 
-                var found = false;
-                for (var j = coinLine.Count - 1; j >= 0; j--) {
-                    var coin = coinLine.Items[j];
-                    if (Collisions.CheckAabb(boat.Position, boat.Size, coin.Position, coin.Size)) {
-                        playState.CoinCount++;
-                        coinLine.RemoveAtSwapback(j);
-                        playState.Score += CoreConfig.EntityScoreValues[EntityType.Coin];
-                        found = true;
-                        break;
-                    }
-                }
+                if (Collisions.CheckAabb(boat.Position, boatSize, coin.Position, coinSize)) {
+                    playState.CoinCount++;
+                    
+                    playState.Score += CoreConfig.EntityScoreValues[EntityType.Coin];
 
-                if (found) {
-                    if (coinLine.Count == 0) {
-                        region.CoinLines.RemoveAtSwapback(i);
-                        playState.Score += 10;
+                    if (coin.LineId != _currentLineId) {
+                        _currentLineLooted = 0;
+                        _currentLineId = coin.LineId;
+                    } 
+                    
+                    _currentLineLooted++;
+                    if (_currentLineLooted == coinConf.CoinLineCount) {
+                        playState.Score += coinConf.CoinLineBonus;
                     }
-                    break;
+
+                    toRemoveIndices.Add(i);
                 }
+            }
+            
+            foreach (var index in toRemoveIndices) {
+                region.Coins.RemoveAtSwapback(index);
             }
         }
     }

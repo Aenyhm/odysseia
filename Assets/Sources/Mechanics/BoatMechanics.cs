@@ -1,6 +1,6 @@
 using System;
 using System.Diagnostics.Contracts;
-using Sources.Configuration;
+using Sources.Core;
 using Sources.Toolbox;
 
 namespace Sources.Mechanics {

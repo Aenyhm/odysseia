@@ -1,6 +1,22 @@
 using System;
 
 namespace Sources.Toolbox {
+    
+    [Serializable]
+    public struct Vec2I32 {
+        public int X;
+        public int Y;
+        
+        public Vec2I32(int x = 0, int y = 0) {
+            X = x;
+            Y = y;
+        }
+        
+        public override string ToString() {
+            return $"Vec2I32({X}, {Y})";
+        }
+    }
+    
     [Serializable]
     public struct Vec3F32 {
         public float X;

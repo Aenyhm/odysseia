@@ -1,27 +1,28 @@
-using Sources.Configuration;
 using Sources.Core;
 using Sources.Toolbox;
 
 namespace Sources.Mechanics {
     public static class CoinMechanics {
-        public static SimpleArray<Entity> GenerateCoinLine(int segmentZ) {
-            var result = new SimpleArray<Entity>(CoreConfig.CoinLineCount);
+        private static int _currentLineId;
+        
+        public static Coin[] GenerateCoinLine(in CoinConf coinConf, EntityCell entityCell, int segmentZ) {
+            var result = new Coin[coinConf.CoinLineCount];
             
-            var laneType = Enums.GetRandom<LaneType>();
+            var laneType = (LaneType)entityCell.X;
             var x = LaneMechanics.GetPosition(laneType, CoreConfig.LaneDistance);
-            var coinSize = Services.Get<RendererConf>().Sizes[EntityType.Coin];
+            var lineId = ++_currentLineId;
             
-            for (var i = 0; i < CoreConfig.CoinLineCount; i++) {
-                var coin = new Entity();
-                coin.Size = coinSize;
-                coin.Position = new Vec3F32(x, 0, segmentZ + i*CoreConfig.CoinDistance);
+            for (var i = 0; i < coinConf.CoinLineCount; i++) {
+                var pos = new Vec3F32(x, 0, segmentZ + entityCell.Y*CoreConfig.GridScale + i*coinConf.CoinDistance);
+                
+                var coin = new Coin();
+                coin.Position = pos;
                 coin.Id = EntityManager.NextId;
-                coin.Type = EntityType.Coin;
-                result.Add(coin);
+                coin.LineId = lineId;
+                result[i] = coin;
             }
             
             return result;
         }
-        
     }
 }

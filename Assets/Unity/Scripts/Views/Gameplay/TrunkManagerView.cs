@@ -6,18 +6,19 @@ namespace Unity.Scripts.Views.Gameplay {
         protected override EntityType Type => EntityType.Trunk;
 
         public override void Render(in GameState gameState, float dt) {
-            var views = new List<EntityView>();
-            
+            var entitiesById = new Dictionary<int, Entity>();
             foreach (var e in gameState.PlayState.Region.Entities) {
                 if (e.Type == EntityType.Trunk) {
-                    var entityView = new EntityView();
-                    entityView.Id = e.Id;
-                    entityView.Position = e.Position.ToUnityVector3();
-                    views.Add(entityView);
+                    entitiesById[e.Id] = e;
                 }
             }
             
-            Sync(views, dt);
+            Sync(entitiesById.Keys);
+            
+            foreach (var (id, go) in _gosById) {
+                var e = entitiesById[id];
+                go.transform.localPosition = e.Position.ToUnityVector3();
+            }
         }
     }
 }

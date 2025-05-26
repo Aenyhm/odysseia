@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Sources.Configuration;
+using Sources.Core;
 using Sources.Mechanics;
 
 namespace Tests.Editor {
@@ -11,13 +11,13 @@ namespace Tests.Editor {
         
         public static IEnumerable<TestCaseData> Cases {
             get {
-                var conf = CoreConfig.BoatConf.SpeedMaxConf;
+                var conf = new SpeedMaxConf { DistanceStep = 500, Multiplier = 1.1f, Min = 20, Max = 40 };
 
                 yield return new TestCaseData(conf,     0).Returns(conf.Min);
                 yield return new TestCaseData(conf,   499).Returns(conf.Min);
-                yield return new TestCaseData(conf,   500).Returns((float)(conf.Min*Math.Pow(1.1, 1)));
-                yield return new TestCaseData(conf,   750).Returns((float)(conf.Min*Math.Pow(1.1, 1)));
-                yield return new TestCaseData(conf,  1200).Returns((float)(conf.Min*Math.Pow(1.1, 2)));
+                yield return new TestCaseData(conf,   500).Returns((float)(conf.Min*Math.Pow(conf.Multiplier, 1)));
+                yield return new TestCaseData(conf,   750).Returns((float)(conf.Min*Math.Pow(conf.Multiplier, 1)));
+                yield return new TestCaseData(conf,  1200).Returns((float)(conf.Min*Math.Pow(conf.Multiplier, 2)));
                 yield return new TestCaseData(conf, 40000).Returns(conf.Max);
             }
         }

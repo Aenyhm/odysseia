@@ -7,7 +7,8 @@ namespace Sources {
         
         public GameState GameState => _gameState;
 
-        public GameController(SceneType sceneType, in RendererConf rendererConf) {
+        public GameController(SceneType sceneType, in GameConf gameConf, in RendererConf rendererConf) {
+            Services.Register(gameConf);
             Services.Register(rendererConf);
             
             SceneManager.Register(SceneType.Title, new TitleScene());
@@ -25,7 +26,8 @@ namespace Sources {
                 SceneManager.GoTo(sceneType, ref _gameState);
             }
             
-            SceneManager.Get(_gameState.CurrentSceneType).Update(ref _gameState, in input, dt);
+            var currentScene = SceneManager.Get(_gameState.CurrentSceneType);
+            currentScene.Update(ref _gameState, in input, dt);
         }
     }
 }
