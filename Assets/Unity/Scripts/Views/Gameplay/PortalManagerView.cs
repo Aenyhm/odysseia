@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Sources;
 using Sources.Core;
-using Sources.Mechanics;
 using UnityEngine;
 
 namespace Unity.Scripts.Views.Gameplay {
@@ -30,7 +29,7 @@ namespace Unity.Scripts.Views.Gameplay {
                 foreach (var portal in gameState.PlayState.Region.Portals) {
                     if (regionType == portal.RegionType) {
                         found = true;
-                        var posX = LaneMechanics.GetPosition(portal.LaneType, CoreConfig.LaneDistance);
+                        var posX = LaneLogic.GetPosition((int)portal.LaneType);
                         go.transform.MoveOnAxis(Axis.X, posX);
                         break;
                     }

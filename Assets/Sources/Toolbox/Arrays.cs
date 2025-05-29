@@ -3,20 +3,20 @@ using System;
 namespace Sources.Toolbox {
     
     [Serializable]
-    public struct SimpleArray<T> {
+    public struct SwapbackArray<T> {
         public T[] Items;
         public int Capacity;
         public int Count;
 
-        public SimpleArray(int initialCapacity) {
+        public SwapbackArray(int initialCapacity) {
             Items = new T[initialCapacity];
             Count = 0;
             Capacity = initialCapacity;
         }
 
-        public void Reset() => Count = 0;
-        public bool CanAdd(int n = 1) => Count + n < Capacity;
+        public readonly bool CanAdd(int n = 1) => Count + n < Capacity;
         public void Add(T item) => Items[Count++] = item;
+        public void Reset() => Count = 0;
         
         public void AddRange(T[] item) {
             foreach (var t in item) Add(t);
@@ -29,16 +29,15 @@ namespace Sources.Toolbox {
             Items = newArray;
         }
         
-        public void RemoveAtSwapback(int index) {
+        public void RemoveAt(int index) {
             Items[index] = Items[Count - 1];
             Count--;
         }
-        
-        public void RemoveAtOrdered(int index) {
-            for (var i = index; i < Count - 1; i++) {
-                Items[i] = Items[i + 1];
+  
+        public void RemoveAll(Predicate<T> match) {
+            for (var i = Count - 1; i >= 0; i--) {
+                if (match(Items[i])) RemoveAt(i);
             }
-            Count--;
         }
     }
     
@@ -55,5 +54,6 @@ namespace Sources.Toolbox {
         }
         
         public int CoordsToIndex(int x, int y) => y*Width + x;
+        public int CoordsToIndex(Vec2I32 v) => CoordsToIndex(v.X, v.Y);
     }
 }

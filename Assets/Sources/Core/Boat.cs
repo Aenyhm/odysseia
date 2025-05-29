@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Sources.Mechanics;
+using System.Diagnostics.Contracts;
 using Sources.Toolbox;
 
 namespace Sources.Core {
@@ -43,6 +43,36 @@ namespace Sources.Core {
         public bool SailWindward;
     }
     
+    public static class BoatLogic {
+        
+        [Pure]
+        public static float GetMaxSpeed(in SpeedMaxConf speedMaxConf, float distance) {
+            var distanceFloored = Convert.ToInt64(distance);
+            var distanceStep = distanceFloored/speedMaxConf.DistanceStep;
+            var targetSpeed = (float)(speedMaxConf.Min*Math.Pow(speedMaxConf.Multiplier, distanceStep));
+            
+            return Math.Clamp(targetSpeed, speedMaxConf.Min, speedMaxConf.Max);
+        }
+
+        [Pure]
+        public static bool IsSailWindward(in SailConf sailConf, float sailAngle, float windAngle) {
+            var halfRange = sailConf.WindwardAngleRange/2;
+            var min = Math.Max(-sailConf.AngleMax, windAngle - halfRange);
+            var max = Math.Min(+sailConf.AngleMax, windAngle + halfRange);
+            if (max - min < sailConf.WindwardAngleRange) {
+                if (Maths.FloatEquals(min, -sailConf.AngleMax)) max = min + sailConf.WindwardAngleRange;
+                if (Maths.FloatEquals(max, +sailConf.AngleMax)) min = max - sailConf.WindwardAngleRange;
+            }
+            
+            return sailAngle >= min && sailAngle <= max;
+        }
+                
+        [Pure]
+        public static float MoveSailAngle(in SailConf sailConf, float angle) {
+            return Math.Clamp(angle, -sailConf.AngleMax, +sailConf.AngleMax);
+        }
+    }
+    
     public static class BoatSystem {
         public static Boat CreateBoat() {
             var boatConf = Services.Get<GameConf>().BoatConf;
@@ -60,23 +90,26 @@ namespace Sources.Core {
         public static void Execute(ref GameState gameState, in GameInput input, float dt) {
             ref var playState = ref gameState.PlayState;
             ref var boat = ref playState.Boat;
-            var boatConf = Services.Get<GameConf>().BoatConf;
+            var gameConf = Services.Get<GameConf>();
+            var boatConf = gameConf.BoatConf;
             
-            CheckCollisions(ref boat, in playState.Region);
+            if (gameConf.EnableBoatCollisions) {
+                CheckCollisions(ref boat, in playState.Region);
+            }
 
             // Voile
             if (input.MouseButtonLeftDown) {
                 var targetSailAngle = boat.SailAngle + input.MouseDeltaX;
-                boat.SailAngle = BoatMechanics.MoveSailAngle(boatConf.SailConf, targetSailAngle);
+                boat.SailAngle = BoatLogic.MoveSailAngle(boatConf.SailConf, targetSailAngle);
             }
             
             // Vitesse
             {
                 var wind = playState.Wind;
-                boat.SailWindward = BoatMechanics.IsSailWindward(boatConf.SailConf, boat.SailAngle, wind.CurrentAngle);
+                boat.SailWindward = BoatLogic.IsSailWindward(boatConf.SailConf, boat.SailAngle, wind.CurrentAngle);
                 var speedDirection = boat.SailWindward ? 1 : -1;
                 var targetSpeed = boat.SpeedZ + speedDirection*dt;
-                var maxSpeed = BoatMechanics.GetMaxSpeed(boatConf.SpeedMaxConf, playState.Distance);
+                var maxSpeed = BoatLogic.GetMaxSpeed(boatConf.SpeedMaxConf, playState.Distance);
                 boat.SpeedZ = Math.Clamp(targetSpeed, boatConf.SpeedZMin, maxSpeed);
             }
             
@@ -88,10 +121,12 @@ namespace Sources.Core {
 
         private static void CheckCollisions(ref Boat boat, in Region region) {
             var boatConf = Services.Get<GameConf>().BoatConf;
-            var boatSize = Services.Get<RendererConf>().Sizes[EntityType.Boat];
+            var sizes = Services.Get<RendererConf>().Sizes;
 
             foreach (var e in region.Entities) {
-                if (Collisions.CheckAabb(boat.Position, boatSize, e.Position, e.Size)) {
+                var pos = EntityLogic.GetPosition(e.Type, e.Coords);
+                
+                if (Collisions.CheckAabb(boat.Position, sizes[EntityType.Boat], pos, sizes[e.Type])) {
                     if (boat.CollisionIds.Add(e.Id)) {
                         boat.Health = (byte)Math.Max(0, boat.Health - 1);
                         var targetSpeed = boat.SpeedZ*boatConf.SpeedCollisionFactor;

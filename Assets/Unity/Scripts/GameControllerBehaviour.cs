@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.IO;
 using Sources;
 using Sources.Core;
 using Sources.Toolbox;
 using Unity.Scripts.Scriptables;
-using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Unity.Scripts {
     public class GameControllerBehaviour : MonoBehaviour {
@@ -39,7 +36,7 @@ namespace Unity.Scripts {
             foreach (RegionType regionType in Enum.GetValues(typeof(RegionType))) {
                 rendererConf.SegmentsByRegion.Add(regionType, new List<Segment>());
                 
-                var segmentScriptables = LoadAssetsAt<SegmentScriptable>($"Unity/Configuration/Segments/{regionType}/");
+                var segmentScriptables = Resources.LoadAll<SegmentScriptable>($"Segments/{regionType}/");
                 foreach (var item in segmentScriptables) {
                     rendererConf.SegmentsByRegion[regionType].Add(item.Segment);
                 }
@@ -65,31 +62,9 @@ namespace Unity.Scripts {
             input.MouseDeltaX = Input.mousePositionDelta.x;
             input.MouseButtonLeftDown = Input.GetMouseButton(0);
             input.Escape = Input.GetKey(KeyCode.Escape);
+            input.Space = Input.GetKeyDown(KeyCode.Space);
             return input;
         }
-        
-        private static List<T> LoadAssetsAt<T>(string path) where T: Object {
-		    var result = new List<T>();
-            
-            if (path[^1] != '/') path += '/';
-            
-            var dirPath = Application.dataPath + "/" + path;
-            if (Directory.Exists(dirPath)) {
-		        var fileEntries = Directory.GetFiles(dirPath);
-                
-                foreach (var fileName in fileEntries) {
-			        var index = fileName.LastIndexOf("/", StringComparison.Ordinal);
-			        var localPath = "Assets/" + path + fileName.Substring(index);
-                    
-			        var t = (T)AssetDatabase.LoadAssetAtPath(localPath, typeof(T));
-			        if (t) {
-                        result.Add(t);
-                    }
-		        }
-            }
-
-		    return result;
-	    }
 
         [Pure]
         private static Vec3F32 GetVisualSize(GameObject go) {

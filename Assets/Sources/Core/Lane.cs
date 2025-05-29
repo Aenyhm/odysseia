@@ -1,9 +1,20 @@
 using System;
-using Sources.Mechanics;
+using System.Diagnostics.Contracts;
 using Sources.Toolbox;
 
 namespace Sources.Core {
     public enum LaneType : byte { Left, Center, Right }
+    
+    public static class LaneLogic {
+        [Pure]
+        public static LaneType GetDelta(LaneType laneType, int delta) {
+            var index = (int)laneType + delta;
+            
+            return (LaneType)Math.Clamp(index, 0, Enums.Count<LaneType>() - 1);
+        }
+
+        public static float GetPosition(float x) => (x - 1)*CoreConfig.LaneDistance;
+    }
 
     public static class ChangeLaneSystem {
         public static void Execute(ref GameState gameState, in GameInput input, float dt) {
@@ -16,10 +27,10 @@ namespace Sources.Core {
                     deltaX = GetForcedDeltaX(in playState);
                 }
                 
-                boat.LaneType = LaneMechanics.GetDelta(boat.LaneType, deltaX);
+                boat.LaneType = LaneLogic.GetDelta(boat.LaneType, deltaX);
                 boat.XSign = deltaX;
             } else {
-                var targetX = LaneMechanics.GetPosition(boat.LaneType, CoreConfig.LaneDistance);
+                var targetX = LaneLogic.GetPosition((int)boat.LaneType);
                 
                 var boatConf = Services.Get<GameConf>().BoatConf;
 
@@ -42,12 +53,15 @@ namespace Sources.Core {
             
             foreach (var e in playState.Region.Entities) {
                 if (e.Type == EntityType.Mermaid) {
+                    var pos = EntityLogic.GetPosition(e.Type, e.Coords);
+                    var laneType = (LaneType)e.Coords[0].X;
+
                     if (
-                        e.Position.Z > playState.Boat.Position.Z &&
-                        e.Position.Z - playState.Boat.Position.Z < CoreConfig.MermaidEffectDistance
+                        pos.Z > playState.Boat.Position.Z &&
+                        pos.Z - playState.Boat.Position.Z < CoreConfig.MermaidEffectDistance
                     ) {
-                        if (e.LaneType < boat.LaneType) result = -1;
-                        else if (e.LaneType > boat.LaneType) result = +1;
+                        if (laneType < boat.LaneType) result = -1;
+                        else if (laneType > boat.LaneType) result = +1;
                         break;
                     }
                 }

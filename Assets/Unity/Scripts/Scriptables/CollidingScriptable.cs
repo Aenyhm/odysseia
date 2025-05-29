@@ -1,5 +1,5 @@
 using System;
-using Sources;
+using Sources.Core;
 using UnityEngine;
 
 namespace Unity.Scripts.Scriptables {
