@@ -65,6 +65,7 @@ namespace Unity.Scripts {
             input.MouseDeltaX = Input.mousePositionDelta.x;
             input.MouseButtonLeftDown = Input.GetMouseButton(0);
             input.Escape = Input.GetKey(KeyCode.Escape);
+            input.Space = Input.GetKeyDown(KeyCode.Space);
             return input;
         }
         

@@ -10,7 +10,7 @@ namespace Unity.Scripts.Views.Gameplay {
         private Vector3 _initialPosition;
         private Vector3 _lastPosition;
         
-        [SerializeField] private int _cameraSpeed = 4;
+        [SerializeField] private int _cameraSpeed = 8;
 
         private void Awake() {
             _camera = GetComponent<Camera>();

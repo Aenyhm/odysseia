@@ -39,3 +39,9 @@ MonoBehaviour:
     WindConf:
       AngleMax: 30
       ChangeDistance: 60
+    CannonConf:
+      AmmoReloadTime: 3
+      AmmoSpawnFreq: 10
+      AmmoSpeedFactor: 3
+      AmmoMax: 10
+    EnableBoatCollisions: 1

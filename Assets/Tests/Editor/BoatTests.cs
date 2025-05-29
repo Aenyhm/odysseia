@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Sources.Core;
-using Sources.Mechanics;
 
 namespace Tests.Editor {
     
@@ -24,7 +23,7 @@ namespace Tests.Editor {
         
         [TestCaseSource(nameof(Cases))]
         public float GetMaxSpeed_ReturnsExpected(SpeedMaxConf conf, float distance) {
-            return BoatMechanics.GetMaxSpeed(conf, distance);
+            return BoatLogic.GetMaxSpeed(conf, distance);
         }
     }
 }

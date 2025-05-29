@@ -13,6 +13,7 @@ namespace Unity.Editor {
     
     [CustomEditor(typeof(SegmentScriptable))]
     public class SegmentLayoutEditor : UnityEditor.Editor {
+        private const string _iconsFolder = "Assets/Unity/Editor/Icons/";
         private static readonly int _width = Enums.Count<LaneType>();
         private const int _cellSize = 40;
         private SegmentScriptable _scriptable;
@@ -63,7 +64,7 @@ namespace Unity.Editor {
             var grid = new SimpleGrid<EntityType>(_width, _height);
 
             foreach (var e in _scriptable.Segment.EntityCells) {
-                var size = EntityDefinitions.DimensionByEntityType[e.Type];
+                var size = EntityConf.DimensionByEntityType[e.Type];
                 for (var dx = 0; dx < size.X; dx++) {
                     for (var dy = 0; dy < size.Y; dy++) {
                         var index = grid.CoordsToIndex(e.X + dx, e.Y + dy);
@@ -76,25 +77,30 @@ namespace Unity.Editor {
                 EditorGUILayout.BeginHorizontal();
                 
                 for (var x = 0; x < _width; x++) {
-                    var index = grid.CoordsToIndex(x, y);
-                    var type = grid.Items[index];
-                    var icon = GetIcon(type);
-                    
                     var cellRect = GUILayoutUtility.GetRect(_cellSize, _cellSize);
-
-                    GUI.DrawTexture(cellRect, icon ?? Texture2D.grayTexture, ScaleMode.ScaleToFit);
                     
-                    var e = Event.current;
-                    if (e.type == EventType.MouseDown && cellRect.Contains(e.mousePosition)) {
-                        Undo.RecordObject(_scriptable, "Change Cell");
+                    // On laisse 10m de chaque côté de libre pour ne pas créer des tronçons qui se bloquent.
+                    if (y == 0 || y == _height - 1) {
+                        GUI.DrawTexture(cellRect, LoadIcon("blocked"), ScaleMode.ScaleToFit);
+                    } else {
+                        var index = grid.CoordsToIndex(x, y);
+                        var type = grid.Items[index];
+                        var icon = LoadIcon(type.ToString());
+                        
+                        GUI.DrawTexture(cellRect, icon ?? Texture2D.grayTexture, ScaleMode.ScaleToFit);
+                        
+                        var e = Event.current;
+                        if (e.type == EventType.MouseDown && cellRect.Contains(e.mousePosition)) {
+                            Undo.RecordObject(_scriptable, "Change Cell");
 
-                        switch (e.button) {
-                            case 0: TryPlace(x, y);  break; // clic gauche
-                            case 1: TryRemove(x, y); break; // clic droit
+                            switch (e.button) {
+                                case 0: TryPlace(x, y);  break; // clic gauche
+                                case 1: TryRemove(x, y); break; // clic droit
+                            }
+
+                            EditorUtility.SetDirty(_scriptable);
+                            e.Use(); // Empêche les autres handlers d'utiliser l'événement
                         }
-
-                        EditorUtility.SetDirty(_scriptable);
-                        e.Use(); // Empêche les autres handlers d'utiliser l'événement
                     }
                 }
                 EditorGUILayout.EndHorizontal();
@@ -124,17 +130,15 @@ namespace Unity.Editor {
         }
         
         private bool AvailableEntityTypes(Enum value) {
-            return EntityDefinitions.IsEntityTypeAvailableForRegion((EntityType)value, _scriptable.Segment.RegionType);
+            return EntityConf.IsEntityTypeAvailableForRegion((EntityType)value, _scriptable.Segment.RegionType);
         }
 
-        private static Texture GetIcon(EntityType type) {
-            var iconPath = $"Assets/Unity/Editor/Icons/{type}.png";
-            
-            return (Texture)AssetDatabase.LoadAssetAtPath(iconPath, typeof(Texture));
+        private static Texture LoadIcon(string iconName) {
+            return (Texture)AssetDatabase.LoadAssetAtPath($"{_iconsFolder}{iconName}.png", typeof(Texture));
         }
         
         private void TryPlace(int x, int y) {
-            var size = EntityDefinitions.DimensionByEntityType[selectedType];
+            var size = EntityConf.DimensionByEntityType[selectedType];
             if (selectedType == EntityType.None) return;
             
             if (x + size.X > _width || y + size.Y > _height) return; // Hors limites
@@ -146,7 +150,7 @@ namespace Unity.Editor {
                     var checkY = y + dy;
 
                     foreach (var e in _scriptable.Segment.EntityCells) {
-                        var otherSize = EntityDefinitions.DimensionByEntityType[e.Type];
+                        var otherSize = EntityConf.DimensionByEntityType[e.Type];
                         for (var ox = 0; ox < otherSize.X; ox++) {
                             for (var oy = 0; oy < otherSize.Y; oy++) {
                                 if (e.X + ox == checkX && e.Y + oy == checkY)
@@ -163,7 +167,7 @@ namespace Unity.Editor {
         private void TryRemove(int x, int y) {
             for (var i = 0; i < _scriptable.Segment.EntityCells.Count; i++) {
                 var e = _scriptable.Segment.EntityCells[i];
-                var size = EntityDefinitions.DimensionByEntityType[e.Type];
+                var size = EntityConf.DimensionByEntityType[e.Type];
                 
                 for (var dx = 0; dx < size.X; dx++) {
                     for (var dy = 0; dy < size.Y; dy++) {

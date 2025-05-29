@@ -13,8 +13,8 @@ namespace Sources.Core {
 
     [Serializable]
     public struct EntityCell {
-        public EntityType Type;
         public int X;
         public int Y;
+        public EntityType Type;
     }
 }

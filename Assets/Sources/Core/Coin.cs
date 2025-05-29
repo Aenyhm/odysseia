@@ -13,9 +13,34 @@ namespace Sources.Core {
     
     [Serializable]
     public struct Coin {
+        public Vec2I32[] Coords;
         public Vec3F32 Position;
         public int Id;
         public int LineId;
+    }
+    
+    public static class CoinLogic {
+        private static int _currentLineId;
+        
+        public static Coin[] GenerateCoinLine(in CoinConf coinConf, EntityCell entityCell, int offsetZ) {
+            var result = new Coin[coinConf.CoinLineCount];
+            
+            var x = LaneLogic.GetPosition(entityCell.X);
+            var lineId = ++_currentLineId;
+            
+            for (var i = 0; i < coinConf.CoinLineCount; i++) {
+                var pos = new Vec3F32(x, 0, (offsetZ + entityCell.Y)*CoreConfig.GridScale + i*coinConf.CoinDistance);
+                
+                var coin = new Coin();
+                coin.Coords = EntityLogic.GetAllEntityCoords(entityCell, offsetZ);
+                coin.Position = pos;
+                coin.Id = EntityLogic.NextId;
+                coin.LineId = lineId;
+                result[i] = coin;
+            }
+            
+            return result;
+        }
     }
     
     public static class CoinSystem {
@@ -59,7 +84,7 @@ namespace Sources.Core {
             }
             
             foreach (var index in toRemoveIndices) {
-                region.Coins.RemoveAtSwapback(index);
+                region.Coins.RemoveAt(index);
             }
         }
     }

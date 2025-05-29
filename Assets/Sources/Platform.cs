@@ -11,6 +11,7 @@ namespace Sources {
         public float HorizontalAxis;
         public bool MouseButtonLeftDown;
         public bool Escape;
+        public bool Space;
     }
 
     [Serializable]
@@ -19,6 +20,8 @@ namespace Sources {
         public CoinConf CoinConf;
         public RegionConf RegionConf;
         public WindConf WindConf;
+        public CannonConf CannonConf;
+        public bool EnableBoatCollisions;
     }
 
     public struct RendererConf {

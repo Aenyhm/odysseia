@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using Sources;
+using Sources.Core;
 using Sources.Toolbox;
-using Unity.Scripts.Views;
 using UnityEngine;
 
-namespace Unity.Scripts {
+namespace Unity.Scripts.Views {
     public abstract class AbstractEntityManagerView : AbstractView {
         [SerializeField] protected GameObject _prefab;
         
@@ -12,7 +11,10 @@ namespace Unity.Scripts {
         protected readonly Dictionary<int, GameObject> _gosById = new();
 
         private void Awake() {
-             _pool = new Pool<GameObject>(() => Instantiate(_prefab, transform));
+            var parent = new GameObject($"{Type}s");
+            parent.transform.parent = transform;
+            
+             _pool = new Pool<GameObject>(() => Instantiate(_prefab, parent.transform));
         }
         
         protected abstract EntityType Type { get; }

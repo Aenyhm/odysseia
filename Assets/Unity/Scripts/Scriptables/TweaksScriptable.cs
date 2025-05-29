@@ -31,6 +31,13 @@ namespace Unity.Scripts.Scriptables {
                 AngleMax = 30,
                 ChangeDistance = 60
             },
+            CannonConf = new CannonConf {
+                AmmoReloadTime = 3f,
+                AmmoSpawnFreq = 2f,
+                AmmoSpeedFactor = 3f,
+                AmmoMax = 10,
+            },
+            EnableBoatCollisions = true,
         };
     }
 }

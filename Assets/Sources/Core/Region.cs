@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Sources.Mechanics;
 using Sources.Toolbox;
 
 namespace Sources.Core {
@@ -16,7 +15,8 @@ namespace Sources.Core {
     [Serializable]
     public struct Region {
         public List<Entity> Entities;
-        public SimpleArray<Coin> Coins;
+        public SwapbackArray<Coin> Coins;
+        public SimpleGrid<EntityType> EntityGrid;
         public Portal[] Portals;
         public RegionType Type;
     }
@@ -30,7 +30,7 @@ namespace Sources.Core {
     public static class RegionSystem {
  
         // -1 car on ne met pas dans le pool la région actuelle
-        private static SimpleArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1);
+        private static SwapbackArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1);
 
         public static void Enter(ref GameState gameState, RegionType regionType) {
             ref var playState = ref gameState.PlayState;
@@ -41,7 +41,11 @@ namespace Sources.Core {
             var rendererConf = Services.Get<RendererConf>();
 
             var entities = new List<Entity>();
-            var coins = new SimpleArray<Coin>(4*8*coinConf.CoinLineCount); // max 4 coin lines / segment
+            var coins = new SwapbackArray<Coin>(4*8*coinConf.CoinLineCount); // max 4 coin lines / segment
+            
+            var entityGrid = new SimpleGrid<EntityType>(
+                Enums.Count<LaneType>(), gameConf.RegionConf.RegionDistance/CoreConfig.GridScale
+            );
             
             var filledSegmentsDistance = regionConf.RegionDistance - 2*regionConf.ZenDistance;
             var availableSegments = rendererConf.SegmentsByRegion[regionType];
@@ -55,23 +59,37 @@ namespace Sources.Core {
                         spawnPct = pct;
                     }
                     
+                    var offsetZ = segmentZ/CoreConfig.GridScale;
+                    
                     if (Prng.Chance(spawnPct, 100)) {
                         if (entityCell.Type == EntityType.Coin) {
-                            var coinLine = CoinMechanics.GenerateCoinLine(in coinConf, entityCell, segmentZ);
+                            var coinLine = CoinLogic.GenerateCoinLine(in coinConf, entityCell, offsetZ);
                             if (!coins.CanAdd(coinLine.Length)) coins.Resize(coins.Capacity*2);
                             coins.AddRange(coinLine);
                         } else {
-                             entities.Add(GenerateEntity(entityCell, segmentZ));
+                            var e = GenerateEntity(entityCell, offsetZ);
+                            entities.Add(e);
+                            AddEntityToGrid(e.Type, e.Coords, ref entityGrid);
                         }
                     }
                 }
    
                 segmentZ += (int)segment.Length;
             }
+            
+            foreach (var e in entities) {
+                AddEntityToGrid(e.Type, e.Coords, ref entityGrid);
+            }
+
+            for (var i = 0; i < coins.Count; i++) {
+                var coin = coins.Items[i];
+                AddEntityToGrid(EntityType.Coin, coin.Coords, ref entityGrid);
+            }
 
             var newRegion = new Region {
                 Type = regionType,
                 Entities = entities,
+                EntityGrid = entityGrid,
                 Coins = coins,
                 Portals = GeneratePortals(regionType, regionConf.PortalCount)
             };
@@ -129,29 +147,27 @@ namespace Sources.Core {
             return result;
         }
         
-        private static Entity GenerateEntity(EntityCell entityCell, int segmentZ) {
-            var sizes = Services.Get<RendererConf>().Sizes;
-
+        private static Entity GenerateEntity(EntityCell entityCell, int offsetZ) {
             var e = new Entity();
-            e.Id = EntityManager.NextId;
+            e.Id = EntityLogic.NextId;
             e.Type = entityCell.Type;
-            e.LaneType = (LaneType)entityCell.X; // FIXME: trunk on 2 lanes
-            e.Size = sizes[entityCell.Type];
-
-            var coords = new Vec3F32(LaneMechanics.GetSign(e.LaneType), 0, entityCell.Y);
-            var dimensions = EntityDefinitions.DimensionByEntityType[entityCell.Type];
-            if (dimensions.X == 2) {
-                coords.X += 0.5f;
-            }
-            e.Position = new Vec3F32(coords.X*CoreConfig.LaneDistance, 0, segmentZ + entityCell.Y*CoreConfig.GridScale);
+            
+            e.Coords = EntityLogic.GetAllEntityCoords(entityCell, offsetZ);
             
             return e;
+        }
+        
+        private static void AddEntityToGrid(EntityType entityType, Vec2I32[] coords, ref SimpleGrid<EntityType> entityGrid) {
+            foreach (var coord in coords) {
+                var gridCoords = entityGrid.CoordsToIndex(coord);
+                entityGrid.Items[gridCoords] = entityType;
+            }
         }
         
         private static Portal[] GeneratePortals(RegionType currentRegionType, int portalCount) {
             var result = new Portal[portalCount];
             
-            var lanePool = new SimpleArray<LaneType>(Enums.Count<LaneType>());
+            var lanePool = new SwapbackArray<LaneType>(Enums.Count<LaneType>());
             foreach (LaneType laneType in Enum.GetValues(typeof(LaneType))) {
                 lanePool.Add(laneType);
             }
@@ -163,7 +179,7 @@ namespace Sources.Core {
                 var laneIndex = Prng.Roll(lanePool.Count);
                 var lane = lanePool.Items[laneIndex];
                 portal.LaneType = lane;
-                lanePool.RemoveAtSwapback(laneIndex);
+                lanePool.RemoveAt(laneIndex);
                 
                 result[i] = portal;
             }
@@ -178,7 +194,7 @@ namespace Sources.Core {
             
             var index = Prng.Roll(_regionTypePool.Count);
             var result = _regionTypePool.Items[index];
-            _regionTypePool.RemoveAtSwapback(index);
+            _regionTypePool.RemoveAt(index);
             
             return result;
         }

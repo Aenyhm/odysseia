@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sources;
+using Sources.Core;
 
 namespace Unity.Scripts.Views.Gameplay {
     public class MermaidManagerView : AbstractEntityManagerView {
@@ -17,7 +18,9 @@ namespace Unity.Scripts.Views.Gameplay {
             
             foreach (var (id, go) in _gosById) {
                 var e = entitiesById[id];
-                go.transform.localPosition = e.Position.ToUnityVector3();
+                var pos = EntityLogic.GetPosition(e.Type, e.Coords);
+                
+                go.transform.localPosition = pos.ToUnityVector3();
             }
         }
     }

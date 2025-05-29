@@ -23,3 +23,7 @@ MonoBehaviour:
     gameObject: {fileID: 2406253536039142207, guid: 56fd3799febbb9343b2cba04be4ef02f, type: 3}
   - entityType: 5
     gameObject: {fileID: 6130946111610369492, guid: bc7fe3f557b25014cae35333720684f5, type: 3}
+  - entityType: 6
+    gameObject: {fileID: 1297050693554299760, guid: c4653b9bef736ff409714f3664db424a, type: 3}
+  - entityType: 7
+    gameObject: {fileID: 7894051042452519542, guid: beb6581838825c9478523286792b8af7, type: 3}
