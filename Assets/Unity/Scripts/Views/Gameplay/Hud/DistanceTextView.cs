@@ -11,7 +11,7 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
         }
         
         public override void Render(in GameState gameState, float dt) {
-            var distance = Convert.ToInt64(gameState.PlayState.Distance);
+            var distance = (int)gameState.PlayState.Boat.Distance;
             
             _textComponent.text = $"{distance} m";
         }

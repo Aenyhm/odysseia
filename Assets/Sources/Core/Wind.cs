@@ -25,9 +25,9 @@ namespace Sources.Core {
             if (Maths.FloatEquals(wind.CurrentAngle, wind.TargetAngle)) {
                 var windConf = Services.Get<GameConf>().WindConf;
 
-                if (playState.Distance > wind.LastChangeDistance + windConf.ChangeDistance) {
+                if (boat.Distance > wind.LastChangeDistance + windConf.ChangeDistance) {
                     wind.TargetAngle = GetNewAngle(wind.CurrentAngle, windConf.AngleMax);
-                    wind.LastChangeDistance = playState.Distance;
+                    wind.LastChangeDistance = boat.Distance;
                 }
             } else {
                 wind.CurrentAngle = Maths.MoveTowards(wind.CurrentAngle, wind.TargetAngle, dt*boat.SpeedZ);

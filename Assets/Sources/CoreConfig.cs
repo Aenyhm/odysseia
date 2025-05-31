@@ -5,8 +5,10 @@ namespace Sources {
     
     // TODO: Get rid of this file: either it goes to the file conf or to the scriptable conf.
     public static class CoreConfig {
-        public const int GridScale = 10;
+        public const string GlobalFileName = "global_save.json";
+        public const string PlayFileName = "play_saves.json";
         public const float LaneDistance = 2.1f*2;
+        public const int GridScale = 10;
         
         public static readonly Dictionary<EntityType, int> EntityScoreValues = new () {
             { EntityType.Coin, 1 },

@@ -10,7 +10,7 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
         }
         
         public override void Render(in GameState gameState, float dt) {
-            _textComponent.text = gameState.PlayState.Score.ToString();
+            _textComponent.text = gameState.PlayState.PlayProgression.Score.ToString();
         }
     }
 }

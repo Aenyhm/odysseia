@@ -1,16 +1,26 @@
+using System;
+
 namespace Sources.Core {
     public static class GameOverSystem {
-        
+
         public static void Execute(ref GameState gameState) {
-            if (gameState.PlayState.Mode == PlayMode.GameOver) return;
+            ref var playState = ref gameState.PlayState;
             
-            if (gameState.PlayState.Boat.Health == 0) {
-                gameState.PlayState.Boat.SailWindward = false;
-                gameState.TotalCoinCount += gameState.PlayState.CoinCount;
-                gameState.PlayState.Mode = PlayMode.GameOver;
+            if (playState.Mode == PlayMode.Play && playState.Boat.Health == 0) {
+                playState.Boat.SailWindward = false;
+                playState.Mode = PlayMode.GameOver;
+                
+                ref var globalProg = ref gameState.GlobalProgression;
+                globalProg.CoinCount += playState.CoinCount;
+                FileStorage.Save(globalProg, CoreConfig.GlobalFileName, false);
+            
+                var playProg = playState.PlayProgression;
+                playProg.SaveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                playProg.Distance = (int)playState.Boat.Distance;
+                FileStorage.Save(playProg, CoreConfig.PlayFileName, true);
+                
+                gameState.PlayProgressions.Add(playProg);
             }
-            
-            // TODO: Save PlayState
         }
     }
 }

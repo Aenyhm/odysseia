@@ -1,15 +1,18 @@
 using System;
+using System.Collections.Generic;
 using Sources.Core;
 using Sources.Toolbox;
 
 namespace Sources {
-    public enum SceneType : byte { Title, Gameplay }
+    // Ne pas changer l'ordre : correspond à celui d'Unity
+    public enum SceneType : byte { Title, Gameplay, Leaderboard }
     public enum PlayMode : byte { Play, Pause, GameOver }
 
     [Serializable]
     public struct GameState {
+        public List<PlayProgression> PlayProgressions;
         public PlayState PlayState;
-        public int TotalCoinCount;
+        public GlobalProgression GlobalProgression;
         public SceneType CurrentSceneType;
     }
     
@@ -20,8 +23,7 @@ namespace Sources {
         public Region Region;
         public Wind Wind;
         public Cannon Cannon;
-        public float Distance;
-        public int Score;
+        public PlayProgression PlayProgression;
         public int CoinCount;
         public PlayMode Mode;
     }
@@ -29,5 +31,17 @@ namespace Sources {
     [Serializable]
     public struct Entities {
         public SwapbackArray<Cannonball> Cannonballs;
+    }
+    
+    [Serializable]
+    public struct GlobalProgression {
+        public int CoinCount;
+    }
+    
+    [Serializable]
+    public struct PlayProgression {
+        public string SaveTime;
+        public int Distance;
+        public int Score;
     }
 }

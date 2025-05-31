@@ -35,8 +35,10 @@ namespace Sources.Core {
     public struct Boat {
         public HashSet<int> CollisionIds;
         public Vec3F32 Position;  // Reset tous les 1000m pour changement de région
+        public float Distance;
         public float SailAngle;
         public float SpeedZ;
+        public float MeterDelta;
         public int XSign;
         public byte Health;
         public LaneType LaneType;
@@ -109,14 +111,28 @@ namespace Sources.Core {
                 boat.SailWindward = BoatLogic.IsSailWindward(boatConf.SailConf, boat.SailAngle, wind.CurrentAngle);
                 var speedDirection = boat.SailWindward ? 1 : -1;
                 var targetSpeed = boat.SpeedZ + speedDirection*dt;
-                var maxSpeed = BoatLogic.GetMaxSpeed(boatConf.SpeedMaxConf, playState.Distance);
+                var maxSpeed = BoatLogic.GetMaxSpeed(boatConf.SpeedMaxConf, boat.Distance);
                 boat.SpeedZ = Math.Clamp(targetSpeed, boatConf.SpeedZMin, maxSpeed);
             }
             
             // Déplacement en avant
             var deltaZ = boat.SpeedZ*dt;
             boat.Position.Z += deltaZ;
-            playState.Distance += deltaZ;
+            boat.Distance += deltaZ;
+            
+            ComputeDistanceScore(ref playState, deltaZ);
+        }
+        
+        private static void ComputeDistanceScore(ref PlayState playState, float deltaZ) {
+            ref var boat = ref playState.Boat;
+            
+            var total = boat.MeterDelta + deltaZ;
+            
+            var integer = (int)total;
+            var fractional = total - integer;
+            
+            boat.MeterDelta = fractional;
+            playState.PlayProgression.Score += integer;
         }
 
         private static void CheckCollisions(ref Boat boat, in Region region) {

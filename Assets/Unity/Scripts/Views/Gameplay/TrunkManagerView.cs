@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using Sources;
 using Sources.Core;
+using UnityEngine;
 
 namespace Unity.Scripts.Views.Gameplay {
-    public class TrunkManagerView : AbstractEntityManagerView {
-        protected override EntityType Type => EntityType.Trunk;
+    public class TrunkManagerView : AbstractManagerView<Entity> {
+        private TrunkManagerView() : base("Trunk") { }
 
         public override void Render(in GameState gameState, float dt) {
             var entitiesById = new Dictionary<int, Entity>();
@@ -14,14 +15,12 @@ namespace Unity.Scripts.Views.Gameplay {
                 }
             }
             
-            Sync(entitiesById.Keys);
-            
-            foreach (var (id, go) in _gosById) {
-                var e = entitiesById[id];
-                var pos = EntityLogic.GetPosition(e.Type, e.Coords);
-                
-                go.transform.localPosition = pos.ToUnityVector3();
-            }
+            Sync(entitiesById);
+        }
+
+        protected override void InitChild(GameObject go, Entity data) {
+            var pos = EntityLogic.GetPosition(data.Type, data.Coords);
+            go.transform.localPosition = pos.ToUnityVector3();
         }
     }
 }

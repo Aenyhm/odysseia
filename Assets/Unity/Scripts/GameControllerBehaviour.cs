@@ -43,7 +43,12 @@ namespace Unity.Scripts {
             }
 
             // Doit être fait après le Awake pour que le SceneController passe avant.
-            _gameController = new GameController(CurrentScene.SceneType, _tweaksScriptable.GameConf, rendererConf);
+            _gameController = new GameController(
+                new UnityPlatform(),
+                CurrentScene.SceneType,
+                _tweaksScriptable.GameConf,
+                rendererConf
+            );
         }
 
         private void FixedUpdate() {

@@ -1,3 +1,4 @@
+using Sources.Core;
 using Sources.Scenes;
 using Sources.Toolbox;
 
@@ -7,11 +8,14 @@ namespace Sources {
         
         public GameState GameState => _gameState;
 
-        public GameController(SceneType sceneType, in GameConf gameConf, in RendererConf rendererConf) {
+        public GameController(IPlatform platform, SceneType sceneType, in GameConf gameConf, in RendererConf rendererConf) {
+            Services.Register(platform);
             Services.Register(gameConf);
             Services.Register(rendererConf);
             
-            SceneManager.Register(SceneType.Title, new TitleScene());
+            _gameState.GlobalProgression = FileStorage.Load<GlobalProgression>(CoreConfig.GlobalFileName);
+            _gameState.PlayProgressions = FileStorage.LoadList<PlayProgression>(CoreConfig.PlayFileName);
+            
             SceneManager.Register(SceneType.Gameplay, new GameplayScene());
             
             foreach (var scene in SceneManager.All) {
@@ -24,10 +28,10 @@ namespace Sources {
         public void CoreUpdate(SceneType sceneType, in GameInput input, float dt) {
             if (sceneType != _gameState.CurrentSceneType) {
                 SceneManager.GoTo(sceneType, ref _gameState);
+                _gameState.CurrentSceneType = sceneType;
             }
-            
-            var currentScene = SceneManager.Get(_gameState.CurrentSceneType);
-            currentScene.Update(ref _gameState, in input, dt);
+ 
+            SceneManager.Update(ref _gameState, in input, dt);
         }
     }
 }

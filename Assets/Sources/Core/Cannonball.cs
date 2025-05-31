@@ -105,7 +105,7 @@ namespace Sources.Core {
             };
             spawnDistance = (int)(spawnDistance + playState.Boat.Position.Z)/CoreConfig.GridScale;
             
-            if (spawnDistance > regionConf.RegionDistance - regionConf.ZenDistance) return;
+            if (spawnDistance > (regionConf.RegionDistance - regionConf.ZenDistance)/CoreConfig.GridScale) return;
             
             ref var entityGrid = ref playState.Region.EntityGrid;
             
@@ -191,7 +191,7 @@ namespace Sources.Core {
                             entitiesToCheck.RemoveAt(index);
 
                             if (CoreConfig.EntityScoreValues.TryGetValue(e.Type, out var score)) {
-                                playState.Score += score;
+                                playState.PlayProgression.Score += score;
                             }
                         }
                     }

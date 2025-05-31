@@ -10,7 +10,7 @@ namespace Unity.Scripts.Views.Title {
         }
         
         public override void Render(in GameState gameState, float dt) {
-            _textComponent.text = gameState.TotalCoinCount.ToString();  // TODO: animation incrément
+            _textComponent.text = gameState.GlobalProgression.CoinCount.ToString();  // TODO: animation incrément
         }
     }
 }

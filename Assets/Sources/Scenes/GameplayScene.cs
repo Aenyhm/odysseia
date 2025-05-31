@@ -29,6 +29,8 @@ namespace Sources.Scenes {
             gameState.PlayState.Boat = BoatSystem.CreateBoat();
             CannonballSystem.Init(ref gameState);
             RegionSystem.Enter(ref gameState, RegionType.Aegis);
+            
+            gameState.PlayState.PlayProgression = new PlayProgression();
             gameState.PlayState.Mode = PlayMode.Play;
         }
         

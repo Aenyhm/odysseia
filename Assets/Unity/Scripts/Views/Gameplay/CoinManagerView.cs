@@ -4,14 +4,10 @@ using Sources.Core;
 using UnityEngine;
 
 namespace Unity.Scripts.Views.Gameplay {
-    public class CoinManagerView : AbstractEntityManagerView {
+    public class CoinManagerView : AbstractManagerView<Coin> {
         [SerializeField] private float _rotateSpeed = 150f;
         
-        protected override EntityType Type => EntityType.Coin;
-        
-        protected override void Init(GameObject go) {
-            go.transform.RotateOnAxis(Axis.Y, 0);
-        }
+        private CoinManagerView() : base("Coin") { }
 
         public override void Render(in GameState gameState, float dt) {
             var coins = gameState.PlayState.Region.Coins;
@@ -22,13 +18,16 @@ namespace Unity.Scripts.Views.Gameplay {
                 entitiesById.Add(coin.Id, coin);
             }
             
-            Sync(entitiesById.Keys);
+            Sync(entitiesById);
             
-            foreach (var (id, go) in _gosById) {
-                var coin = entitiesById[id];
-                go.transform.localPosition = coin.Position.ToUnityVector3();
+            foreach (var go in _gosById.Values) {
                 go.transform.RotateOnAxis(Axis.Y, go.transform.localEulerAngles.y + dt*_rotateSpeed);
             }
+        }
+
+        protected override void InitChild(GameObject go, Coin data) {
+            go.transform.localPosition = data.Position.ToUnityVector3();
+            go.transform.RotateOnAxis(Axis.Y, 0);
         }
     }
 }
