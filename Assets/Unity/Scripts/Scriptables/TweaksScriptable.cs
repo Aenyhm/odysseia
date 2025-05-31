@@ -1,5 +1,6 @@
 using Sources;
 using Sources.Core;
+using Sources.Toolbox;
 using UnityEngine;
 
 namespace Unity.Scripts.Scriptables {
@@ -28,13 +29,14 @@ namespace Unity.Scripts.Scriptables {
                 PortalCount = 2,
             },
             WindConf = new WindConf {
+                ChangeFreq = new RangeI32 { Min = 2, Max = 5 },
+                ChangeDuration = 1,
                 AngleMax = 30,
-                ChangeDistance = 60
             },
             CannonConf = new CannonConf {
                 AmmoReloadTime = 3f,
                 AmmoSpawnFreq = 2f,
-                AmmoSpeedFactor = 3f,
+                AmmoSpeed = 30f,
                 AmmoMax = 10,
             },
             EnableBoatCollisions = true,

@@ -25,7 +25,7 @@ MonoBehaviour:
       PositionY: 0.5
       SpeedCollisionFactor: 0.5
       SpeedZStart: 10
-      SpeedZMin: 10
+      SpeedZMin: 1
       SpeedX: 30
       HealthMax: 3
     CoinConf:
@@ -37,11 +37,14 @@ MonoBehaviour:
       RegionDistance: 1000
       PortalCount: 2
     WindConf:
+      ChangeFreq:
+        Min: 2
+        Max: 5
+      ChangeDuration: 1
       AngleMax: 30
-      ChangeDistance: 60
     CannonConf:
       AmmoReloadTime: 3
       AmmoSpawnFreq: 10
-      AmmoSpeedFactor: 3
+      AmmoSpeed: 40
       AmmoMax: 10
     EnableBoatCollisions: 1

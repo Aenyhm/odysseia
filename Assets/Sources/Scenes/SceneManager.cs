@@ -23,8 +23,8 @@ namespace Sources.Scenes {
             }
         }
         
-        public static void Update(ref GameState gameState, in GameInput input, float dt) {
-            _currentScene?.Update(ref gameState, in input, dt);
+        public static void Update(ref GameState gameState, in GameInput input) {
+            _currentScene?.Update(ref gameState, in input);
         }
     }
 }

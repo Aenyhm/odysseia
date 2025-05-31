@@ -8,7 +8,7 @@ namespace Sources.Core {
     public struct CannonConf {
         public float AmmoReloadTime;
         public float AmmoSpawnFreq;
-        public float AmmoSpeedFactor;
+        public float AmmoSpeed;
         public int AmmoMax;
     }
     
@@ -31,7 +31,8 @@ namespace Sources.Core {
     public static class CannonballSystem {
         public static void Init(ref GameState gameState) {
             var cannonConf = Services.Get<GameConf>().CannonConf;
-            gameState.PlayState.Entities.Cannonballs = new SwapbackArray<Cannonball>(cannonConf.AmmoMax);
+            var maxElements = cannonConf.AmmoMax*(int)cannonConf.AmmoSpawnFreq;
+            gameState.PlayState.Entities.Cannonballs = new SwapbackArray<Cannonball>(maxElements);
         }
         
         public static void HandleCooldown(ref GameState gameState, in GameInput input, float dt) {
@@ -70,7 +71,7 @@ namespace Sources.Core {
             var cannonball = new Cannonball();
             cannonball.Id = EntityLogic.NextId;
             cannonball.Position = new Vec3F32(boat.Position.X, 1.3f, boat.Position.Z + offsetZ);
-            cannonball.Velocity.Z = boat.SpeedZ*cannonConf.AmmoSpeedFactor;
+            cannonball.Velocity.Z = cannonConf.AmmoSpeed;
 
             return cannonball;
         }

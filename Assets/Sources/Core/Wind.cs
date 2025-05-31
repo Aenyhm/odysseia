@@ -5,32 +5,48 @@ namespace Sources.Core {
     
     [Serializable]
     public struct WindConf {
+        public RangeI32 ChangeFreq;
+        public float ChangeDuration;
         public int AngleMax;
-        public int ChangeDistance;
     }
     
     [Serializable]
     public struct Wind {
         public float CurrentAngle;
         public float TargetAngle;
-        public float LastChangeDistance;
+        public float LastChangeTime;
     }
     
     public static class WindSystem {
-        public static void Execute(ref GameState gameState, float dt) {
-            ref var playState = ref gameState.PlayState;
-            ref var wind = ref playState.Wind;
-            var boat = playState.Boat;
+        private static Animation _changeAnim;
+        
+        public static void Init(ref GameState gameState) {
+            var windConf = Services.Get<GameConf>().WindConf;
 
-            if (Maths.FloatEquals(wind.CurrentAngle, wind.TargetAngle)) {
+            var wind = new Wind();
+            wind.LastChangeTime = Clock.Time + windConf.ChangeFreq.Max;
+            
+            gameState.PlayState.Wind = wind;
+        }
+        
+        public static void Execute(ref GameState gameState, float dt) {
+            ref var wind = ref gameState.PlayState.Wind;
+            
+            if (_changeAnim != null && !_changeAnim.Completed) {
+                wind.CurrentAngle = _changeAnim.Update(dt);
+            } else {
                 var windConf = Services.Get<GameConf>().WindConf;
 
-                if (boat.Distance > wind.LastChangeDistance + windConf.ChangeDistance) {
+                var currentTime = Clock.Time;
+
+                if (wind.LastChangeTime < currentTime) {
                     wind.TargetAngle = GetNewAngle(wind.CurrentAngle, windConf.AngleMax);
-                    wind.LastChangeDistance = boat.Distance;
+                    wind.LastChangeTime = currentTime + Prng.Range(windConf.ChangeFreq);
+                    
+                    _changeAnim = new Animation(
+                        wind.CurrentAngle, wind.TargetAngle, windConf.ChangeDuration, Easings.InOutSine
+                    );
                 }
-            } else {
-                wind.CurrentAngle = Maths.MoveTowards(wind.CurrentAngle, wind.TargetAngle, dt*boat.SpeedZ);
             }
         }
         

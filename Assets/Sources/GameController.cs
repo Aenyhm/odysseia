@@ -26,12 +26,14 @@ namespace Sources {
         }
         
         public void CoreUpdate(SceneType sceneType, in GameInput input, float dt) {
+            Clock.Update(dt);
+            
             if (sceneType != _gameState.CurrentSceneType) {
                 SceneManager.GoTo(sceneType, ref _gameState);
                 _gameState.CurrentSceneType = sceneType;
             }
  
-            SceneManager.Update(ref _gameState, in input, dt);
+            SceneManager.Update(ref _gameState, in input);
         }
     }
 }

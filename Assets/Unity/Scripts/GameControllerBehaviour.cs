@@ -52,23 +52,13 @@ namespace Unity.Scripts {
         }
 
         private void FixedUpdate() {
-            _gameController.CoreUpdate(CurrentScene.SceneType, ReadInput(), Time.fixedDeltaTime*_frameRate);
+            _gameController.CoreUpdate(CurrentScene.SceneType, UnityInput.Read(), Time.fixedDeltaTime*_frameRate);
             
             _gameState = _gameController.GameState;
         }
         
         private void Update() {
             CurrentScene.Render(in _gameState, Time.deltaTime*_frameRate);
-        }
-        
-        private static GameInput ReadInput() {
-            GameInput input;
-            input.HorizontalAxis = Input.GetAxisRaw("Horizontal");
-            input.MouseDeltaX = Input.mousePositionDelta.x;
-            input.MouseButtonLeftDown = Input.GetMouseButton(0);
-            input.Escape = Input.GetKey(KeyCode.Escape);
-            input.Space = Input.GetKeyDown(KeyCode.Space);
-            return input;
         }
 
         [Pure]

@@ -1,11 +1,14 @@
 using Sources.Core;
+using Sources.Toolbox;
 
 namespace Sources.Scenes {
     public class GameplayScene : AbstractScene {
         public override void Init(ref GameState gameState) {
         }
 
-        public override void Update(ref GameState gameState, in GameInput input, float dt) {
+        public override void Update(ref GameState gameState, in GameInput input) {
+            var dt = Clock.DeltaTime;
+            
             if (gameState.PlayState.Mode != PlayMode.GameOver) {
                 PauseSystem.Execute(ref gameState.PlayState, in input);
             }
@@ -27,6 +30,7 @@ namespace Sources.Scenes {
         
         public override void Enter(ref GameState gameState) {
             gameState.PlayState.Boat = BoatSystem.CreateBoat();
+            WindSystem.Init(ref gameState);
             CannonballSystem.Init(ref gameState);
             RegionSystem.Enter(ref gameState, RegionType.Aegis);
             

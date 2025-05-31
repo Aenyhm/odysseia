@@ -2,7 +2,7 @@ using Sources;
 using TMPro;
 
 namespace Unity.Scripts.Views.Gameplay.Hud {
-    public class DistanceTextView : AbstractView {
+    public class SpeedTextView : AbstractView {
         private TextMeshProUGUI _textComponent;
         
         private void Awake() {
@@ -10,9 +10,9 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
         }
         
         public override void Render(in GameState gameState, float dt) {
-            var distance = (int)gameState.PlayState.Boat.Distance;
+            var speedZ = (int)gameState.PlayState.Boat.SpeedZ;
             
-            _textComponent.text = $"{distance} m";
+            _textComponent.text = $"{speedZ} m/s";
         }
     }
 }
