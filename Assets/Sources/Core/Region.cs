@@ -14,7 +14,7 @@ namespace Sources.Core {
     
     [Serializable]
     public struct Region {
-        public List<Entity> Entities;
+        public SwapbackArray<Entity> Entities;
         public SwapbackArray<Coin> Coins;
         public SimpleGrid<EntityType> EntityGrid;
         public Portal[] Portals;
@@ -30,7 +30,7 @@ namespace Sources.Core {
     public static class RegionSystem {
  
         // -1 car on ne met pas dans le pool la région actuelle
-        private static SwapbackArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1);
+        private static readonly SwapbackArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1);
 
         public static void Enter(ref GameState gameState, RegionType regionType) {
             ref var playState = ref gameState.PlayState;
@@ -40,8 +40,8 @@ namespace Sources.Core {
             
             var rendererConf = Services.Get<RendererConf>();
 
-            var entities = new List<Entity>();
-            var coins = new SwapbackArray<Coin>(4*8*coinConf.CoinLineCount); // max 4 coin lines / segment
+            var entities = new SwapbackArray<Entity>();
+            var coins = new SwapbackArray<Coin>();
             
             var entityGrid = new SimpleGrid<EntityType>(
                 Enums.Count<LaneType>(), gameConf.RegionConf.RegionDistance/CoreConfig.GridScale
@@ -64,12 +64,10 @@ namespace Sources.Core {
                     if (Prng.Chance(spawnPct, 100)) {
                         if (entityCell.Type == EntityType.Coin) {
                             var coinLine = CoinLogic.GenerateCoinLine(in coinConf, entityCell, offsetZ);
-                            if (!coins.CanAdd(coinLine.Length)) coins.Resize(coins.Capacity*2);
-                            coins.AddRange(coinLine);
+                            coins.Append(coinLine);
                         } else {
                             var e = GenerateEntity(entityCell, offsetZ);
-                            entities.Add(e);
-                            AddEntityToGrid(e.Type, e.Coords, ref entityGrid);
+                            entities.Append(e);
                         }
                     }
                 }
@@ -81,8 +79,7 @@ namespace Sources.Core {
                 AddEntityToGrid(e.Type, e.Coords, ref entityGrid);
             }
 
-            for (var i = 0; i < coins.Count; i++) {
-                var coin = coins.Items[i];
+            foreach (var coin in coins) {
                 AddEntityToGrid(EntityType.Coin, coin.Coords, ref entityGrid);
             }
 
@@ -153,6 +150,7 @@ namespace Sources.Core {
             e.Type = entityCell.Type;
             
             e.Coords = EntityLogic.GetAllEntityCoords(entityCell, offsetZ);
+            e.Position = EntityLogic.GetPosition(e.Type, e.Coords);
             
             return e;
         }
@@ -169,7 +167,7 @@ namespace Sources.Core {
             
             var lanePool = new SwapbackArray<LaneType>(Enums.Count<LaneType>());
             foreach (LaneType laneType in Enum.GetValues(typeof(LaneType))) {
-                lanePool.Add(laneType);
+                lanePool.Append(laneType);
             }
             
             for (var i = 0; i < result.Length; i++) {
@@ -204,7 +202,7 @@ namespace Sources.Core {
             
             // On évite d'avoir la même région dans le portail suivant.
             foreach (RegionType rt in Enum.GetValues(typeof(RegionType))) {
-                if (rt != currentRegionType) _regionTypePool.Add(rt);
+                if (rt != currentRegionType) _regionTypePool.Append(rt);
             }
         }
     }

@@ -30,9 +30,7 @@ namespace Sources.Core {
     
     public static class CannonballSystem {
         public static void Init(ref GameState gameState) {
-            var cannonConf = Services.Get<GameConf>().CannonConf;
-            var maxElements = cannonConf.AmmoMax*(int)cannonConf.AmmoSpawnFreq;
-            gameState.PlayState.Entities.Cannonballs = new SwapbackArray<Cannonball>(maxElements);
+            gameState.PlayState.Entities.Cannonballs = new SwapbackArray<Cannonball>();
         }
         
         public static void HandleCooldown(ref GameState gameState, in GameInput input, float dt) {
@@ -43,7 +41,7 @@ namespace Sources.Core {
                 ref var cannonballs = ref playState.Entities.Cannonballs;
 
                 var cannonball = CreateOnCannon(in playState.Boat);
-                cannonballs.Add(cannonball);
+                cannonballs.Append(cannonball);
                 cannon.ReloadCooldown = Services.Get<GameConf>().CannonConf.AmmoReloadTime;
                 cannon.AmmoCount--;
             }
@@ -123,7 +121,7 @@ namespace Sources.Core {
                 var cellIndex = Prng.Roll(emptyCells.Count);
                 var spawnCoord = emptyCells[cellIndex];
                 var cannonball = CreateOnGround(spawnCoord);
-                playState.Entities.Cannonballs.Add(cannonball);
+                playState.Entities.Cannonballs.Append(cannonball);
                 
                 var gridIndex = entityGrid.CoordsToIndex(spawnCoord);
                 entityGrid.Items[gridIndex] = EntityType.Cannonball;
@@ -175,21 +173,20 @@ namespace Sources.Core {
                  
             var sizes = Services.Get<RendererConf>().Sizes;
             
-            for (var index = entitiesToCheck.Count - 1; index >= 0; index--) {
-                var e = entitiesToCheck[index];
-                
+            for (var index = 0; index < entitiesToCheck.Count; index++) {
+                ref var e = ref entitiesToCheck.Items[index];
+                if (e.Destroy) continue;
+
                 for (var i = 0; i < cannonballs.Count; i++) {
                     ref var cannonball = ref cannonballs.Items[i];
                     
                     if (cannonball.Destroy) continue;
                     
-                    var pos = EntityLogic.GetPosition(e.Type, e.Coords);
-
-                    if (Collisions.CheckAabb(cannonball.Position, sizes[EntityType.Cannonball], pos, sizes[e.Type])) {
+                    if (Collisions.CheckAabb(cannonball.Position, sizes[EntityType.Cannonball], e.Position, sizes[e.Type])) {
                         cannonball.Destroy = true;
                         
                         if (EntityConf.DestroyableEntityTypes.Contains(e.Type)) {
-                            entitiesToCheck.RemoveAt(index);
+                            e.Destroy = true;
 
                             if (CoreConfig.EntityScoreValues.TryGetValue(e.Type, out var score)) {
                                 playState.PlayProgression.Score += score;

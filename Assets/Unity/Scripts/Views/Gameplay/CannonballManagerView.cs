@@ -11,8 +11,7 @@ namespace Unity.Scripts.Views.Gameplay {
             var entities = gameState.PlayState.Entities.Cannonballs;
             
             var entitiesById = new Dictionary<int, Cannonball>(entities.Count);
-            for (var i = 0; i < entities.Count; i++) {
-                var e = entities.Items[i];
+            foreach (var e in entities) {
                 entitiesById.Add(e.Id, e);
             }
             

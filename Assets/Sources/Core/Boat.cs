@@ -40,6 +40,7 @@ namespace Sources.Core {
         public float SpeedZ;
         public float MeterDelta;
         public int XSign;
+        public int CharmedById;
         public byte Health;
         public LaneType LaneType;
         public bool SailWindward;
@@ -140,9 +141,7 @@ namespace Sources.Core {
             var sizes = Services.Get<RendererConf>().Sizes;
 
             foreach (var e in region.Entities) {
-                var pos = EntityLogic.GetPosition(e.Type, e.Coords);
-                
-                if (Collisions.CheckAabb(boat.Position, sizes[EntityType.Boat], pos, sizes[e.Type])) {
+                if (Collisions.CheckAabb(boat.Position, sizes[EntityType.Boat], e.Position, sizes[e.Type])) {
                     if (boat.CollisionIds.Add(e.Id)) {
                         boat.Health = (byte)Math.Max(0, boat.Health - 1);
                         var targetSpeed = boat.SpeedZ*boatConf.SpeedCollisionFactor;

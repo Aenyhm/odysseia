@@ -18,7 +18,5 @@ namespace Sources {
             { EntityType.Coin, 80 },
             { EntityType.Mermaid, 40 },
         };
-        
-        public const int MermaidEffectDistance = 40; 
     }
 }

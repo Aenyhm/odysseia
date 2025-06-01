@@ -22,11 +22,10 @@ namespace Sources.Core {
             ref var boat = ref playState.Boat;
             
             if (boat.XSign == 0) {
-                var deltaX = Convert.ToInt32(input.HorizontalAxis);
-                if (deltaX == 0) {
-                    deltaX = GetForcedDeltaX(in playState);
-                }
-                
+                var deltaX = boat.CharmedById != 0 ?
+                    GetForcedDeltaX(in playState) :
+                    Convert.ToInt32(input.HorizontalAxis);
+
                 boat.LaneType = LaneLogic.GetDelta(boat.LaneType, deltaX);
                 boat.XSign = deltaX;
             } else {
@@ -50,20 +49,14 @@ namespace Sources.Core {
             var result = 0;
             
             var boat = playState.Boat;
-            
+        
             foreach (var e in playState.Region.Entities) {
-                if (e.Type == EntityType.Mermaid) {
-                    var pos = EntityLogic.GetPosition(e.Type, e.Coords);
+                if (boat.CharmedById == e.Id) {
                     var laneType = (LaneType)e.Coords[0].X;
-
-                    if (
-                        pos.Z > playState.Boat.Position.Z &&
-                        pos.Z - playState.Boat.Position.Z < CoreConfig.MermaidEffectDistance
-                    ) {
-                        if (laneType < boat.LaneType) result = -1;
-                        else if (laneType > boat.LaneType) result = +1;
-                        break;
-                    }
+                    
+                    if (laneType < boat.LaneType) result = -1;
+                    else if (laneType > boat.LaneType) result = +1;
+                    break;
                 }
             }
             

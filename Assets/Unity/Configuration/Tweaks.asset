@@ -28,10 +28,19 @@ MonoBehaviour:
       SpeedZMin: 1
       SpeedX: 30
       HealthMax: 3
+    CannonConf:
+      AmmoReloadTime: 3
+      AmmoSpawnFreq: 10
+      AmmoSpeed: 40
+      AmmoMax: 10
     CoinConf:
       CoinDistance: 1.5
       CoinLineCount: 10
       CoinLineBonus: 10
+    MermaidConf:
+      PowerReloadDuration: 10
+      StunDuration: 3
+      SightDistance: 50
     RegionConf:
       ZenDistance: 100
       RegionDistance: 1000
@@ -42,9 +51,4 @@ MonoBehaviour:
         Max: 5
       ChangeDuration: 1
       AngleMax: 30
-    CannonConf:
-      AmmoReloadTime: 3
-      AmmoSpawnFreq: 10
-      AmmoSpeed: 40
-      AmmoMax: 10
-    EnableBoatCollisions: 1
+    EnableBoatCollisions: 0

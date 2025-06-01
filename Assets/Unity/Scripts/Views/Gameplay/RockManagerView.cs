@@ -19,8 +19,7 @@ namespace Unity.Scripts.Views.Gameplay {
         }
 
         protected override void InitChild(GameObject go, Entity data) {
-            var pos = EntityLogic.GetPosition(data.Type, data.Coords);
-            go.transform.localPosition = pos.ToUnityVector3();
+            go.transform.localPosition = data.Position.ToUnityVector3();
             
             go.transform.GetChild(0).RotateOnAxis(Axis.Z, Random.Range(0, 360));
         }

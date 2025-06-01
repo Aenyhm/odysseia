@@ -18,9 +18,13 @@ namespace Sources.Core {
 
     [Serializable]
     public struct Entity {
+        public Vec3F32 Position;
         public Vec2I32[] Coords;
         public int Id;
         public EntityType Type;
+        public bool Destroy;
+        
+        public MermaidData MermaidData;
     }
 
     public static class EntityConf {

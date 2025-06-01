@@ -24,10 +24,11 @@ namespace Sources {
     [Serializable]
     public struct GameConf {
         public BoatConf BoatConf;
+        public CannonConf CannonConf;
         public CoinConf CoinConf;
+        public MermaidConf MermaidConf;
         public RegionConf RegionConf;
         public WindConf WindConf;
-        public CannonConf CannonConf;
         public bool EnableBoatCollisions;
     }
 

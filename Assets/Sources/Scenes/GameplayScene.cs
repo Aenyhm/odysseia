@@ -18,6 +18,7 @@ namespace Sources.Scenes {
             }
             
             if (gameState.PlayState.Mode == PlayMode.Play) {
+                MermaidSystem.Execute(ref gameState);
                 ChangeLaneSystem.Execute(ref gameState, in input, dt);
                 BoatSystem.Execute(ref gameState, in input, dt);
                 CannonballSystem.HandleCooldown(ref gameState, input, dt);
@@ -26,13 +27,16 @@ namespace Sources.Scenes {
                 CoinSystem.Execute(ref gameState);
                 GameOverSystem.Execute(ref gameState);
             }
+            
+            MermaidSystem.Destroy(ref gameState);
+            gameState.PlayState.Region.Entities.RemoveAll(e => e.Destroy);
         }
         
         public override void Enter(ref GameState gameState) {
             gameState.PlayState.Boat = BoatSystem.CreateBoat();
-            WindSystem.Init(ref gameState);
             CannonballSystem.Init(ref gameState);
             RegionSystem.Enter(ref gameState, RegionType.Aegis);
+            WindSystem.Init(ref gameState);
             
             gameState.PlayState.PlayProgression = new PlayProgression();
             gameState.PlayState.Mode = PlayMode.Play;
