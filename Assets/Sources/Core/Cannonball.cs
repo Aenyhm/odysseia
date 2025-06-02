@@ -30,7 +30,7 @@ namespace Sources.Core {
     
     public static class CannonballSystem {
         public static void Init(ref GameState gameState) {
-            gameState.PlayState.Entities.Cannonballs = new SwapbackArray<Cannonball>();
+            gameState.PlayState.Cannonballs = new SwapbackArray<Cannonball>();
         }
         
         public static void HandleCooldown(ref GameState gameState, in GameInput input, float dt) {
@@ -38,7 +38,7 @@ namespace Sources.Core {
             ref var cannon = ref playState.Cannon;
             
             if (input.Space && cannon.ReloadCooldown == 0f && cannon.AmmoCount > 0) {
-                ref var cannonballs = ref playState.Entities.Cannonballs;
+                ref var cannonballs = ref playState.Cannonballs;
 
                 var cannonball = CreateOnCannon(in playState.Boat);
                 cannonballs.Append(cannonball);
@@ -51,7 +51,7 @@ namespace Sources.Core {
         
         public static void Execute(ref GameState gameState, float dt) {
             ref var playState = ref gameState.PlayState;
-            ref var cannonballs = ref playState.Entities.Cannonballs;
+            ref var cannonballs = ref playState.Cannonballs;
             
             SpawnCannonballs(ref playState, dt);
             UpdateCannonballs(ref playState, dt);
@@ -121,7 +121,7 @@ namespace Sources.Core {
                 var cellIndex = Prng.Roll(emptyCells.Count);
                 var spawnCoord = emptyCells[cellIndex];
                 var cannonball = CreateOnGround(spawnCoord);
-                playState.Entities.Cannonballs.Append(cannonball);
+                playState.Cannonballs.Append(cannonball);
                 
                 var gridIndex = entityGrid.CoordsToIndex(spawnCoord);
                 entityGrid.Items[gridIndex] = EntityType.Cannonball;
@@ -129,7 +129,7 @@ namespace Sources.Core {
         }
         
         private static void UpdateCannonballs(ref PlayState playState, float dt) {
-            ref var cannonballs = ref playState.Entities.Cannonballs;
+            ref var cannonballs = ref playState.Cannonballs;
             ref var boat = ref playState.Boat;
             
             for (var i = 0; i < cannonballs.Count; i++) {
@@ -147,7 +147,7 @@ namespace Sources.Core {
         }
         
         private static void CheckLoot(ref PlayState playState) {
-            ref var cannonballs = ref playState.Entities.Cannonballs;
+            ref var cannonballs = ref playState.Cannonballs;
             ref var boat = ref playState.Boat;
             var sizes = Services.Get<RendererConf>().Sizes;
             var ammoMax = Services.Get<GameConf>().CannonConf.AmmoMax;
@@ -168,7 +168,7 @@ namespace Sources.Core {
         }
         
         private static void CheckCollisions(ref PlayState playState) {
-            ref var cannonballs = ref playState.Entities.Cannonballs;
+            ref var cannonballs = ref playState.Cannonballs;
             ref var entitiesToCheck = ref playState.Region.Entities;
                  
             var sizes = Services.Get<RendererConf>().Sizes;

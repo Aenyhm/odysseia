@@ -23,13 +23,13 @@ namespace Sources.Scenes {
                 BoatSystem.Execute(ref gameState, in input, dt);
                 CannonballSystem.HandleCooldown(ref gameState, input, dt);
                 RegionSystem.Execute(ref gameState);
+                RelicSystem.Execute(ref gameState);
                 WindSystem.Execute(ref gameState, dt);
                 CoinSystem.Execute(ref gameState);
                 GameOverSystem.Execute(ref gameState);
             }
             
-            MermaidSystem.Destroy(ref gameState);
-            gameState.PlayState.Region.Entities.RemoveAll(e => e.Destroy);
+            DestroySystem.Execute(ref gameState);
         }
         
         public override void Enter(ref GameState gameState) {

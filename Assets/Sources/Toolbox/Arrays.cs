@@ -41,6 +41,21 @@ namespace Sources.Toolbox {
                 if (match(Items[i])) RemoveAt(i);
             }
         }
+        
+        public T First(Predicate<T> match) {
+            var result = default(T);
+            
+            for (var i = 0; i < Count; i++) {
+                var item = Items[i];
+                
+                if (match(item)) {
+                    result = item;
+                    break;
+                }
+            }
+            
+            return result;
+        }
 
         public IEnumerator<T> GetEnumerator() {
             for (var i = 0; i < Count; i++) {

@@ -45,21 +45,5 @@ namespace Sources.Core {
                 }
             }
         }
-        
-        public static void Destroy(ref GameState gameState) {
-            ref var playState = ref gameState.PlayState;
-            ref var entities = ref playState.Region.Entities;
-            ref var boat = ref playState.Boat;
-            
-            for (var i = 0; i < entities.Count; i++) {
-                ref var e = ref entities.Items[i];
-                
-                if (!(e.Type == EntityType.Mermaid && e.Destroy)) continue;
-                
-                if (boat.CharmedById == e.Id) {
-                    boat.CharmedById = 0;
-                }
-            }
-        }
     }
 }

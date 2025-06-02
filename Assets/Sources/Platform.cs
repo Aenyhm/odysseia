@@ -28,6 +28,7 @@ namespace Sources {
         public CoinConf CoinConf;
         public MermaidConf MermaidConf;
         public RegionConf RegionConf;
+        public RelicConf RelicConf;
         public WindConf WindConf;
         public bool EnableBoatCollisions;
     }

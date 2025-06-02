@@ -75,6 +75,8 @@ namespace Sources.Core {
                 segmentZ += (int)segment.Length;
             }
             
+            entities.Append(RelicLogic.Create());
+            
             foreach (var e in entities) {
                 AddEntityToGrid(e.Type, e.Coords, ref entityGrid);
             }

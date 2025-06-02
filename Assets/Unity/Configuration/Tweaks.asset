@@ -45,10 +45,14 @@ MonoBehaviour:
       ZenDistance: 100
       RegionDistance: 1000
       PortalCount: 2
+    RelicConf:
+      Distance: 800
+      CoinValue: 100
+      Score: 500
     WindConf:
       ChangeFreq:
         Min: 2
         Max: 5
       ChangeDuration: 1
       AngleMax: 30
-    EnableBoatCollisions: 0
+    EnableBoatCollisions: 1

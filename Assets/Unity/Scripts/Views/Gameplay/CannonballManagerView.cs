@@ -8,7 +8,7 @@ namespace Unity.Scripts.Views.Gameplay {
         private CannonballManagerView() : base("Ammo") { }
 
         public override void Render(in GameState gameState, float dt) {
-            var entities = gameState.PlayState.Entities.Cannonballs;
+            var entities = gameState.PlayState.Cannonballs;
             
             var entitiesById = new Dictionary<int, Cannonball>(entities.Count);
             foreach (var e in entities) {

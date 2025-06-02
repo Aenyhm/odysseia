@@ -64,7 +64,7 @@ namespace Unity.Editor {
             var grid = new SimpleGrid<EntityType>(_width, _height);
 
             foreach (var e in _scriptable.Segment.EntityCells) {
-                var size = EntityConf.DimensionByEntityType[e.Type];
+                var size = EntityLogic.GetEntityTypeDimension(e.Type);
                 for (var dx = 0; dx < size.X; dx++) {
                     for (var dy = 0; dy < size.Y; dy++) {
                         var index = grid.CoordsToIndex(e.X + dx, e.Y + dy);
@@ -130,7 +130,7 @@ namespace Unity.Editor {
         }
         
         private bool AvailableEntityTypes(Enum value) {
-            return EntityConf.IsEntityTypeAvailableForRegion((EntityType)value, _scriptable.Segment.RegionType);
+            return EntityLogic.IsEntityTypeAvailableForRegion((EntityType)value, _scriptable.Segment.RegionType);
         }
 
         private static Texture LoadIcon(string iconName) {
@@ -138,7 +138,7 @@ namespace Unity.Editor {
         }
         
         private void TryPlace(int x, int y) {
-            var size = EntityConf.DimensionByEntityType[selectedType];
+            var size = EntityLogic.GetEntityTypeDimension(selectedType);
             if (selectedType == EntityType.None) return;
             
             if (x + size.X > _width || y + size.Y > _height) return; // Hors limites
@@ -150,7 +150,7 @@ namespace Unity.Editor {
                     var checkY = y + dy;
 
                     foreach (var e in _scriptable.Segment.EntityCells) {
-                        var otherSize = EntityConf.DimensionByEntityType[e.Type];
+                        var otherSize = EntityLogic.GetEntityTypeDimension(e.Type);
                         for (var ox = 0; ox < otherSize.X; ox++) {
                             for (var oy = 0; oy < otherSize.Y; oy++) {
                                 if (e.X + ox == checkX && e.Y + oy == checkY)
@@ -167,7 +167,7 @@ namespace Unity.Editor {
         private void TryRemove(int x, int y) {
             for (var i = 0; i < _scriptable.Segment.EntityCells.Count; i++) {
                 var e = _scriptable.Segment.EntityCells[i];
-                var size = EntityConf.DimensionByEntityType[e.Type];
+                var size = EntityLogic.GetEntityTypeDimension(e.Type);
                 
                 for (var dx = 0; dx < size.X; dx++) {
                     for (var dy = 0; dy < size.Y; dy++) {

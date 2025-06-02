@@ -18,7 +18,7 @@ namespace Sources {
     
     [Serializable]
     public struct PlayState {
-        public Entities Entities;
+        public SwapbackArray<Cannonball> Cannonballs;
         public Boat Boat;
         public Region Region;
         public Wind Wind;
@@ -27,12 +27,7 @@ namespace Sources {
         public int CoinCount;
         public PlayMode Mode;
     }
-    
-    [Serializable]
-    public struct Entities {
-        public SwapbackArray<Cannonball> Cannonballs;
-    }
-    
+
     [Serializable]
     public struct GlobalProgression {
         public int CoinCount;

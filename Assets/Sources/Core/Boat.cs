@@ -141,14 +141,16 @@ namespace Sources.Core {
             var sizes = Services.Get<RendererConf>().Sizes;
 
             foreach (var e in region.Entities) {
-                if (Collisions.CheckAabb(boat.Position, sizes[EntityType.Boat], e.Position, sizes[e.Type])) {
-                    if (boat.CollisionIds.Add(e.Id)) {
-                        boat.Health = (byte)Math.Max(0, boat.Health - 1);
-                        var targetSpeed = boat.SpeedZ*boatConf.SpeedCollisionFactor;
-                        boat.SpeedZ = Math.Max(boatConf.SpeedZMin, targetSpeed);
+                if (EntityConf.ObstacleTypes.Contains(e.Type)) {
+                    if (Collisions.CheckAabb(boat.Position, sizes[EntityType.Boat], e.Position, sizes[e.Type])) {
+                        if (boat.CollisionIds.Add(e.Id)) {
+                            boat.Health = (byte)Math.Max(0, boat.Health - 1);
+                            var targetSpeed = boat.SpeedZ*boatConf.SpeedCollisionFactor;
+                            boat.SpeedZ = Math.Max(boatConf.SpeedZMin, targetSpeed);
+                        }
+                    } else {
+                        boat.CollisionIds.Remove(e.Id);
                     }
-                } else {
-                    boat.CollisionIds.Remove(e.Id);
                 }
             }
         }
