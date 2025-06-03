@@ -24,7 +24,9 @@ namespace Unity.Scripts.Views.Gameplay {
         }
 
         protected override void InitChild(GameObject go, Cannonball data) {
-            // TODO: son
+            if (!data.Lootable) {
+                go.GetComponent<AudioSource>().Play();
+            }
         }
     }
 }

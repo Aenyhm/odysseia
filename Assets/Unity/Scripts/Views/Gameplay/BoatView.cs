@@ -8,11 +8,22 @@ namespace Unity.Scripts.Views.Gameplay {
         private const float _minSailBow = 0.35f;
         private const float _maxSailBow = 0.75f;
         private const float _gameOverMoveSpeed = 2f;
-        private float _gameOverRotateSpeed = 10f;
 
         [SerializeField] private Transform _sailTransform;
-        
+        [SerializeField] private AudioSource _audio;
+
         private float _sailBow = _minSailBow;
+        private float _gameOverRotateSpeed = 10f;
+        private byte _lastHealth;
+        
+        void Awake() {
+            _audio = GetComponent<AudioSource>();
+        }
+        
+        void Start() {
+            _lastHealth = Services.Get<GameConf>().BoatConf.HealthMax;
+        }
+        
 
         public override void Render(in GameState gameState, float dt) {
             var boat = gameState.PlayState.Boat;
@@ -21,6 +32,11 @@ namespace Unity.Scripts.Views.Gameplay {
             _sailBow = Maths.MoveTowards(_sailBow, targetSailBow, dt);
             _sailTransform.RotateOnAxis(Axis.Y, boat.SailAngle);
             _sailTransform.ScaleOnAxis(Axis.Z, _sailBow);
+            
+            if (_lastHealth != boat.Health) {
+                _lastHealth = boat.Health;
+                _audio.Play();
+            }
             
             if (gameState.PlayState.Mode == PlayMode.Play) {
                 transform.localPosition = boat.Position.ToUnityVector3();
