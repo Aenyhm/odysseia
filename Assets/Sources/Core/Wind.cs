@@ -24,7 +24,7 @@ namespace Sources.Core {
             var windConf = Services.Get<GameConf>().WindConf;
 
             var wind = new Wind();
-            wind.LastChangeTime = Clock.Time + windConf.ChangeFreq.Max;
+            wind.LastChangeTime = Clock.GameTime + windConf.ChangeFreq.Max;
             
             gameState.PlayState.Wind = wind;
         }
@@ -37,7 +37,7 @@ namespace Sources.Core {
             } else {
                 var windConf = Services.Get<GameConf>().WindConf;
 
-                var currentTime = Clock.Time;
+                var currentTime = Clock.GameTime;
 
                 if (wind.LastChangeTime < currentTime) {
                     wind.TargetAngle = GetNewAngle(wind.CurrentAngle, windConf.AngleMax);

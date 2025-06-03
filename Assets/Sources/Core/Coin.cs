@@ -67,7 +67,7 @@ namespace Sources.Core {
                 if (Collisions.CheckAabb(boat.Position, boatSize, coin.Position, coinSize)) {
                     playState.CoinCount++;
                     
-                    playState.PlayProgression.Score += CoreConfig.EntityScoreValues[EntityType.Coin];
+                    playState.PlayProgression.Score += EntityConf.EntityScoreValues[EntityType.Coin];
 
                     if (coin.LineId != _currentLineId) {
                         _currentLineLooted = 0;

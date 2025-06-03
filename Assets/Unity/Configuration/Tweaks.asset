@@ -37,10 +37,13 @@ MonoBehaviour:
       CoinDistance: 1.5
       CoinLineCount: 10
       CoinLineBonus: 10
+    JellyfishConf:
+      Speed: 1
+      SightDistance: 100
     MermaidConf:
       PowerReloadDuration: 10
       StunDuration: 3
-      SightDistance: 50
+      SightDistance: 60
     RegionConf:
       ZenDistance: 100
       RegionDistance: 1000

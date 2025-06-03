@@ -26,6 +26,7 @@ namespace Sources.Core {
         public bool Destroy;
         
         public MermaidData MermaidData;
+        public JellyfishData JellyfishData;
     }
 
     public static class EntityConf {
@@ -53,6 +54,18 @@ namespace Sources.Core {
             EntityType.Trunk,
             EntityType.Mermaid,
             EntityType.Jellyfish,
+        };
+
+        public static readonly Dictionary<EntityType, int> EntityScoreValues = new () {
+            { EntityType.Coin, 1 },
+            { EntityType.Mermaid, 5 },
+            { EntityType.Jellyfish, 5 },
+        };
+
+        public static readonly Dictionary<EntityType, int> EntitySpawnPcts = new () {
+            { EntityType.Coin, 80 },
+            { EntityType.Mermaid, 40 },
+            { EntityType.Jellyfish, 40 },
         };
     }
     

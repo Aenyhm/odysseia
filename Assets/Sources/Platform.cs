@@ -26,6 +26,7 @@ namespace Sources {
         public BoatConf BoatConf;
         public CannonConf CannonConf;
         public CoinConf CoinConf;
+        public JellyfishConf JellyfishConf;
         public MermaidConf MermaidConf;
         public RegionConf RegionConf;
         public RelicConf RelicConf;

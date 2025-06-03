@@ -188,7 +188,7 @@ namespace Sources.Core {
                         if (EntityConf.DestroyableEntityTypes.Contains(e.Type)) {
                             e.Destroy = true;
 
-                            if (CoreConfig.EntityScoreValues.TryGetValue(e.Type, out var score)) {
+                            if (EntityConf.EntityScoreValues.TryGetValue(e.Type, out var score)) {
                                 playState.PlayProgression.Score += score;
                             }
                         }

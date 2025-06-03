@@ -19,6 +19,7 @@ namespace Sources.Scenes {
             
             if (gameState.PlayState.Mode == PlayMode.Play) {
                 MermaidSystem.Execute(ref gameState);
+                JellyfishSystem.Execute(ref gameState);
                 ChangeLaneSystem.Execute(ref gameState, in input, dt);
                 BoatSystem.Execute(ref gameState, in input, dt);
                 CannonballSystem.HandleCooldown(ref gameState, input, dt);

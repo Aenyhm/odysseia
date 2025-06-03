@@ -30,10 +30,10 @@ namespace Unity.Editor {
             if (_scriptable.Segment.EntityCells == null) {
                 _scriptable.Segment.Length = SegmentLength.L100;
                 _scriptable.Segment.EntityCells = new List<EntityCell>();
+            } else {
+                _cleanCopy = AssetDatabase.LoadAssetAtPath<SegmentScriptable>(_assetPath);
+                _cleanCopy.name = _scriptable.name;
             }
-            
-            _cleanCopy = Instantiate(AssetDatabase.LoadAssetAtPath<SegmentScriptable>(_assetPath));
-            _cleanCopy.name = _scriptable.name;
             
             _height = (int)_scriptable.Segment.Length/CoreConfig.GridScale;
         }
@@ -126,7 +126,9 @@ namespace Unity.Editor {
         }
         
         private void Restore() {
-            EditorUtility.CopySerialized(_cleanCopy, _scriptable);
+            if (_cleanCopy) {
+                EditorUtility.CopySerialized(_cleanCopy, _scriptable);
+            }
         }
         
         private bool AvailableEntityTypes(Enum value) {

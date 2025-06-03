@@ -29,6 +29,15 @@ namespace Unity.Scripts.Scriptables {
                 CoinLineCount = 10,
                 CoinLineBonus = 10,
             },
+            JellyfishConf = new JellyfishConf {
+                Speed = 1f,
+                SightDistance = 100,
+            },
+            MermaidConf = new MermaidConf {
+                PowerReloadDuration = 10f,
+                StunDuration = 3f,
+                SightDistance = 60,
+            },
             RegionConf = new RegionConf {
                 ZenDistance = 100,
                 RegionDistance = 1000,

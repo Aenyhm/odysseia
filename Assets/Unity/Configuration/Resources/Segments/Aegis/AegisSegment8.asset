@@ -10,24 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5df71ef8ac5b42b4aa51fa540c0e229f, type: 3}
-  m_Name: AegisSegment7
+  m_Name: AegisSegment8
   m_EditorClassIdentifier: 
   Segment:
     EntityCells:
+    - X: 0
+      Y: 7
+      Type: 6
+    - X: 2
+      Y: 2
+      Type: 6
     - X: 1
-      Y: 5
+      Y: 6
       Type: 2
-    - X: 0
-      Y: 8
-      Type: 3
-    - X: 0
-      Y: 1
-      Type: 3
     - X: 1
-      Y: 4
+      Y: 3
       Type: 2
-    - X: 0
-      Y: 4
-      Type: 4
     Length: 100
     RegionType: 0

@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Segment:
     EntityCells:
-    - Type: 4
-      X: 0
+    - X: 0
       Y: 3
-    - Type: 5
-      X: 2
+      Type: 4
+    - X: 2
       Y: 5
-    - Type: 3
-      X: 1
+      Type: 5
+    - X: 1
       Y: 8
-    - Type: 3
-      X: 0
+      Type: 3
+    - X: 0
       Y: 1
+      Type: 3
     Length: 100
     RegionType: 0

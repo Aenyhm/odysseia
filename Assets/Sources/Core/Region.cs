@@ -55,7 +55,7 @@ namespace Sources.Core {
             foreach (var segment in segments) {
                 foreach (var entityCell in segment.EntityCells) {
                     var spawnPct = 100;
-                    if (CoreConfig.EntitySpawnPcts.TryGetValue(entityCell.Type, out var pct)) {
+                    if (EntityConf.EntitySpawnPcts.TryGetValue(entityCell.Type, out var pct)) {
                         spawnPct = pct;
                     }
                     
