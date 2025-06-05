@@ -19,21 +19,21 @@ namespace Sources.Core {
     
     public static class WindSystem {
         private static Animation _changeAnim;
-        
-        public static void Init(ref GameState gameState) {
+
+        public static void Init(GameState gameState) {
+            ref var wind = ref gameState.PlayState.Wind;
             var windConf = Services.Get<GameConf>().WindConf;
 
-            var wind = new Wind();
+            wind.CurrentAngle = 0;
+            wind.TargetAngle = 0;
             wind.LastChangeTime = Clock.GameTime + windConf.ChangeFreq.Max;
-            
-            gameState.PlayState.Wind = wind;
         }
         
-        public static void Execute(ref GameState gameState, float dt) {
+        public static void Execute(GameState gameState) {
             ref var wind = ref gameState.PlayState.Wind;
             
             if (_changeAnim != null && !_changeAnim.Completed) {
-                wind.CurrentAngle = _changeAnim.Update(dt);
+                wind.CurrentAngle = _changeAnim.Update();
             } else {
                 var windConf = Services.Get<GameConf>().WindConf;
 

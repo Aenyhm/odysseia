@@ -47,7 +47,7 @@ namespace Sources.Core {
         private static int _currentLineId;
         private static int _currentLineLooted;
 
-        public static void Execute(ref GameState gameState) {
+        public static void Execute(GameState gameState) {
             var gameConf = Services.Get<GameConf>();
             var coinConf = gameConf.CoinConf;
             
@@ -67,7 +67,7 @@ namespace Sources.Core {
                 if (Collisions.CheckAabb(boat.Position, boatSize, coin.Position, coinSize)) {
                     playState.CoinCount++;
                     
-                    playState.PlayProgression.Score += EntityConf.EntityScoreValues[EntityType.Coin];
+                    ScoreLogic.Add(gameState, EntityConf.EntityScoreValues[EntityType.Coin]);
 
                     if (coin.LineId != _currentLineId) {
                         _currentLineLooted = 0;
@@ -76,7 +76,7 @@ namespace Sources.Core {
                     
                     _currentLineLooted++;
                     if (_currentLineLooted == coinConf.CoinLineCount) {
-                        playState.PlayProgression.Score += coinConf.CoinLineBonus;
+                        ScoreLogic.Add(gameState, coinConf.CoinLineBonus);
                     }
 
                     toRemoveIndices.Add(i);

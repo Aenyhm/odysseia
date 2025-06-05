@@ -27,9 +27,9 @@ namespace Sources.Core {
     }
     
     public static class RelicSystem {
-        public static void Execute(ref GameState gameState) {
+        public static void Execute(GameState gameState) {
             ref var playState = ref gameState.PlayState;
-            ref var entities = ref playState.Region.Entities;
+            var entities = playState.Region.Entities;
             var boat = playState.Boat;
             
             var sizes = Services.Get<RendererConf>().Sizes;
@@ -41,7 +41,7 @@ namespace Sources.Core {
                 if (e.Type != EntityType.Relic) continue;
                     
                 if (Collisions.CheckAabb(e.Position, sizes[e.Type], boat.Position, sizes[EntityType.Boat])) {
-                    playState.PlayProgression.Score += relicConf.Score;
+                    ScoreLogic.Add(gameState, relicConf.Score);
                     playState.CoinCount += relicConf.CoinValue;
                     e.Destroy = true;
                 }

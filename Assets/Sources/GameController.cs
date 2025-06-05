@@ -4,36 +4,35 @@ using Sources.Toolbox;
 
 namespace Sources {
     public class GameController {
-        private GameState _gameState;
-        
-        public GameState GameState => _gameState;
+        public readonly GameState GameState = new();
 
         public GameController(IPlatform platform, SceneType sceneType, in GameConf gameConf, in RendererConf rendererConf) {
             Services.Register(platform);
             Services.Register(gameConf);
             Services.Register(rendererConf);
             
-            _gameState.GlobalProgression = FileStorage.Load<GlobalProgression>(CoreConfig.GlobalFileName);
-            _gameState.PlayProgressions = FileStorage.LoadList<PlayProgression>(CoreConfig.PlayFileName);
+            GameState.GlobalProgression = FileStorage.Load<GlobalProgression>(CoreConfig.GlobalFileName);
+            GameState.PlayProgressions = FileStorage.LoadList<PlayProgression>(CoreConfig.PlayFileName);
             
-            SceneManager.Register(SceneType.Gameplay, new GameplayScene());
+            SceneManager.Register(SceneType.Gameplay, new GameplayScene(GameState));
             
             foreach (var scene in SceneManager.All) {
-                scene.Init(ref _gameState);
+                scene.Init();
             }
             
-            SceneManager.GoTo(sceneType, ref _gameState);
+            SceneManager.GoTo(sceneType);
         }
-        
-        public void CoreUpdate(SceneType sceneType, in GameInput input, float dt) {
+
+        public void CoreUpdate(SceneType sceneType, in GameInput gameInput, float dt) {
             Clock.Update(dt);
+            GameState.Input = gameInput;
             
-            if (sceneType != _gameState.CurrentSceneType) {
-                SceneManager.GoTo(sceneType, ref _gameState);
-                _gameState.CurrentSceneType = sceneType;
+            if (sceneType != GameState.CurrentSceneType) {
+                SceneManager.GoTo(sceneType);
+                GameState.CurrentSceneType = sceneType;
             }
  
-            SceneManager.Update(ref _gameState, in input);
+            SceneManager.Update();
         }
     }
 }

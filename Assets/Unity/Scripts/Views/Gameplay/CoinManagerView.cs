@@ -9,7 +9,7 @@ namespace Unity.Scripts.Views.Gameplay {
         
         private CoinManagerView() : base("Coin") { }
 
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var coins = gameState.PlayState.Region.Coins;
             
             var entitiesById = new Dictionary<int, Coin>(coins.Count);

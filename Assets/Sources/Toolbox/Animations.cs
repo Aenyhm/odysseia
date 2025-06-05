@@ -29,8 +29,8 @@ namespace Sources.Toolbox {
             _easing = easing;
         }
 
-        public float Update(float dt) {
-            _elapsed += dt;
+        public float Update() {
+            _elapsed += Clock.DeltaTime;
             
             if (Completed) {
                 Reset();

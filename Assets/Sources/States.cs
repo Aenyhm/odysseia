@@ -9,21 +9,24 @@ namespace Sources {
     public enum PlayMode : byte { Play, Pause, GameOver }
 
     [Serializable]
-    public struct GameState {
+    public class GameState {
         public List<PlayProgression> PlayProgressions;
         public PlayState PlayState;
+        public GameInput Input;
         public GlobalProgression GlobalProgression;
         public SceneType CurrentSceneType;
     }
     
     [Serializable]
     public struct PlayState {
+        public SwapbackArray<Cannonball> Ammos;
         public SwapbackArray<Cannonball> Cannonballs;
         public Boat Boat;
         public Region Region;
         public Wind Wind;
         public Cannon Cannon;
         public PlayProgression PlayProgression;
+        public float ScoreMultiplier;
         public int CoinCount;
         public PlayMode Mode;
     }

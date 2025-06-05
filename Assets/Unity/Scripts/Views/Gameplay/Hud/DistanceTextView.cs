@@ -9,7 +9,7 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
             _textComponent = GetComponent<TextMeshProUGUI>();
         }
         
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var distance = (int)gameState.PlayState.Boat.Distance;
             
             _textComponent.text = $"{distance} m";

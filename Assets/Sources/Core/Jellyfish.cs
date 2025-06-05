@@ -14,7 +14,7 @@ namespace Sources.Core {
     }
     
     public static class JellyfishSystem {
-        public static void Execute(ref GameState gameState) {
+        public static void Execute(GameState gameState) {
             var entities = gameState.PlayState.Region.Entities;
             ref var entityGrid = ref gameState.PlayState.Region.EntityGrid;
             var jellyfishConf = Services.Get<GameConf>().JellyfishConf;

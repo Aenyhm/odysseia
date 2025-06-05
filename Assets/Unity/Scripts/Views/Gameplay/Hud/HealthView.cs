@@ -22,7 +22,7 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
             }
         }
 
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var boat = gameState.PlayState.Boat;
             
             for (var i = 0; i < _heartImages.Length; i++) {

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace Sources.Toolbox {
     public static class Prng {
@@ -10,10 +9,10 @@ namespace Sources.Toolbox {
         public static bool Chance(int value, int max) => Roll(max) < value;
         
         // Fisher–Yates shuffle Algorithm
-        public static void Shuffle<T>(List<T> l) {
-            for (var i = l.Count - 1; i > 0; i--) {
+        public static void Shuffle<T>(T[] a) {
+            for (var i = a.Length - 1; i > 0; i--) {
                 var j = _random.Next(i + 1);
-                (l[i], l[j]) = (l[j], l[i]);
+                (a[i], a[j]) = (a[j], a[i]);
             }
         }
     }

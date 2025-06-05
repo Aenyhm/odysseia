@@ -72,8 +72,18 @@ namespace Sources.Core {
     public static class EntityLogic {
         private static int _currentId;
         public static int NextId => ++_currentId;
+
+        public static Entity GenerateEntity(EntityCell entityCell, int offsetZ) {
+            var e = new Entity();
+            e.Id = NextId;
+            e.Type = entityCell.Type;
+            
+            e.Coords = GetAllEntityCoords(entityCell, offsetZ);
+            e.Position = GetPosition(e.Type, e.Coords);
+            
+            return e;
+        }
         
-                
         public static Vec2I32 GetEntityTypeDimension(EntityType entityType) {
             var result = Vec2I32.One;
             

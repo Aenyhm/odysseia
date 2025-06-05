@@ -3,10 +3,15 @@ using System.Diagnostics.Contracts;
 
 namespace Sources.Toolbox {
     public static class Enums {
+        
+        [Pure]
+        public static T[] Members<T>() where T : Enum {
+            return (T[])Enum.GetValues(typeof(T));
+        }
 
         [Pure]
         public static int Count<T>() where T : Enum {
-            return Enum.GetValues(typeof(T)).Length;
+            return Members<T>().Length;
         }
 
         public static T GetRandom<T>() where T : Enum {

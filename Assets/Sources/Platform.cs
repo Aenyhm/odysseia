@@ -9,10 +9,12 @@ namespace Sources {
     public interface IPlatform {
         string PersistentPath { get; }
         void Log(string message);
+        void LogWarn(string message);
         string Serialize(object obj);
         T Deserialize<T>(string json);
     }
 
+    [Serializable]
     public struct GameInput {
         public float MouseDeltaX;
         public float HorizontalAxis;

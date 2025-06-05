@@ -77,32 +77,34 @@ namespace Sources.Core {
     }
     
     public static class BoatSystem {
-        public static Boat CreateBoat() {
+        public static void Init(GameState gameState) {
+            ref var boat = ref gameState.PlayState.Boat;
             var boatConf = Services.Get<GameConf>().BoatConf;
             
-            var boat = new Boat();
             boat.CollisionIds = new HashSet<int>();
             boat.Position.Y = boatConf.PositionY;
             boat.SpeedZ = boatConf.SpeedZStart;
             boat.Health = boatConf.HealthMax;
             boat.LaneType = LaneType.Center;
-            
-            return boat;
         }
         
-        public static void Execute(ref GameState gameState, in GameInput input, float dt) {
+        public static void Execute(GameState gameState) {
             ref var playState = ref gameState.PlayState;
             ref var boat = ref playState.Boat;
             var gameConf = Services.Get<GameConf>();
             var boatConf = gameConf.BoatConf;
             
-            if (gameConf.EnableBoatCollisions) {
-                CheckCollisions(ref boat, in playState.Region);
+            var checkCollisions = gameConf.EnableBoatCollisions;
+            #if !UNITY_EDITOR
+            checkCollisions = true;
+            #endif
+            if (checkCollisions) {
+                CheckCollisions(ref boat, playState.Region.Entities);
             }
 
             // Voile
-            if (input.MouseButtonLeftDown) {
-                var targetSailAngle = boat.SailAngle + input.MouseDeltaX;
+            if (gameState.Input.MouseButtonLeftDown) {
+                var targetSailAngle = boat.SailAngle + gameState.Input.MouseDeltaX;
                 boat.SailAngle = BoatLogic.MoveSailAngle(boatConf.SailConf, targetSailAngle);
             }
             
@@ -111,21 +113,21 @@ namespace Sources.Core {
                 var wind = playState.Wind;
                 boat.SailWindward = BoatLogic.IsSailWindward(boatConf.SailConf, boat.SailAngle, wind.CurrentAngle);
                 var speedDirection = boat.SailWindward ? 1 : -1;
-                var targetSpeed = boat.SpeedZ + speedDirection*dt;
+                var targetSpeed = boat.SpeedZ + speedDirection*Clock.DeltaTime;
                 var maxSpeed = BoatLogic.GetMaxSpeed(boatConf.SpeedMaxConf, boat.Distance);
                 boat.SpeedZ = Math.Clamp(targetSpeed, boatConf.SpeedZMin, maxSpeed);
             }
             
             // Déplacement en avant
-            var deltaZ = boat.SpeedZ*dt;
+            var deltaZ = boat.SpeedZ*Clock.DeltaTime;
             boat.Position.Z += deltaZ;
             boat.Distance += deltaZ;
             
-            ComputeDistanceScore(ref playState, deltaZ);
+            ComputeDistanceScore(gameState, deltaZ);
         }
         
-        private static void ComputeDistanceScore(ref PlayState playState, float deltaZ) {
-            ref var boat = ref playState.Boat;
+        private static void ComputeDistanceScore(GameState gameState, float deltaZ) {
+            ref var boat = ref gameState.PlayState.Boat;
             
             var total = boat.MeterDelta + deltaZ;
             
@@ -133,14 +135,14 @@ namespace Sources.Core {
             var fractional = total - integer;
             
             boat.MeterDelta = fractional;
-            playState.PlayProgression.Score += integer;
+            ScoreLogic.Add(gameState, integer);
         }
 
-        private static void CheckCollisions(ref Boat boat, in Region region) {
+        private static void CheckCollisions(ref Boat boat, SwapbackArray<Entity> entities) {
             var boatConf = Services.Get<GameConf>().BoatConf;
             var sizes = Services.Get<RendererConf>().Sizes;
 
-            foreach (var e in region.Entities) {
+            foreach (var e in entities) {
                 if (EntityConf.ObstacleTypes.Contains(e.Type)) {
                     if (Collisions.CheckAabb(boat.Position, sizes[EntityType.Boat], e.Position, sizes[e.Type])) {
                         if (boat.CollisionIds.Add(e.Id)) {

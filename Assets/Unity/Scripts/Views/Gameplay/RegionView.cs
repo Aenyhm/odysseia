@@ -10,7 +10,7 @@ namespace Unity.Scripts.Views.Gameplay {
         
         private RegionType? _regionType;
         
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var region = gameState.PlayState.Region;
             
             if (_regionType == null || _regionType != region.Type) {

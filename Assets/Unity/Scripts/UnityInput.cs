@@ -1,39 +1,27 @@
-using System.Collections.Generic;
+using System;
 using Sources;
 using UnityEngine;
 
 namespace Unity.Scripts {
     public static class UnityInput {
-        private static readonly Dictionary<KeyCode, bool> _statesByKey = new();
+        private static GameInput _input;
+
+        public static GameInput Data => _input;
         
-        public static GameInput Read() {
-            GameInput input;
-            input.HorizontalAxis = Input.GetAxisRaw("Horizontal");
-            input.MouseDeltaX = Input.mousePositionDelta.x;
-            input.MouseButtonLeftDown = Input.GetMouseButton(0);
-            input.Escape = IsKeyPressed(KeyCode.Escape);
-            input.Space = IsKeyPressed(KeyCode.Space);
-            return input;
+        public static void Clear() {
+            _input = default;
         }
-        
-        /// <summary>
-        /// Permet de mieux gérer l'état d'une touche.
-        /// </summary>
-        /// <param name="code">code de la touche</param>
-        /// <returns>vrai au changement d'état si la touche est enfoncée.</returns>
-        private static bool IsKeyPressed(KeyCode code) {
-            var result = false;
-            
-            _statesByKey.TryAdd(code, false);
-            
-            var newState = Input.GetKeyDown(code);
-            
-            if (_statesByKey[code] != newState) {
-                _statesByKey[code] = newState;
-                result = newState;
-            }
-            
-            return result;
+
+        public static void Update() {
+            _input.HorizontalAxis = GetMaxFloatValue(_input.HorizontalAxis, Input.GetAxisRaw("Horizontal"));
+            _input.MouseDeltaX = GetMaxFloatValue(_input.MouseDeltaX, Input.mousePositionDelta.x);
+            _input.MouseButtonLeftDown |= Input.GetMouseButton(0);
+            _input.Escape |= Input.GetKeyDown(KeyCode.Escape);
+            _input.Space |= Input.GetKeyDown(KeyCode.Space);
+        }
+
+        private static float GetMaxFloatValue(float previous, float value) {
+            return Math.Abs(value) > Math.Abs(previous) ? value : previous;
         }
     }
 }

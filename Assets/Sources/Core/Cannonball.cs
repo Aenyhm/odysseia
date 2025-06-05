@@ -1,195 +1,61 @@
 using System;
-using System.Collections.Generic;
 using Sources.Toolbox;
 
 namespace Sources.Core {
-    
-    [Serializable]
-    public struct CannonConf {
-        public float AmmoReloadTime;
-        public float AmmoSpawnFreq;
-        public float AmmoSpeed;
-        public int AmmoMax;
-    }
     
     [Serializable]
     public struct Cannonball {
         public Vec3F32 Position;
         public Vec3F32 Velocity;
         public int Id;
-        public bool Lootable;
-        public bool Destroy;
-    }
-    
-    [Serializable]
-    public struct Cannon {
-        public float ReloadCooldown;
-        public float AmmoSpawnCooldown;
-        public int AmmoCount;
     }
     
     public static class CannonballSystem {
-        public static void Init(ref GameState gameState) {
-            gameState.PlayState.Cannonballs = new SwapbackArray<Cannonball>();
-        }
-        
-        public static void HandleCooldown(ref GameState gameState, in GameInput input, float dt) {
-            ref var playState = ref gameState.PlayState;
-            ref var cannon = ref playState.Cannon;
-            
-            if (input.Space && cannon.ReloadCooldown == 0f && cannon.AmmoCount > 0) {
-                ref var cannonballs = ref playState.Cannonballs;
-
-                var cannonball = CreateOnCannon(in playState.Boat);
-                cannonballs.Append(cannonball);
-                cannon.ReloadCooldown = Services.Get<GameConf>().CannonConf.AmmoReloadTime;
-                cannon.AmmoCount--;
-            }
-            
-            cannon.ReloadCooldown = Math.Max(0f, cannon.ReloadCooldown - dt);
-        }
-        
-        public static void Execute(ref GameState gameState, float dt) {
-            ref var playState = ref gameState.PlayState;
-            ref var cannonballs = ref playState.Cannonballs;
-            
-            SpawnCannonballs(ref playState, dt);
-            UpdateCannonballs(ref playState, dt);
-            CheckLoot(ref playState);
-            CheckCollisions(ref playState);
-
-            cannonballs.RemoveAll(e => e.Destroy);
-        }
-        
-        private static Cannonball CreateOnCannon(in Boat boat) {
-            var cannonConf = Services.Get<GameConf>().CannonConf;
-            var sizes = Services.Get<RendererConf>().Sizes;
-            var offsetZ = sizes[EntityType.Boat].Z/2f + sizes[EntityType.Cannonball].Z/2f;
-            
-            var cannonball = new Cannonball();
-            cannonball.Id = EntityLogic.NextId;
-            cannonball.Position = new Vec3F32(boat.Position.X, 1.3f, boat.Position.Z + offsetZ);
-            cannonball.Velocity.Z = cannonConf.AmmoSpeed;
-
-            return cannonball;
-        }
-        
-        private static Cannonball CreateOnGround(Vec2I32 coords) {
-            var cannonball = new Cannonball();
-            cannonball.Id = EntityLogic.NextId;
-            cannonball.Position = new Vec3F32((coords.X - 1)*CoreConfig.LaneDistance, 0.5f, coords.Y*CoreConfig.GridScale);
-            cannonball.Lootable = true;
-            
-            return cannonball;
-        }
-        
-        private static void SpawnCannonballs(ref PlayState playState, float dt) {
-            ref var cannon = ref playState.Cannon;
-            var cannonConf = Services.Get<GameConf>().CannonConf;
-            var regionConf = Services.Get<GameConf>().RegionConf;
-            
-            if (cannon.AmmoSpawnCooldown > 0) {
-                cannon.AmmoSpawnCooldown = Math.Max(0, cannon.AmmoSpawnCooldown - dt);
-                return;
-            }
-            
-            cannon.AmmoSpawnCooldown = cannonConf.AmmoSpawnFreq;
-
-            if (cannon.AmmoCount == cannonConf.AmmoMax) return;
-
-            var spawnDistance = cannon.AmmoCount switch {
-                0 => 30,
-                < 5 => 100,
-                _ => 500
-            };
-            spawnDistance = (int)(spawnDistance + playState.Boat.Position.Z)/CoreConfig.GridScale;
-            
-            if (spawnDistance > (regionConf.RegionDistance - regionConf.ZenDistance)/CoreConfig.GridScale) return;
-            
-            ref var entityGrid = ref playState.Region.EntityGrid;
-            
-            var emptyCells = new List<Vec2I32>(Enums.Count<LaneType>());
-            for (var i = 0; i < entityGrid.Width; i++) {
-                var coord = new Vec2I32(i, spawnDistance);
-                var gridIndex = entityGrid.CoordsToIndex(coord);
-                if (entityGrid.Items[gridIndex] == EntityType.None) {
-                    emptyCells.Add(coord);
-                }
-            }
-            
-            if (emptyCells.Count > 0) {
-                var cellIndex = Prng.Roll(emptyCells.Count);
-                var spawnCoord = emptyCells[cellIndex];
-                var cannonball = CreateOnGround(spawnCoord);
-                playState.Cannonballs.Append(cannonball);
                 
-                var gridIndex = entityGrid.CoordsToIndex(spawnCoord);
-                entityGrid.Items[gridIndex] = EntityType.Cannonball;
-            }
+        public static void Execute(GameState gameState) {
+            ref var playState = ref gameState.PlayState;
+            var cannonballs = playState.Cannonballs;
+            
+            UpdateCannonballs(cannonballs);
+            CheckCollisions(gameState, cannonballs, playState.Region.Entities);
         }
         
-        private static void UpdateCannonballs(ref PlayState playState, float dt) {
-            ref var cannonballs = ref playState.Cannonballs;
-            ref var boat = ref playState.Boat;
-            
-            for (var i = 0; i < cannonballs.Count; i++) {
+        private static void UpdateCannonballs(SwapbackArray<Cannonball> cannonballs) {
+            for (var i = cannonballs.Count - 1; i >= 0; i--) {
                 ref var cannonball = ref cannonballs.Items[i];
                 
-                if (cannonball.Position.Y < 0 || cannonball.Position.Z < boat.Position.Z - 40) {
-                    cannonball.Destroy = true;
-                }
-                
-                if (!cannonball.Lootable) {
-                    cannonball.Position += cannonball.Velocity*dt;
+                if (cannonball.Position.Y < 0) {
+                    cannonballs.RemoveAt(i);
+                } else {
+                    cannonball.Position += cannonball.Velocity*Clock.DeltaTime;
                     cannonball.Velocity.Y -= 0.01f;
                 }
             }
         }
         
-        private static void CheckLoot(ref PlayState playState) {
-            ref var cannonballs = ref playState.Cannonballs;
-            ref var boat = ref playState.Boat;
+        private static void CheckCollisions(
+            GameState gameState, SwapbackArray<Cannonball> cannonballs, SwapbackArray<Entity> entities
+        ) {
             var sizes = Services.Get<RendererConf>().Sizes;
-            var ammoMax = Services.Get<GameConf>().CannonConf.AmmoMax;
-
-            for (var i = 0; i < cannonballs.Count; i++) {
-                ref var cannonball = ref cannonballs.Items[i];
-                
-                if (!cannonball.Lootable) continue;
-
-                if (Collisions.CheckAabb(cannonball.Position, sizes[EntityType.Cannonball], boat.Position, sizes[EntityType.Boat])) {
-                    if (playState.Cannon.AmmoCount == ammoMax) break;
-          
-                    playState.Cannon.AmmoCount++;
-                    cannonball.Destroy = true;
-                }
-            }
+            var cannonballSize = sizes[EntityType.Cannonball];
             
-        }
-        
-        private static void CheckCollisions(ref PlayState playState) {
-            ref var cannonballs = ref playState.Cannonballs;
-            ref var entitiesToCheck = ref playState.Region.Entities;
-                 
-            var sizes = Services.Get<RendererConf>().Sizes;
-            
-            for (var index = 0; index < entitiesToCheck.Count; index++) {
-                ref var e = ref entitiesToCheck.Items[index];
+            for (var index = 0; index < entities.Count; index++) {
+                ref var e = ref entities.Items[index];
                 if (e.Destroy) continue;
+                
+                var entitySize = sizes[e.Type];
 
-                for (var i = 0; i < cannonballs.Count; i++) {
-                    ref var cannonball = ref cannonballs.Items[i];
-                    
-                    if (cannonball.Destroy) continue;
-                    
-                    if (Collisions.CheckAabb(cannonball.Position, sizes[EntityType.Cannonball], e.Position, sizes[e.Type])) {
-                        cannonball.Destroy = true;
+                for (var i = cannonballs.Count - 1; i >= 0; i--) {
+                    var cannonball = cannonballs.Items[i];
+                 
+                    if (Collisions.CheckAabb(cannonball.Position, cannonballSize, e.Position, entitySize)) {
+                        cannonballs.RemoveAt(i);
                         
                         if (EntityConf.DestroyableEntityTypes.Contains(e.Type)) {
                             e.Destroy = true;
 
                             if (EntityConf.EntityScoreValues.TryGetValue(e.Type, out var score)) {
-                                playState.PlayProgression.Score += score;
+                                ScoreLogic.Add(gameState, score);
                             }
                         }
                     }

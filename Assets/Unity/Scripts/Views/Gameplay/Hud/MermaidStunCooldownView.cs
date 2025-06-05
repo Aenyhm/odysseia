@@ -8,7 +8,7 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
         [SerializeField] private Image _cooldownImage;
         [SerializeField] private GameObject _parent;
 
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var boat = gameState.PlayState.Boat;
             
             var show = boat.CharmedById != 0;

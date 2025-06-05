@@ -24,8 +24,7 @@ namespace Unity.Scripts.Views.Gameplay {
             _lastHealth = Services.Get<GameConf>().BoatConf.HealthMax;
         }
         
-
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var boat = gameState.PlayState.Boat;
             
             var targetSailBow = boat.SailWindward ? _maxSailBow : _minSailBow;
@@ -39,7 +38,11 @@ namespace Unity.Scripts.Views.Gameplay {
             }
             
             if (gameState.PlayState.Mode == PlayMode.Play) {
-                transform.localPosition = boat.Position.ToUnityVector3();
+                // Pour que le déplacement latéral ne soit pas saccadé, on interpole avec le frame delta time.
+                var speedX = Services.Get<GameConf>().BoatConf.SpeedX;
+                var x = Maths.MoveTowards(transform.localPosition.x, boat.Position.X, dt*speedX);
+                transform.MoveOnAxis(Axis.X, x);
+                transform.MoveOnAxis(Axis.Z, boat.Position.Z);
             } else if (gameState.PlayState.Mode == PlayMode.GameOver) {
                 transform.Translate(0, 0, _gameOverMoveSpeed*dt);
                 transform.Rotate(_gameOverRotateSpeed*dt, 0, 0);

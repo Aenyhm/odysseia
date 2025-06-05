@@ -8,7 +8,7 @@ namespace Unity.Scripts.Views.Gameplay {
             _defaultZ = transform.position.z;
         }
         
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var boat = gameState.PlayState.Boat;
 
             transform.MoveOnAxis(Axis.Z, boat.Position.Z + _defaultZ);

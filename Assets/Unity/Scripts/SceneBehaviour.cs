@@ -7,25 +7,27 @@ namespace Unity.Scripts {
         [SerializeField] private GameControllerBehaviour _gameControllerScript;
         [SerializeField] private SceneType _sceneType;
 
-        private static GameControllerBehaviour _gameControllerInstance;
+        public static GameControllerBehaviour GameControllerInstance;
+        
         private AbstractView[] _views;
         
         public SceneType SceneType => _sceneType;
 
         private void Awake() {
-            if (!_gameControllerInstance) {
-                _gameControllerInstance = Instantiate(_gameControllerScript);
-                _gameControllerInstance.gameObject.name = "GameController";
+            if (!GameControllerInstance) {
+                GameControllerInstance = Instantiate(_gameControllerScript);
+                GameControllerInstance.gameObject.name = "GameController";
+                GameControllerInstance.Init(_sceneType);
             }
             
-            _gameControllerInstance.CurrentScene = this;
+            GameControllerInstance.CurrentScene = this;
 
             _views = FindObjectsByType<AbstractView>(FindObjectsSortMode.None);
         }
 
-        public void Render(in GameState gameState, float dt) {
+        public void Render(GameState gameState, float dt) {
             foreach (var view in _views) {
-                view.Render(in gameState, dt);
+                view.Render(gameState, dt);
             }
         }
     }

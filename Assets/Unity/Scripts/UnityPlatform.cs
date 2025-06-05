@@ -6,7 +6,15 @@ namespace Unity.Scripts {
         public string PersistentPath => Application.persistentDataPath;
 
         public void Log(string message) {
+            #if UNITY_EDITOR
             Debug.Log(message);
+            #endif
+        }
+        
+        public void LogWarn(string message) {
+            #if UNITY_EDITOR
+            Debug.LogWarning(message);
+            #endif
         }
         
         public string Serialize(object obj) {

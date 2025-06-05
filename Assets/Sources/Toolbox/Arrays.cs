@@ -5,14 +5,14 @@ using System.Collections.Generic;
 namespace Sources.Toolbox {
 
     [Serializable]
-    public class SwapbackArray<T> : IEnumerable {
-        private const int _initialCapacity = 256;
+    public class SwapbackArray<T> : IEnumerable where T : struct {
+        private const int _defaultCapacity = 256;
 
         public T[] Items;
         public int Capacity;
         public int Count;
 
-        public SwapbackArray(int capacity = _initialCapacity) {
+        public SwapbackArray(int capacity = _defaultCapacity) {
             Items = new T[capacity];
             Capacity = capacity;
             Count = 0;
@@ -66,9 +66,8 @@ namespace Sources.Toolbox {
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         private void Resize(int newCapacity) {
-            var newArray = new T[newCapacity];
-            Array.Copy(Items, newArray, Count);
-            Items = newArray;
+            Services.Get<IPlatform>().LogWarn($"[SwapbackArray] Resizing {typeof(T).Name} from {Capacity} to {newCapacity}");
+            Array.Resize(ref Items, newCapacity);
             Capacity = newCapacity;
         }
     }
@@ -87,5 +86,11 @@ namespace Sources.Toolbox {
 
         public int CoordsToIndex(int x, int y) => y*Width + x;
         public int CoordsToIndex(Vec2I32 v) => CoordsToIndex(v.X, v.Y);
+        
+        public void Reset() {
+            for (var i = 0; i < Items.Length; i++) {
+                Items[i] = default;
+            }
+        }
     }
 }

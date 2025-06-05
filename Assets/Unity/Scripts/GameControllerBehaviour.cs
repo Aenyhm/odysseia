@@ -14,17 +14,18 @@ namespace Unity.Scripts {
 
         [Header("Debug")]
         [SerializeField][Range(0, 15)] private float _frameRate = 1f;
-        [SerializeField] private GameState _gameState;
+        [SerializeField] public GameState GameState;
 
         private GameController _gameController;
         
         public SceneBehaviour CurrentScene { get; set; }
+        public int TitleCoinCount { get; set; }
 
         private void Awake() {
             DontDestroyOnLoad(gameObject);
         }
         
-        private void Start() {
+        public void Init(SceneType sceneType) {
             var rendererConf = new RendererConf();
 
             rendererConf.Sizes = new Dictionary<EntityType, Vec3F32>();
@@ -42,23 +43,29 @@ namespace Unity.Scripts {
                 }
             }
 
-            // Doit être fait après le Awake pour que le SceneController passe avant.
             _gameController = new GameController(
                 new UnityPlatform(),
-                CurrentScene.SceneType,
+                sceneType,
                 _tweaksScriptable.GameConf,
                 rendererConf
             );
+
+            TitleCoinCount = _gameController.GameState.GlobalProgression.CoinCount;
         }
 
         private void FixedUpdate() {
-            _gameController.CoreUpdate(CurrentScene.SceneType, UnityInput.Read(), Time.fixedDeltaTime*_frameRate);
+            _gameController.CoreUpdate(CurrentScene.SceneType, UnityInput.Data, Time.fixedDeltaTime*_frameRate);
+            UnityInput.Clear();
             
-            _gameState = _gameController.GameState;
+            GameState = _gameController.GameState;
         }
         
         private void Update() {
-            CurrentScene.Render(in _gameState, Time.deltaTime*_frameRate);
+            // L'input doit être calculé dans l'Update et non dans le FixedUpdate
+            // pour qu'il soit check à chaque frame, pas moins.
+            UnityInput.Update();
+
+            CurrentScene.Render(GameState, Time.deltaTime*_frameRate);
         }
 
         [Pure]

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Sources.Toolbox;
 
 namespace Sources.Core {
@@ -26,30 +25,43 @@ namespace Sources.Core {
         public RegionType RegionType;
         public LaneType LaneType;
     }
-    
-    public static class RegionSystem {
- 
-        // -1 car on ne met pas dans le pool la région actuelle
-        private static readonly SwapbackArray<RegionType> _regionTypePool = new(Enums.Count<RegionType>() - 1);
 
-        public static void Enter(ref GameState gameState, RegionType regionType) {
+    public static class RegionSystem {
+
+        private static SwapbackArray<RegionType> _regionTypePool;
+        
+        public static void Init(GameState gameState) {
+            ref var region = ref gameState.PlayState.Region;
+            var regionConf = Services.Get<GameConf>().RegionConf;
+            
+            // -1 car on ne met pas dans le pool la région actuelle
+            _regionTypePool = new SwapbackArray<RegionType>(Enums.Count<RegionType>() - 1);
+            
+            region.Entities = new SwapbackArray<Entity>();
+            region.Coins = new SwapbackArray<Coin>();
+            region.EntityGrid = new SimpleGrid<EntityType>(
+                Enums.Count<LaneType>(),
+                regionConf.RegionDistance/CoreConfig.GridScale
+            );
+            
+            Enter(gameState, RegionType.Aegis);
+        }
+
+        private static void Enter(GameState gameState, RegionType regionType) {
             ref var playState = ref gameState.PlayState;
+            ref var region = ref gameState.PlayState.Region;
             var gameConf = Services.Get<GameConf>();
             var regionConf = gameConf.RegionConf;
             var coinConf = gameConf.CoinConf;
-            
             var rendererConf = Services.Get<RendererConf>();
 
-            var entities = new SwapbackArray<Entity>();
-            var coins = new SwapbackArray<Coin>();
-            
-            var entityGrid = new SimpleGrid<EntityType>(
-                Enums.Count<LaneType>(), gameConf.RegionConf.RegionDistance/CoreConfig.GridScale
-            );
+            region.Entities.Reset();
+            region.Coins.Reset();
+            region.EntityGrid.Reset();
             
             var filledSegmentsDistance = regionConf.RegionDistance - 2*regionConf.ZenDistance;
             var availableSegments = rendererConf.SegmentsByRegion[regionType];
-            var segments = GenerateSegments(availableSegments, filledSegmentsDistance);
+            var segments = SegmentLogic.GenerateSegments(availableSegments, filledSegmentsDistance);
             
             var segmentZ = regionConf.ZenDistance;
             foreach (var segment in segments) {
@@ -64,10 +76,10 @@ namespace Sources.Core {
                     if (Prng.Chance(spawnPct, 100)) {
                         if (entityCell.Type == EntityType.Coin) {
                             var coinLine = CoinLogic.GenerateCoinLine(in coinConf, entityCell, offsetZ);
-                            coins.Append(coinLine);
+                            region.Coins.Append(coinLine);
                         } else {
-                            var e = GenerateEntity(entityCell, offsetZ);
-                            entities.Append(e);
+                            var e = EntityLogic.GenerateEntity(entityCell, offsetZ);
+                            region.Entities.Append(e);
                         }
                     }
                 }
@@ -75,28 +87,23 @@ namespace Sources.Core {
                 segmentZ += (int)segment.Length;
             }
             
-            entities.Append(RelicLogic.Create());
+            region.Entities.Append(RelicLogic.Create());
             
-            foreach (var e in entities) {
-                AddEntityToGrid(e.Type, e.Coords, ref entityGrid);
+            foreach (var e in region.Entities) {
+                AddEntityToGrid(e.Type, e.Coords, ref region.EntityGrid);
             }
 
-            foreach (var coin in coins) {
-                AddEntityToGrid(EntityType.Coin, coin.Coords, ref entityGrid);
+            foreach (var coin in region.Coins) {
+                AddEntityToGrid(EntityType.Coin, coin.Coords, ref region.EntityGrid);
             }
+            
+            region.Type = regionType;
+            region.Portals = GeneratePortals(regionType, regionConf.PortalCount);
 
-            var newRegion = new Region {
-                Type = regionType,
-                Entities = entities,
-                EntityGrid = entityGrid,
-                Coins = coins,
-                Portals = GeneratePortals(regionType, regionConf.PortalCount)
-            };
-            playState.Region = newRegion;
             playState.Boat.Position.Z = 0;
         }
 
-        public static void Execute(ref GameState gameState) {
+        public static void Execute(GameState gameState) {
             ref var playState = ref gameState.PlayState;
             var gameConf = Services.Get<GameConf>();
             var regionConf = gameConf.RegionConf;
@@ -114,49 +121,10 @@ namespace Sources.Core {
                     }
                 }
                 
-                Enter(ref gameState, nextRegionType);
+                Enter(gameState, nextRegionType);
             }
         }
-        
-        // On génère des tronçons de 100m d'obstacles et 50m d'ennemis
-        // en laissant une zone tranquille entre les portails.
-        private static List<Segment> GenerateSegments(List<Segment> availableSegments, int filledSegmentsDistance) {
-            var result = new List<Segment>();
-            
-            if (availableSegments.Count != 0) {
-                var generatedDistance = 0;
-                
-                while (generatedDistance < filledSegmentsDistance - (int)SegmentLength.L50) {
-                    var segmentIndex = Prng.Roll(availableSegments.Count);
-                    var segment = availableSegments[segmentIndex];
-         
-                    result.Add(segment);
-                    generatedDistance += (int)segment.Length;
-                }
-                
-                if (generatedDistance != filledSegmentsDistance) {
-                    throw new Exception(
-                        $"Wrong segment distance generated: {generatedDistance}; must be {filledSegmentsDistance}."
-                    );
-                }
-                
-                Prng.Shuffle(result);
-            }
-            
-            return result;
-        }
-        
-        private static Entity GenerateEntity(EntityCell entityCell, int offsetZ) {
-            var e = new Entity();
-            e.Id = EntityLogic.NextId;
-            e.Type = entityCell.Type;
-            
-            e.Coords = EntityLogic.GetAllEntityCoords(entityCell, offsetZ);
-            e.Position = EntityLogic.GetPosition(e.Type, e.Coords);
-            
-            return e;
-        }
-        
+
         private static void AddEntityToGrid(EntityType entityType, Vec2I32[] coords, ref SimpleGrid<EntityType> entityGrid) {
             foreach (var coord in coords) {
                 var gridCoords = entityGrid.CoordsToIndex(coord);
@@ -167,20 +135,13 @@ namespace Sources.Core {
         private static Portal[] GeneratePortals(RegionType currentRegionType, int portalCount) {
             var result = new Portal[portalCount];
             
-            var lanePool = new SwapbackArray<LaneType>(Enums.Count<LaneType>());
-            foreach (LaneType laneType in Enum.GetValues(typeof(LaneType))) {
-                lanePool.Append(laneType);
-            }
+            var laneTypes = Enums.Members<LaneType>();
+            Prng.Shuffle(laneTypes);
             
             for (var i = 0; i < result.Length; i++) {
-                var portal = new Portal();
+                Portal portal;
                 portal.RegionType = PickRegionType(currentRegionType);
-                
-                var laneIndex = Prng.Roll(lanePool.Count);
-                var lane = lanePool.Items[laneIndex];
-                portal.LaneType = lane;
-                lanePool.RemoveAt(laneIndex);
-                
+                portal.LaneType = laneTypes[i];
                 result[i] = portal;
             }
 

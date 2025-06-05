@@ -7,7 +7,7 @@ namespace Unity.Scripts.Views.Leaderboard {
     public class ScoreManagerView : AbstractManagerView<PlayProgression> {
         private ScoreManagerView() : base("Score", false) { }
         
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var dataById = new Dictionary<int, PlayProgression>(gameState.PlayProgressions.Count);
             
             gameState.PlayProgressions.Sort((a, b) => b.Score.CompareTo(a.Score));

@@ -20,7 +20,7 @@ namespace Unity.Scripts.Views.Gameplay {
             _audio = GetComponent<AudioSource>();
         }
         
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             if (gameState.PlayState.Mode == PlayMode.GameOver) {
                 if (!firstPass) {
                     firstPass = true;

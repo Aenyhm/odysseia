@@ -9,7 +9,7 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
             _textComponent = GetComponent<TextMeshProUGUI>();
         }
         
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var speedZ = (int)gameState.PlayState.Boat.SpeedZ;
             
             _textComponent.text = $"{speedZ} m/s";

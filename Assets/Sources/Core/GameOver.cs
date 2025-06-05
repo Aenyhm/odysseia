@@ -3,7 +3,7 @@ using System;
 namespace Sources.Core {
     public static class GameOverSystem {
 
-        public static void Execute(ref GameState gameState) {
+        public static void Execute(GameState gameState) {
             ref var playState = ref gameState.PlayState;
             
             if (playState.Mode == PlayMode.Play && playState.Boat.Health == 0) {

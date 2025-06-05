@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace Unity.Scripts.Views.Gameplay {
     public class CannonballManagerView : AbstractManagerView<Cannonball> {
-        private CannonballManagerView() : base("Ammo") { }
+        private CannonballManagerView() : base("Cannonball") { }
 
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var entities = gameState.PlayState.Cannonballs;
             
             var entitiesById = new Dictionary<int, Cannonball>(entities.Count);
@@ -24,9 +24,7 @@ namespace Unity.Scripts.Views.Gameplay {
         }
 
         protected override void InitChild(GameObject go, Cannonball data) {
-            if (!data.Lootable) {
-                go.GetComponent<AudioSource>().Play();
-            }
+            go.GetComponent<AudioSource>().Play();
         }
     }
 }

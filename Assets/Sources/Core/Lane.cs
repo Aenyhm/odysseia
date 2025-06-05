@@ -17,14 +17,14 @@ namespace Sources.Core {
     }
 
     public static class ChangeLaneSystem {
-        public static void Execute(ref GameState gameState, in GameInput input, float dt) {
+        public static void Execute(GameState gameState) {
             ref var playState = ref gameState.PlayState;
             ref var boat = ref playState.Boat;
             
             if (boat.XSign == 0) {
                 var deltaX = boat.CharmedById != 0 ?
                     GetForcedDeltaX(in playState) :
-                    Convert.ToInt32(input.HorizontalAxis);
+                    Convert.ToInt32(gameState.Input.HorizontalAxis);
 
                 boat.LaneType = LaneLogic.GetDelta(boat.LaneType, deltaX);
                 boat.XSign = deltaX;
@@ -33,7 +33,7 @@ namespace Sources.Core {
                 
                 var boatConf = Services.Get<GameConf>().BoatConf;
 
-                boat.Position.X = Maths.MoveTowards(boat.Position.X, targetX, boatConf.SpeedX*dt);
+                boat.Position.X = Maths.MoveTowards(boat.Position.X, targetX, boatConf.SpeedX*Clock.DeltaTime);
                 
                 var moveLaneCompleted = (
                     boat.XSign == -1 && boat.Position.X <= targetX ||

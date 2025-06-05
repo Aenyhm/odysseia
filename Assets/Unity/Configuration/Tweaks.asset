@@ -25,7 +25,7 @@ MonoBehaviour:
       PositionY: 0.5
       SpeedCollisionFactor: 0.5
       SpeedZStart: 10
-      SpeedZMin: 1
+      SpeedZMin: 10
       SpeedX: 30
       HealthMax: 3
     CannonConf:
@@ -33,6 +33,7 @@ MonoBehaviour:
       AmmoSpawnFreq: 10
       AmmoSpeed: 40
       AmmoMax: 10
+      AmmoInitialCount: 0
     CoinConf:
       CoinDistance: 1.5
       CoinLineCount: 10

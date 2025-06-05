@@ -1,49 +1,56 @@
 using Sources.Core;
-using Sources.Toolbox;
 
 namespace Sources.Scenes {
-    public class GameplayScene : AbstractScene {
-        public override void Init(ref GameState gameState) {
+    public class GameplayScene : IScene {
+        private readonly GameState _gameState;
+        
+        public GameplayScene(GameState gameState) {
+            _gameState = gameState;
+        }
+        
+        public void Init() {
         }
 
-        public override void Update(ref GameState gameState, in GameInput input) {
-            var dt = Clock.DeltaTime;
-            
-            if (gameState.PlayState.Mode != PlayMode.GameOver) {
-                PauseSystem.Execute(ref gameState.PlayState, in input);
+        public void Update() {
+            if (_gameState.PlayState.Mode != PlayMode.GameOver) {
+                PauseSystem.Execute(_gameState);
             }
             
-            if (gameState.PlayState.Mode is PlayMode.Play or PlayMode.GameOver) {
-                CannonballSystem.Execute(ref gameState, dt);
+            if (_gameState.PlayState.Mode is PlayMode.Play or PlayMode.GameOver) {
+                CannonballSystem.Execute(_gameState);
             }
             
-            if (gameState.PlayState.Mode == PlayMode.Play) {
-                MermaidSystem.Execute(ref gameState);
-                JellyfishSystem.Execute(ref gameState);
-                ChangeLaneSystem.Execute(ref gameState, in input, dt);
-                BoatSystem.Execute(ref gameState, in input, dt);
-                CannonballSystem.HandleCooldown(ref gameState, input, dt);
-                RegionSystem.Execute(ref gameState);
-                RelicSystem.Execute(ref gameState);
-                WindSystem.Execute(ref gameState, dt);
-                CoinSystem.Execute(ref gameState);
-                GameOverSystem.Execute(ref gameState);
+            if (_gameState.PlayState.Mode == PlayMode.Play) {
+                ScoreSystem.Execute(_gameState);
+                AmmoSystem.Execute(_gameState);
+                MermaidSystem.Execute(_gameState);
+                JellyfishSystem.Execute(_gameState);
+                ChangeLaneSystem.Execute(_gameState);
+                BoatSystem.Execute(_gameState);
+                CannonSystem.Execute(_gameState);
+                RegionSystem.Execute(_gameState);
+                RelicSystem.Execute(_gameState);
+                WindSystem.Execute(_gameState);
+                CoinSystem.Execute(_gameState);
+                GameOverSystem.Execute(_gameState);
             }
             
-            DestroySystem.Execute(ref gameState);
+            DestroySystem.Execute(_gameState);
         }
         
-        public override void Enter(ref GameState gameState) {
-            gameState.PlayState.Boat = BoatSystem.CreateBoat();
-            CannonballSystem.Init(ref gameState);
-            RegionSystem.Enter(ref gameState, RegionType.Aegis);
-            WindSystem.Init(ref gameState);
+        public void Enter() {
+            _gameState.PlayState = default;
             
-            gameState.PlayState.PlayProgression = new PlayProgression();
-            gameState.PlayState.Mode = PlayMode.Play;
+            AmmoSystem.Init(_gameState);
+            BoatSystem.Init(_gameState);
+            CannonSystem.Init(_gameState);
+            RegionSystem.Init(_gameState);
+            WindSystem.Init(_gameState);
+            
+            _gameState.PlayState.PlayProgression = new PlayProgression();
+            _gameState.PlayState.Mode = PlayMode.Play;
         }
         
-        public override void Exit(ref GameState gameState) {
-        }
+        public void Exit() {}
     }
 }

@@ -10,7 +10,7 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
             _image = GetComponent<Image>();
         }
         
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var cooldown = gameState.PlayState.Cannon.ReloadCooldown;
             var cooldownMax = Services.Get<GameConf>().CannonConf.AmmoReloadTime;
             

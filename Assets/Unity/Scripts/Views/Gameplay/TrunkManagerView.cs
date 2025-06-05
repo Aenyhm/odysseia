@@ -7,7 +7,7 @@ namespace Unity.Scripts.Views.Gameplay {
     public class TrunkManagerView : AbstractManagerView<Entity> {
         private TrunkManagerView() : base("Trunk") { }
 
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var entitiesById = new Dictionary<int, Entity>();
             foreach (var e in gameState.PlayState.Region.Entities) {
                 if (e.Type == EntityType.Trunk) {

@@ -16,8 +16,8 @@ namespace Sources.Core {
     }
     
     public static class MermaidSystem {
-        public static void Execute(ref GameState gameState) {
-            ref var entities = ref gameState.PlayState.Region.Entities;
+        public static void Execute(GameState gameState) {
+            var entities = gameState.PlayState.Region.Entities;
             ref var boat = ref gameState.PlayState.Boat;
             
             var mermaidConf = Services.Get<GameConf>().MermaidConf;

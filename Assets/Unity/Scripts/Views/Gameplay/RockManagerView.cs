@@ -7,7 +7,7 @@ namespace Unity.Scripts.Views.Gameplay {
     public class RockManagerView : AbstractManagerView<Entity> {
         private RockManagerView() : base("Rock") { }
 
-        public override void Render(in GameState gameState, float dt) {
+        public override void Render(GameState gameState, float dt) {
             var entitiesById = new Dictionary<int, Entity>();
             foreach (var e in gameState.PlayState.Region.Entities) {
                 if (e.Type == EntityType.Rock) {

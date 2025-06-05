@@ -23,6 +23,7 @@ namespace Unity.Scripts.Scriptables {
                 AmmoSpawnFreq = 2f,
                 AmmoSpeed = 30f,
                 AmmoMax = 10,
+                AmmoInitialCount = 0,
             },
             CoinConf = new CoinConf {
                 CoinDistance = 1.5f, // 10 coins = 15m
