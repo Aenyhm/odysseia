@@ -18,13 +18,15 @@ namespace Unity.Scripts {
         [SerializeField] public GameState GameState;
 
         private GameController _gameController;
-        
+        private UnityInput _unityInput;
+
         public SceneBehaviour CurrentScene { get; set; }
         public int TitleCoinCount { get; set; }
 
         private void Awake() {
-            Application.targetFrameRate = _targetFps;
             DontDestroyOnLoad(gameObject);
+            Application.targetFrameRate = _targetFps;
+            _unityInput = new UnityInput();
         }
         
         public void Init(SceneType sceneType) {
@@ -56,8 +58,8 @@ namespace Unity.Scripts {
         }
 
         private void FixedUpdate() {
-            _gameController.CoreUpdate(CurrentScene.SceneType, UnityInput.Actions, Time.fixedDeltaTime*_frameRate);
-            UnityInput.Clear();
+            _gameController.CoreUpdate(CurrentScene.SceneType, _unityInput.Actions, Time.fixedDeltaTime*_frameRate);
+            _unityInput.Clear();
             
             GameState = _gameController.GameState;
         }
@@ -65,7 +67,7 @@ namespace Unity.Scripts {
         private void Update() {
             // L'input doit être calculé dans l'Update et non dans le FixedUpdate
             // pour qu'il soit check à chaque frame, pas moins.
-            UnityInput.Update();
+            _unityInput.Update();
 
             CurrentScene.Render(GameState, Time.deltaTime*_frameRate);
         }
