@@ -12,7 +12,7 @@ namespace Sources {
     public class GameState {
         public List<PlayProgression> PlayProgressions;
         public PlayState PlayState;
-        public GameInput Input;
+        public PlayerActions PlayerActions;
         public GlobalProgression GlobalProgression;
         public SceneType CurrentSceneType;
     }

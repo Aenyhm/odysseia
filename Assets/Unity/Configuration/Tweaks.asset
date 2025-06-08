@@ -22,11 +22,12 @@ MonoBehaviour:
       SailConf:
         AngleMax: 30
         WindwardAngleRange: 20
+        TurnSpeed: 2
       PositionY: 0.5
       SpeedCollisionFactor: 0.5
       SpeedZStart: 10
       SpeedZMin: 10
-      SpeedX: 30
+      SpeedX: 20
       HealthMax: 3
     CannonConf:
       AmmoReloadTime: 3

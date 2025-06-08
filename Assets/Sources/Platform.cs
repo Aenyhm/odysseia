@@ -15,12 +15,11 @@ namespace Sources {
     }
 
     [Serializable]
-    public struct GameInput {
-        public float MouseDeltaX;
-        public float HorizontalAxis;
-        public bool MouseButtonLeftDown;
-        public bool Escape;
-        public bool Space;
+    public struct PlayerActions {
+        public float DeltaSail;
+        public float SideMove;
+        public bool Cancel;
+        public bool Shoot;
     }
 
     [Serializable]
@@ -37,7 +36,7 @@ namespace Sources {
     }
 
     public struct RendererConf {
-        public Dictionary<EntityType, Vec3F32> Sizes;
+        public Dictionary<EntityType, BoundingBox3F32> BoundingBoxesByEntityType;
         public Dictionary<RegionType, List<Segment>> SegmentsByRegion;
     }
 }

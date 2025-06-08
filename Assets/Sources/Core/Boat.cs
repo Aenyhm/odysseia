@@ -29,6 +29,7 @@ namespace Sources.Core {
     public struct SailConf {
         public float AngleMax;
         public float WindwardAngleRange;
+        public float TurnSpeed;
     }
     
     [Serializable]
@@ -56,9 +57,9 @@ namespace Sources.Core {
             
             return Math.Clamp(targetSpeed, speedMaxConf.Min, speedMaxConf.Max);
         }
-
+        
         [Pure]
-        public static bool IsSailWindward(in SailConf sailConf, float sailAngle, float windAngle) {
+        public static Vec2F32 GetWindwardAngle(in SailConf sailConf, float windAngle) {
             var halfRange = sailConf.WindwardAngleRange/2;
             var min = Math.Max(-sailConf.AngleMax, windAngle - halfRange);
             var max = Math.Min(+sailConf.AngleMax, windAngle + halfRange);
@@ -67,9 +68,9 @@ namespace Sources.Core {
                 if (Maths.FloatEquals(max, +sailConf.AngleMax)) min = max - sailConf.WindwardAngleRange;
             }
             
-            return sailAngle >= min && sailAngle <= max;
+            return new Vec2F32(min, max);
         }
-                
+
         [Pure]
         public static float MoveSailAngle(in SailConf sailConf, float angle) {
             return Math.Clamp(angle, -sailConf.AngleMax, +sailConf.AngleMax);
@@ -103,15 +104,17 @@ namespace Sources.Core {
             }
 
             // Voile
-            if (gameState.Input.MouseButtonLeftDown) {
-                var targetSailAngle = boat.SailAngle + gameState.Input.MouseDeltaX;
+            if (!Maths.FloatEquals(gameState.PlayerActions.DeltaSail, 0)) {
+                var targetSailAngle = boat.SailAngle + gameState.PlayerActions.DeltaSail*boatConf.SailConf.TurnSpeed;
                 boat.SailAngle = BoatLogic.MoveSailAngle(boatConf.SailConf, targetSailAngle);
             }
             
             // Vitesse
             {
                 var wind = playState.Wind;
-                boat.SailWindward = BoatLogic.IsSailWindward(boatConf.SailConf, boat.SailAngle, wind.CurrentAngle);
+                var winwardAngle = BoatLogic.GetWindwardAngle(boatConf.SailConf, wind.CurrentAngle);
+                boat.SailWindward = boat.SailAngle >= winwardAngle.X && boat.SailAngle <= winwardAngle.Y;
+                
                 var speedDirection = boat.SailWindward ? 1 : -1;
                 var targetSpeed = boat.SpeedZ + speedDirection*Clock.DeltaTime;
                 var maxSpeed = BoatLogic.GetMaxSpeed(boatConf.SpeedMaxConf, boat.Distance);
@@ -140,11 +143,11 @@ namespace Sources.Core {
 
         private static void CheckCollisions(ref Boat boat, SwapbackArray<Entity> entities) {
             var boatConf = Services.Get<GameConf>().BoatConf;
-            var sizes = Services.Get<RendererConf>().Sizes;
+            var boxes = Services.Get<RendererConf>().BoundingBoxesByEntityType;
 
             foreach (var e in entities) {
                 if (EntityConf.ObstacleTypes.Contains(e.Type)) {
-                    if (Collisions.CheckAabb(boat.Position, sizes[EntityType.Boat], e.Position, sizes[e.Type])) {
+                    if (Collisions.CheckCollisionBoxes(boat.Position, boxes[EntityType.Boat], e.Position, boxes[e.Type])) {
                         if (boat.CollisionIds.Add(e.Id)) {
                             boat.Health = (byte)Math.Max(0, boat.Health - 1);
                             var targetSpeed = boat.SpeedZ*boatConf.SpeedCollisionFactor;

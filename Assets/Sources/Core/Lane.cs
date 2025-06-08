@@ -24,7 +24,7 @@ namespace Sources.Core {
             if (boat.XSign == 0) {
                 var deltaX = boat.CharmedById != 0 ?
                     GetForcedDeltaX(in playState) :
-                    Convert.ToInt32(gameState.Input.HorizontalAxis);
+                    Convert.ToInt32(gameState.PlayerActions.SideMove);
 
                 boat.LaneType = LaneLogic.GetDelta(boat.LaneType, deltaX);
                 boat.XSign = deltaX;

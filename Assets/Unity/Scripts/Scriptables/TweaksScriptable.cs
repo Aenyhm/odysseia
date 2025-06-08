@@ -10,7 +10,7 @@ namespace Unity.Scripts.Scriptables {
         public GameConf GameConf = new() {
             BoatConf = new BoatConf {
                 SpeedMaxConf = new SpeedMaxConf { DistanceStep = 500, Multiplier = 1.1f, Min = 20, Max = 40 },
-                SailConf = new SailConf { AngleMax = 30f, WindwardAngleRange = 20f },
+                SailConf = new SailConf { AngleMax = 30f, WindwardAngleRange = 20f, TurnSpeed = 2f },
                 PositionY = 0.5f,
                 SpeedCollisionFactor = 0.5f,
                 SpeedZStart = 10,
@@ -54,7 +54,6 @@ namespace Unity.Scripts.Scriptables {
                 ChangeDuration = 1,
                 AngleMax = 30,
             },
-            
             EnableBoatCollisions = true,
         };
     }

@@ -11,6 +11,7 @@ namespace Unity.Scripts {
     public class GameControllerBehaviour : MonoBehaviour {
         [SerializeField] private TweaksScriptable _tweaksScriptable;
         [SerializeField] private CollidingScriptable _collidingScriptable;
+        [SerializeField] private int _targetFps = 60;
 
         [Header("Debug")]
         [SerializeField][Range(0, 15)] private float _frameRate = 1f;
@@ -22,15 +23,16 @@ namespace Unity.Scripts {
         public int TitleCoinCount { get; set; }
 
         private void Awake() {
+            Application.targetFrameRate = _targetFps;
             DontDestroyOnLoad(gameObject);
         }
         
         public void Init(SceneType sceneType) {
             var rendererConf = new RendererConf();
 
-            rendererConf.Sizes = new Dictionary<EntityType, Vec3F32>();
+            rendererConf.BoundingBoxesByEntityType = new Dictionary<EntityType, BoundingBox3F32>();
             foreach (var item in _collidingScriptable.CollidingObjects) {
-                rendererConf.Sizes.Add(item.entityType, GetVisualSize(item.gameObject));
+                rendererConf.BoundingBoxesByEntityType.Add(item.entityType, GetBoundingBox(item.gameObject));
             }
             
             rendererConf.SegmentsByRegion = new Dictionary<RegionType, List<Segment>>();
@@ -54,7 +56,7 @@ namespace Unity.Scripts {
         }
 
         private void FixedUpdate() {
-            _gameController.CoreUpdate(CurrentScene.SceneType, UnityInput.Data, Time.fixedDeltaTime*_frameRate);
+            _gameController.CoreUpdate(CurrentScene.SceneType, UnityInput.Actions, Time.fixedDeltaTime*_frameRate);
             UnityInput.Clear();
             
             GameState = _gameController.GameState;
@@ -69,15 +71,22 @@ namespace Unity.Scripts {
         }
 
         [Pure]
-        private static Vec3F32 GetVisualSize(GameObject go) {
-            var meshRenderers = go.GetComponentsInChildren<MeshRenderer>();
-
-            var bounds = meshRenderers[0].bounds;
-            foreach (var mr in meshRenderers) {
-                bounds.Encapsulate(mr.bounds);
+        private static BoundingBox3F32 GetBoundingBox(GameObject go) {
+            var collider = go.GetComponent<BoxCollider>();
+            if (!collider) {
+                collider = go.GetComponentInChildren<BoxCollider>();
             }
+            
+            var centerWorld = collider.transform.TransformPoint(collider.center);
+            var sizeWorld = Vector3.Scale(collider.size, collider.transform.lossyScale);
 
-            return new Vec3F32(bounds.size.x, bounds.size.y, bounds.size.z);
+            var min = centerWorld - sizeWorld*0.5f;
+            var max = centerWorld + sizeWorld*0.5f;
+
+            return new BoundingBox3F32 {
+                Min = min.FromUnityVector3(),
+                Max = max.FromUnityVector3(),
+            };
         }
     }
 }

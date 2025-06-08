@@ -32,7 +32,7 @@ namespace Sources.Core {
             var entities = playState.Region.Entities;
             var boat = playState.Boat;
             
-            var sizes = Services.Get<RendererConf>().Sizes;
+            var boxes = Services.Get<RendererConf>().BoundingBoxesByEntityType;
             var relicConf = Services.Get<GameConf>().RelicConf;
 
             for (var i = 0; i < entities.Count; i++) {
@@ -40,7 +40,7 @@ namespace Sources.Core {
                 
                 if (e.Type != EntityType.Relic) continue;
                     
-                if (Collisions.CheckAabb(e.Position, sizes[e.Type], boat.Position, sizes[EntityType.Boat])) {
+                if (Collisions.CheckCollisionBoxes(e.Position, boxes[e.Type], boat.Position, boxes[EntityType.Boat])) {
                     ScoreLogic.Add(gameState, relicConf.Score);
                     playState.CoinCount += relicConf.CoinValue;
                     e.Destroy = true;

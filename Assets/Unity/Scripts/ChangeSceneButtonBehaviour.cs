@@ -6,10 +6,10 @@ using UnityEngine.SceneManagement;
 namespace Unity.Scripts {
     public class ChangeSceneButtonBehaviour : MonoBehaviour {
         [SerializeField] private SceneType _sceneType;
-        [SerializeField] private KeyCode _triggerKeyCode;
+        [SerializeField] private PlayerActionType _actionType;
         
         void Update() {
-            if (Input.GetKeyDown(_triggerKeyCode)) OnClick();
+            if (UnityInput.GetAction(_actionType)) OnClick();
         }
 
         public void OnClick() {

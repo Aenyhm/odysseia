@@ -51,9 +51,9 @@ namespace Sources.Core {
             var gameConf = Services.Get<GameConf>();
             var coinConf = gameConf.CoinConf;
             
-            var sizes = Services.Get<RendererConf>().Sizes;
-            var coinSize = sizes[EntityType.Coin];
-            var boatSize = sizes[EntityType.Boat];
+            var boxes = Services.Get<RendererConf>().BoundingBoxesByEntityType;
+            var coinBox = boxes[EntityType.Coin];
+            var boatBox = boxes[EntityType.Boat];
             
             ref var playState = ref gameState.PlayState;
             ref var region = ref playState.Region;
@@ -64,7 +64,7 @@ namespace Sources.Core {
             for (var i = 0; i < region.Coins.Count; i++) {
                 var coin = region.Coins.Items[i];
                 
-                if (Collisions.CheckAabb(boat.Position, boatSize, coin.Position, coinSize)) {
+                if (Collisions.CheckCollisionBoxes(boat.Position, boatBox, coin.Position, coinBox)) {
                     playState.CoinCount++;
                     
                     ScoreLogic.Add(gameState, EntityConf.EntityScoreValues[EntityType.Coin]);

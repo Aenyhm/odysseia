@@ -5,7 +5,7 @@ namespace Sources.Core {
         public static void Execute(GameState gameState) {
             ref var playState = ref gameState.PlayState;
             
-            if (gameState.Input.Escape) {
+            if (gameState.PlayerActions.Cancel) {
                 if (playState.Mode == PlayMode.Pause) {
                     playState.Mode = _previousMode;
                 } else {

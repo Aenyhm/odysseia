@@ -78,16 +78,16 @@ namespace Sources.Core {
 
         private static void CheckLoot(SwapbackArray<Cannonball> ammos, ref Cannon cannon, in Boat boat) {
             var ammoMax = Services.Get<GameConf>().CannonConf.AmmoMax;
-            var sizes = Services.Get<RendererConf>().Sizes;
-            var ammoSize = sizes[EntityType.Cannonball];
-            var boatSize = sizes[EntityType.Boat];
+            var boxes = Services.Get<RendererConf>().BoundingBoxesByEntityType;
+            var ammoBox = boxes[EntityType.Cannonball];
+            var boatBox = boxes[EntityType.Boat];
 
             for (var i = ammos.Count - 1; i >= 0; i--) {
                 if (cannon.AmmoCount == ammoMax) break;
 
                 var ammo = ammos.Items[i];
                 
-                if (Collisions.CheckAabb(ammo.Position, ammoSize, boat.Position, boatSize)) {
+                if (Collisions.CheckCollisionBoxes(ammo.Position, ammoBox, boat.Position, boatBox)) {
                     cannon.AmmoCount++;
                     ammos.RemoveAt(i);
                 }

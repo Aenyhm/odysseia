@@ -6,6 +6,8 @@ namespace Unity.Scripts {
     
     public static class UnityExtensions {
         public static Vector3 ToUnityVector3(this Vec3F32 v) => new(v.X, v.Y, v.Z);
+        public static Vec3F32 FromUnityVector3(this Vector3 v) => new(v.x, v.y, v.z);
+
         public static Color ToUnityColor(this System.Drawing.Color c) => new Color(c.R, c.G, c.B, c.A)/255f;
 
         public static void MoveOnAxis(this Transform transform, Axis axis, float value) {

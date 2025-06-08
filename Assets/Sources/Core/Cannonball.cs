@@ -36,19 +36,19 @@ namespace Sources.Core {
         private static void CheckCollisions(
             GameState gameState, SwapbackArray<Cannonball> cannonballs, SwapbackArray<Entity> entities
         ) {
-            var sizes = Services.Get<RendererConf>().Sizes;
-            var cannonballSize = sizes[EntityType.Cannonball];
+            var boxes = Services.Get<RendererConf>().BoundingBoxesByEntityType;
+            var cannonballSize = boxes[EntityType.Cannonball];
             
             for (var index = 0; index < entities.Count; index++) {
                 ref var e = ref entities.Items[index];
                 if (e.Destroy) continue;
                 
-                var entitySize = sizes[e.Type];
+                var entityBox = boxes[e.Type];
 
                 for (var i = cannonballs.Count - 1; i >= 0; i--) {
                     var cannonball = cannonballs.Items[i];
                  
-                    if (Collisions.CheckAabb(cannonball.Position, cannonballSize, e.Position, entitySize)) {
+                    if (Collisions.CheckCollisionBoxes(cannonball.Position, cannonballSize, e.Position, entityBox)) {
                         cannonballs.RemoveAt(i);
                         
                         if (EntityConf.DestroyableEntityTypes.Contains(e.Type)) {

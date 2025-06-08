@@ -30,7 +30,7 @@ namespace Sources.Core {
             ref var playState = ref gameState.PlayState;
             ref var cannon = ref playState.Cannon;
             
-            if (gameState.Input.Space && cannon.ReloadCooldown == 0f && cannon.AmmoCount > 0) {
+            if (gameState.PlayerActions.Shoot && cannon.ReloadCooldown == 0f && cannon.AmmoCount > 0) {
                 var cannonballs = playState.Cannonballs;
 
                 var cannonball = CreateOnCannon(in playState.Boat);
@@ -44,8 +44,8 @@ namespace Sources.Core {
         
         private static Cannonball CreateOnCannon(in Boat boat) {
             var cannonConf = Services.Get<GameConf>().CannonConf;
-            var sizes = Services.Get<RendererConf>().Sizes;
-            var offsetZ = sizes[EntityType.Boat].Z/2f + sizes[EntityType.Cannonball].Z/2f;
+            var boxes = Services.Get<RendererConf>().BoundingBoxesByEntityType;
+            var offsetZ = boxes[EntityType.Boat].Max.Z/2f + boxes[EntityType.Cannonball].Max.Z/2f;
             
             var cannonball = new Cannonball();
             cannonball.Id = EntityLogic.NextId;

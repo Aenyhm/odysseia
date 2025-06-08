@@ -23,9 +23,9 @@ namespace Sources {
             SceneManager.GoTo(sceneType);
         }
 
-        public void CoreUpdate(SceneType sceneType, in GameInput gameInput, float dt) {
+        public void CoreUpdate(SceneType sceneType, in PlayerActions playerActions, float dt) {
             Clock.Update(dt);
-            GameState.Input = gameInput;
+            GameState.PlayerActions = playerActions;
             
             if (sceneType != GameState.CurrentSceneType) {
                 SceneManager.GoTo(sceneType);
