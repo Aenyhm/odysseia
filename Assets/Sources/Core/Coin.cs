@@ -46,6 +46,8 @@ namespace Sources.Core {
     public static class CoinSystem {
         private static int _currentLineId;
         private static int _currentLineLooted;
+        
+        public static Action LineCompleted;
 
         public static void Execute(GameState gameState) {
             var gameConf = Services.Get<GameConf>();
@@ -66,7 +68,6 @@ namespace Sources.Core {
                 
                 if (Collisions.CheckCollisionBoxes(boat.Position, boatBox, coin.Position, coinBox)) {
                     playState.CoinCount++;
-                    
                     ScoreLogic.Add(gameState, EntityConf.EntityScoreValues[EntityType.Coin]);
 
                     if (coin.LineId != _currentLineId) {
@@ -76,6 +77,7 @@ namespace Sources.Core {
                     
                     _currentLineLooted++;
                     if (_currentLineLooted == coinConf.CoinLineCount) {
+                        LineCompleted.Invoke();
                         ScoreLogic.Add(gameState, coinConf.CoinLineBonus);
                     }
 

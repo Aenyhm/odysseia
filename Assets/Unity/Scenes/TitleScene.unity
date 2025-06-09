@@ -343,19 +343,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 423891158}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 423891160}
-        m_TargetAssemblyTypeName: Unity.Scripts.PlayButtonBehaviour, Assembly-CSharp
-        m_MethodName: OnClick
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &423891158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -406,8 +394,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 909036476434db04d9249b8ef771e375, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sceneType: 1
   _actionType: 0
+  _sceneType: 1
 --- !u!82 &423891161
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1259,8 +1247,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 909036476434db04d9249b8ef771e375, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sceneType: 2
   _actionType: 2
+  _sceneType: 2
 --- !u!114 &1148981163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1304,19 +1292,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1148981164}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1148981162}
-        m_TargetAssemblyTypeName: Unity.Scripts.PlayButtonBehaviour, Assembly-CSharp
-        m_MethodName: OnClick
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1148981164
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1506,6 +1482,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b40b00b9aca34d71b99c16b10d63c129, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _actionType: 1
 --- !u!82 &1343656665
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1646,19 +1623,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1343656667}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1343656664}
-        m_TargetAssemblyTypeName: Unity.Scripts.Buttons.ExitButtonBehaviour, Assembly-CSharp
-        m_MethodName: OnClick
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1343656667
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sources;
 using Sources.Toolbox;
 using UnityEngine;
@@ -8,13 +9,27 @@ namespace Unity.Scripts {
         Validate,
         Cancel,
         Tab,
+        Shoot,
+        Help,
     }
     
-    // Xbox Controller mapping: https://i.sstatic.net/9czAW.jpg
+    public readonly struct KeysByInput {
+        public readonly KeyCode KeyboardKey;
+        public readonly KeyCode GamepadKey;
+        
+        public KeysByInput(KeyCode keyboardKey, KeyCode gamepadKey) {
+            KeyboardKey = keyboardKey;
+            GamepadKey = gamepadKey;
+        }
+    }
+    
     public class UnityInput {
+        private static UnityInput _instance;
         public PlayerActions Actions;
+        
+        public static UnityInput Instance => _instance ??= new UnityInput();
 
-        public UnityInput() {
+        private UnityInput() {
             foreach (var joystickName in Input.GetJoystickNames()) {
                 if (joystickName != "") {
                     Actions.UsingGamepad = true;
@@ -23,17 +38,21 @@ namespace Unity.Scripts {
             }
         }
         
-        private static bool _validate => Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Joystick1Button0);
-        private static bool _cancel => Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Joystick1Button6);
-        private static bool _tab => Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Joystick1Button4);
+        // Je préfère contrôler le mapping ici plutôt que dans les settings, car on peut imaginer
+        // que le joueur pourra les changer comme il le souhaite dans une future version.
+        // Xbox Controller mapping: https://i.sstatic.net/9czAW.jpg
+        private readonly Dictionary<PlayerActionType, KeysByInput> _keysByInputsByActionType = new() {
+            { PlayerActionType.Validate, new KeysByInput(KeyCode.Return, KeyCode.Joystick1Button0) },
+            { PlayerActionType.Cancel,   new KeysByInput(KeyCode.Escape, KeyCode.Joystick1Button6) },
+            { PlayerActionType.Tab,      new KeysByInput(KeyCode.Tab,    KeyCode.Joystick1Button4) },
+            { PlayerActionType.Shoot,    new KeysByInput(KeyCode.Space,  KeyCode.Joystick1Button0) },
+            { PlayerActionType.Help,     new KeysByInput(KeyCode.H,      KeyCode.Joystick1Button3) },
+        };
 
-        public static bool GetAction(PlayerActionType actionType) {
-            return actionType switch {
-                PlayerActionType.Validate => _validate,
-                PlayerActionType.Cancel => _cancel,
-                PlayerActionType.Tab => _tab,
-                _ => false
-            };
+        public bool GetAction(PlayerActionType actionType) {
+            var _keysByInput = _keysByInputsByActionType[actionType];
+            
+            return IsActionDone(_keysByInput);
         }
 
         public void Clear() {
@@ -45,21 +64,18 @@ namespace Unity.Scripts {
         public void Update() {
             Actions.SideMove = GetMaxFloatValue(Actions.SideMove, Input.GetAxisRaw("Horizontal"));
             Actions.DeltaSail = GetMaxFloatValue(Actions.DeltaSail, GetSailValue());
-            
-            // Je préfère contrôler le mapping ici plutôt que dans les settings, car on peut imaginer
-            // que le joueur pourra les changer comme il le souhaite dans une future version.
-            Actions.Cancel |= IsActionDone(KeyCode.Escape, KeyCode.Joystick1Button6);
-            Actions.Shoot |= IsActionDone(KeyCode.Space, KeyCode.Joystick1Button0);
-            Actions.ShowControlsSwitched |= IsActionDone(KeyCode.H, KeyCode.Joystick1Button3);
+            Actions.Cancel |= GetAction(PlayerActionType.Cancel);
+            Actions.Shoot |= GetAction(PlayerActionType.Shoot);
+            Actions.ShowControlsSwitched |= GetAction(PlayerActionType.Help);
         }
 
-        private bool IsActionDone(KeyCode keyboardKey, KeyCode gamepadKey) {
+        private bool IsActionDone(KeysByInput keysByInput) {
             var result = false;
 
-            if (Input.GetKeyDown(keyboardKey)) {
+            if (Input.GetKeyDown(keysByInput.KeyboardKey)) {
                 result = true;
                 Actions.UsingGamepad = false;
-            } else if (Input.GetKeyDown(gamepadKey)) {
+            } else if (Input.GetKeyDown(keysByInput.GamepadKey)) {
                 result = true;
                 Actions.UsingGamepad = true;
             }

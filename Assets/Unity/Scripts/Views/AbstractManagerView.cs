@@ -9,24 +9,15 @@ namespace Unity.Scripts.Views {
         private Pool<GameObject> _pool;
         protected readonly Dictionary<int, GameObject> _gosById = new();
         private readonly string _label;
-        private readonly bool _createParent;
+        private string _initialName;
 
-        protected AbstractManagerView(string label, bool createParent = true) {
+        protected AbstractManagerView(string label) {
             _label = label;
-            _createParent = createParent;
         }
 
         private void Awake() {
-            Transform parentTransform;
-            if (_createParent) {
-                var parent = new GameObject($"{_label}s");
-                parent.transform.parent = transform;
-                parentTransform = parent.transform;
-            } else {
-                parentTransform = transform;
-            }
-            
-            _pool = new Pool<GameObject>(() => Instantiate(_prefab, parentTransform));
+            _pool = new Pool<GameObject>(() => Instantiate(_prefab, transform));
+            _initialName = name;
         }
         
         protected abstract void InitChild(GameObject go, T data);
@@ -63,6 +54,8 @@ namespace Unity.Scripts.Views {
                     _gosById[id] = go;
                 }
             }
+            
+            name = $"{_initialName} ({_gosById.Count})";
         }
     }
 }

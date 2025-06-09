@@ -4,15 +4,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Unity.Scripts.Buttons {
-    public class ChangeSceneButtonBehaviour : MonoBehaviour {
+    public class ChangeSceneButtonBehaviour : AbstractButton {
         [SerializeField] private SceneType _sceneType;
-        [SerializeField] private PlayerActionType _actionType;
         
-        void Update() {
-            if (UnityInput.GetAction(_actionType)) OnClick();
-        }
-
-        public void OnClick() {
+        protected override void DoAction() {
             StartCoroutine(Coroutine());
         }
 

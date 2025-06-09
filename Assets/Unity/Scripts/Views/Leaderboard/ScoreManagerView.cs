@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Unity.Scripts.Views.Leaderboard {
     public class ScoreManagerView : AbstractManagerView<PlayProgression> {
-        private ScoreManagerView() : base("Score", false) { }
+        private ScoreManagerView() : base("Score") { }
         
         public override void Render(GameState gameState, float dt) {
             var dataById = new Dictionary<int, PlayProgression>(gameState.PlayProgressions.Count);
