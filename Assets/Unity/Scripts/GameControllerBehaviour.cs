@@ -22,9 +22,15 @@ namespace Unity.Scripts {
 
         public SceneBehaviour CurrentScene { get; set; }
         public int TitleCoinCount { get; set; }
+        public bool ShowControls { get; private set; }
+
+        public static GameControllerBehaviour Instance;
 
         private void Awake() {
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(this);
+            Instance = this;
+            name = "GameController";
+            
             Application.targetFrameRate = _targetFps;
             _unityInput = new UnityInput();
         }
@@ -55,9 +61,19 @@ namespace Unity.Scripts {
             );
 
             TitleCoinCount = _gameController.GameState.GlobalProgression.CoinCount;
+            
+            if (!PlayerPrefs.HasKey("ShowControls")) {
+                ShowControls = true;
+            } else {
+                ShowControls = PlayerPrefs.GetInt("ShowControls") == 1;
+            }
         }
 
         private void FixedUpdate() {
+            if (_unityInput.Actions.ShowControlsSwitched) {
+                SwitchShowControls();
+            }
+            
             _gameController.CoreUpdate(CurrentScene.SceneType, _unityInput.Actions, Time.fixedDeltaTime*_frameRate);
             _unityInput.Clear();
             
@@ -89,6 +105,11 @@ namespace Unity.Scripts {
                 Min = min.FromUnityVector3(),
                 Max = max.FromUnityVector3(),
             };
+        }
+
+        public void SwitchShowControls() {
+            ShowControls = !ShowControls;
+            PlayerPrefs.SetInt("ShowControls", ShowControls ? 1 : 0);
         }
     }
 }

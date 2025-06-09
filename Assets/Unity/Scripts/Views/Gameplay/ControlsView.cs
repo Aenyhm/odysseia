@@ -14,6 +14,7 @@ namespace Unity.Scripts.Views.Gameplay {
         }
         
         public override void Render(GameState gameState, float dt) {
+            _image.enabled = GameControllerBehaviour.Instance.ShowControls;
             _image.sprite = gameState.PlayerActions.UsingGamepad ? _gamepadSprite : _keyboardSprite;
         }
     }

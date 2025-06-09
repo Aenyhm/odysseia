@@ -6,21 +6,18 @@ namespace Unity.Scripts {
     public class SceneBehaviour : MonoBehaviour {
         [SerializeField] private GameControllerBehaviour _gameControllerScript;
         [SerializeField] private SceneType _sceneType;
-
-        public static GameControllerBehaviour GameControllerInstance;
         
         private AbstractView[] _views;
         
         public SceneType SceneType => _sceneType;
 
         private void Awake() {
-            if (!GameControllerInstance) {
-                GameControllerInstance = Instantiate(_gameControllerScript);
-                GameControllerInstance.gameObject.name = "GameController";
-                GameControllerInstance.Init(_sceneType);
+            if (!GameControllerBehaviour.Instance) {
+                Instantiate(_gameControllerScript);
+                GameControllerBehaviour.Instance.Init(_sceneType);
             }
             
-            GameControllerInstance.CurrentScene = this;
+            GameControllerBehaviour.Instance.CurrentScene = this;
 
             _views = FindObjectsByType<AbstractView>(FindObjectsSortMode.None);
         }

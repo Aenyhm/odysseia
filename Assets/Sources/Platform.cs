@@ -20,6 +20,7 @@ namespace Sources {
         public float SideMove;
         public bool Cancel;
         public bool Shoot;
+        public bool ShowControlsSwitched;
         public bool UsingGamepad;
     }
 

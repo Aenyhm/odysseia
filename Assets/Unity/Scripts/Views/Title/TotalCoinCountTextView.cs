@@ -6,7 +6,6 @@ using Animation = Sources.Toolbox.Animation;
 
 namespace Unity.Scripts.Views.Title {
     public class TotalCoinCountTextView : AbstractView {
-        private GameControllerBehaviour _gameControllerBehaviour;
         private TextMeshProUGUI _textComponent;
         private AudioSource _audioSource;
         private Animation _incrementAnim;
@@ -15,10 +14,9 @@ namespace Unity.Scripts.Views.Title {
         [SerializeField] private float _incrementDuration = 1f;
 
         private void Start() {
-            _gameControllerBehaviour = SceneBehaviour.GameControllerInstance;
             _textComponent = GetComponent<TextMeshProUGUI>();
             _audioSource = GetComponent<AudioSource>();
-            _incrementValue = _gameControllerBehaviour.TitleCoinCount;
+            _incrementValue = GameControllerBehaviour.Instance.TitleCoinCount;
         }
 
         public override void Render(GameState gameState, float dt) {
@@ -26,7 +24,7 @@ namespace Unity.Scripts.Views.Title {
             
             if (_incrementAnim != null && !_incrementAnim.Completed) {
                 _incrementValue = _incrementAnim.Update();
-                _gameControllerBehaviour.TitleCoinCount = (int)_incrementValue;
+                GameControllerBehaviour.Instance.TitleCoinCount = (int)_incrementValue;
                 _audioSource.PlayOneShot(_audioSource.clip, 0.3f);
             } else if ((int)_incrementValue != totalCoinCount) {
                 _incrementAnim = new Animation(_incrementValue, totalCoinCount, _incrementDuration, Easings.InOutSine);
