@@ -3,7 +3,7 @@ using Sources;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Unity.Scripts {
+namespace Unity.Scripts.Buttons {
     public class ChangeSceneButtonBehaviour : MonoBehaviour {
         [SerializeField] private SceneType _sceneType;
         [SerializeField] private PlayerActionType _actionType;
