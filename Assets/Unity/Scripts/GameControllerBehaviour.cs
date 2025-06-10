@@ -59,12 +59,8 @@ namespace Unity.Scripts {
             );
 
             TitleCoinCount = _gameController.GameState.GlobalProgression.CoinCount;
-            
-            if (!PlayerPrefs.HasKey("ShowControls")) {
-                ShowControls = true;
-            } else {
-                ShowControls = PlayerPrefs.GetInt("ShowControls") == 1;
-            }
+
+            LoadPrefs();
         }
 
         private void FixedUpdate() {
@@ -108,6 +104,19 @@ namespace Unity.Scripts {
         public void SwitchShowControls() {
             ShowControls = !ShowControls;
             PlayerPrefs.SetInt("ShowControls", ShowControls ? 1 : 0);
+        }
+
+        private void LoadPrefs() {
+            if (PlayerPrefs.HasKey("AudioVolume")) {
+                AudioListener.volume = PlayerPrefs.GetFloat("AudioVolume");
+            } else {
+                AudioListener.volume = 1.0f;
+                PlayerPrefs.SetFloat("AudioVolume", AudioListener.volume);
+            }
+            
+            if (PlayerPrefs.HasKey("ShowControls")) {
+                ShowControls = PlayerPrefs.GetInt("ShowControls") == 1;
+            }
         }
     }
 }
