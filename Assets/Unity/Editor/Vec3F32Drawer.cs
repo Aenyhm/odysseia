@@ -3,6 +3,8 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Unity.Editor {
+    
+    // Affichage des Vec3F32 dans l'Inspector en ligne (comme des Vector3).
     [CustomPropertyDrawer(typeof(Vec3F32))]
     public class Vec3F32Drawer : PropertyDrawer {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {

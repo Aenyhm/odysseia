@@ -8,6 +8,7 @@ using Unity.Scripts.Scriptables;
 using UnityEngine;
 
 namespace Unity.Scripts {
+    // Point d'entrée du jeu, est créé automatiquement sur la scène qui se lance en premier via SceneBehaviour.
     public class GameControllerBehaviour : MonoBehaviour {
         [SerializeField] private TweaksScriptable _tweaksScriptable;
         [SerializeField] private CollidingScriptable _collidingScriptable;

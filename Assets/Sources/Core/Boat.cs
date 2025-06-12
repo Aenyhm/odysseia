@@ -19,6 +19,7 @@ namespace Sources.Core {
     
     [Serializable]
     public struct SpeedMaxConf {
+        // En fonction de la distance parcourue, les valeurs de vitesse du bateau sont augmentées.
         public float Multiplier;
         public int DistanceStep;
         public int Min;
@@ -34,14 +35,15 @@ namespace Sources.Core {
     
     [Serializable]
     public struct Boat {
+        // On stocke les ids des entités en collision avec le bateau pour ne pas réappliquer les dégâts à chaque frame.
         public HashSet<int> CollisionIds;
-        public Vec3F32 Position;  // Reset tous les 1000m pour changement de région
+        public Vec3F32 Position; // Reset Z tous les 1000m pour le changement de région.
         public float Distance;
         public float SailAngle;
         public float SpeedZ;
-        public float MeterDelta;
-        public int XSign;
-        public int CharmedById;
+        public float MeterDelta; // Déplacement en Z de la précédente frame pour le calcul du score (qui est en `int`).
+        public int XSign; // Déplacement latéral (-1, 0, +1)
+        public int CharmedById; // Si on est stun par une sirène, permet de ne pas pouvoir contrôler le bateau.
         public byte Health;
         public LaneType LaneType;
         public bool SailWindward;
@@ -59,7 +61,7 @@ namespace Sources.Core {
         }
         
         [Pure]
-        public static Vec2F32 GetWindwardAngle(in SailConf sailConf, float windAngle) {
+        public static RangeF32 GetWindwardAngle(in SailConf sailConf, float windAngle) {
             var halfRange = sailConf.WindwardAngleRange/2;
             var min = Math.Max(-sailConf.AngleMax, windAngle - halfRange);
             var max = Math.Min(+sailConf.AngleMax, windAngle + halfRange);
@@ -68,12 +70,7 @@ namespace Sources.Core {
                 if (Maths.FloatEquals(max, +sailConf.AngleMax)) min = max - sailConf.WindwardAngleRange;
             }
             
-            return new Vec2F32(min, max);
-        }
-
-        [Pure]
-        public static float MoveSailAngle(in SailConf sailConf, float angle) {
-            return Math.Clamp(angle, -sailConf.AngleMax, +sailConf.AngleMax);
+            return new RangeF32(min, max);
         }
     }
     
@@ -106,14 +103,14 @@ namespace Sources.Core {
             // Voile
             if (!Maths.FloatEquals(gameState.PlayerActions.DeltaSail, 0)) {
                 var targetSailAngle = boat.SailAngle + gameState.PlayerActions.DeltaSail*boatConf.SailConf.TurnSpeed;
-                boat.SailAngle = BoatLogic.MoveSailAngle(boatConf.SailConf, targetSailAngle);
+                boat.SailAngle = Math.Clamp(targetSailAngle, -boatConf.SailConf.AngleMax, +boatConf.SailConf.AngleMax);
             }
             
             // Vitesse
             {
                 var wind = playState.Wind;
                 var winwardAngle = BoatLogic.GetWindwardAngle(boatConf.SailConf, wind.CurrentAngle);
-                boat.SailWindward = boat.SailAngle >= winwardAngle.X && boat.SailAngle <= winwardAngle.Y;
+                boat.SailWindward = boat.SailAngle >= winwardAngle.Min && boat.SailAngle <= winwardAngle.Max;
                 
                 var speedDirection = boat.SailWindward ? 1 : -1;
                 var targetSpeed = boat.SpeedZ + speedDirection*Clock.DeltaTime;

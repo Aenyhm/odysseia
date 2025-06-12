@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 namespace Unity.Scripts.Buttons {
     
+    // Bouton qui fait une action au clic ou à un input spécifique.
     [RequireComponent(typeof(Button))]
     public abstract class AbstractButton : MonoBehaviour {
         [SerializeField] private PlayerActionType _actionType;

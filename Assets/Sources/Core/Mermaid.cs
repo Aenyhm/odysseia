@@ -28,6 +28,7 @@ namespace Sources.Core {
                 if (e.Type != EntityType.Mermaid) continue;
                 
                 if (boat.CharmedById == e.Id) {
+                    // Désenvoûte une fois le temps de stun passé.
                     e.MermaidData.StunCooldown = Math.Max(0, e.MermaidData.StunCooldown - Clock.DeltaTime);
                     if (e.MermaidData.StunCooldown == 0) {
                         boat.CharmedById = 0;
@@ -38,6 +39,7 @@ namespace Sources.Core {
                     e.MermaidData.PowerReloadCooldown = Math.Max(0, e.MermaidData.PowerReloadCooldown - Clock.DeltaTime);
                 } else if (boat.CharmedById == 0) {
                     if (e.Position.Z > boat.Position.Z && e.Position.Z - boat.Position.Z < mermaidConf.SightDistance) {
+                        // Envoûtement
                         e.MermaidData.PowerReloadCooldown = mermaidConf.PowerReloadDuration;
                         e.MermaidData.StunCooldown = mermaidConf.StunDuration;
                         boat.CharmedById = e.Id;

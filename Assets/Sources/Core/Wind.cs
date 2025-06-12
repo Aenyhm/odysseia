@@ -18,7 +18,7 @@ namespace Sources.Core {
     }
     
     public static class WindSystem {
-        private static Animation _changeAnim;
+        private static FloatTweening _changeAnim;
 
         public static void Init(GameState gameState) {
             ref var wind = ref gameState.PlayState.Wind;
@@ -43,7 +43,7 @@ namespace Sources.Core {
                     wind.TargetAngle = GetNewAngle(wind.CurrentAngle, windConf.AngleMax);
                     wind.LastChangeTime = currentTime + Prng.Range(windConf.ChangeFreq);
                     
-                    _changeAnim = new Animation(
+                    _changeAnim = new FloatTweening(
                         wind.CurrentAngle, wind.TargetAngle, windConf.ChangeDuration, Easings.InOutSine
                     );
                 }

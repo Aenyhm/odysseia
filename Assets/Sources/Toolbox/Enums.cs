@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.Contracts;
 
 namespace Sources.Toolbox {
+    
     public static class Enums {
         
         [Pure]

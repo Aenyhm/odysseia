@@ -1,6 +1,8 @@
 using System;
 
 namespace Sources.Toolbox {
+    // Classe de génération de nombres pseudo-aléatoires : permet d'instancier
+    // une seule fois Random et de gérer tous ses appels au même endroit.
     public static class Prng {
         private static readonly Random _random = new();
         

@@ -17,10 +17,13 @@ namespace Sources.Core {
         Relic,
     }
 
+    // Note: Pas d'héritage pour les structs, donc plusieurs solutions : soit de la composition mais ça veut
+    // dire qu'on ne peut pas stocker toutes les entités ensemble, j'ai donc préféré utiliser une union ici
+    // (bien que ça n'existe pas en C#), où on a des données supplémentaires en fonction du type d'entité.
     [Serializable]
     public struct Entity {
-        public Vec3F32 Position;
-        public Vec2I32[] Coords;
+        public Vec3F32 Position; // Mal nommé : devrait s'appeler `Center`.
+        public Vec2I32[] Coords; // Coordonnées des cases occupées sur la grille 2D de la région.
         public int Id;
         public EntityType Type;
         public bool Destroy;
@@ -73,7 +76,7 @@ namespace Sources.Core {
         private static int _currentId;
         public static int NextId => ++_currentId;
 
-        public static Entity GenerateEntity(EntityCell entityCell, int offsetZ) {
+        public static Entity CreateEntityFromCell(EntityCell entityCell, int offsetZ) {
             var e = new Entity();
             e.Id = NextId;
             e.Type = entityCell.Type;
@@ -94,6 +97,7 @@ namespace Sources.Core {
             return result;
         }
 
+        // Calcul de toutes les cases prises par une entité sur la grille 2D.
         public static Vec2I32[] GetAllEntityCoords(EntityCell cell, int offsetZ) {
             var dimensions = GetEntityTypeDimension(cell.Type);
             var coords = new Vec2I32[dimensions.X*dimensions.Y];
@@ -108,6 +112,7 @@ namespace Sources.Core {
             return coords;
         }
         
+        // On fait un calcul pour avoir le centre d'une entité en fonction des cases qu'elle occupe.
         public static Vec3F32 GetPosition(EntityType entityType, Vec2I32[] coords) {
             var dimensions = GetEntityTypeDimension(entityType);
 

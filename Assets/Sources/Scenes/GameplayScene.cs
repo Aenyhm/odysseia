@@ -1,6 +1,9 @@
 using Sources.Core;
 
 namespace Sources.Scenes {
+    // Note: Un peu dommage qu'il n'y ait qu'une scène utilisée.
+    
+    // Mini-ECS (juste la partie systèmes)
     public class GameplayScene : IScene {
         private readonly GameState _gameState;
         

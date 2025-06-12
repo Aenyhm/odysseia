@@ -3,6 +3,9 @@ using Sources.Toolbox;
 using UnityEngine;
 
 namespace Unity.Scripts.Views {
+    
+    // Gestion de plusieurs entités ayant le même prefab dans un Object Pool pour réutiliser les GameObjects,
+    // car ils sont coûteux à instancier et détruire.
     public abstract class AbstractManagerView<T> : AbstractView {
         [SerializeField] protected GameObject _prefab;
         

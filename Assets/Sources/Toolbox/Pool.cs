@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 
 namespace Sources.Toolbox {
-    public class Pool<T> {
+    
+    // Object Pool: permet de réutiliser des instances de classes plutôt que
+    // de les détruire et de les recréer (et donc d'allouer de la mémoire).
+    public class Pool<T> where T : class {
         private readonly Stack<T> _free = new();
         private readonly Func<T> _createFn;
         

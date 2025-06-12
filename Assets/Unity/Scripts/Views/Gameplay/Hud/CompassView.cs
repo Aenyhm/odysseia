@@ -20,20 +20,19 @@ namespace Unity.Scripts.Views.Gameplay.Hud {
             _windwardRangeInitialAngle = _windwardRange.transform.localEulerAngles.z;
             _windwardRangeImage = _windwardRange.GetComponent<Image>();
         }
-        
+
         public override void Render(GameState gameState, float dt) {
             var wind = gameState.PlayState.Wind;
             var boat = gameState.PlayState.Boat;
-            
 
             _compass.transform.RotateOnAxis(Axis.Z, -wind.CurrentAngle*_angleFactor);
             _sailDirection.transform.RotateOnAxis(Axis.Z, -boat.SailAngle*_angleFactor);
-            
+
             var sailConf = Services.Get<GameConf>().BoatConf.SailConf;
             var windwardAngle = BoatLogic.GetWindwardAngle(sailConf, wind.CurrentAngle);
-            var windwardCenter = (windwardAngle.X + windwardAngle.Y)/2;
+            var windwardCenter = (windwardAngle.Min + windwardAngle.Max)/2;
             _windwardRange.transform.RotateOnAxis(Axis.Z, -windwardCenter*_angleFactor + _windwardRangeInitialAngle);
-   
+
             _windwardRangeImage.color = boat.SailWindward ? _rangeColorIn : _rangeColorOut;
         }
     }

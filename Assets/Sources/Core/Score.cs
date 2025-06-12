@@ -2,6 +2,7 @@ using Sources.Toolbox;
 
 namespace Sources.Core {
     public static class ScoreLogic {
+        // Ajout d'une valeur au score en fonction de la vitesse du bateau.
         public static void Add(GameState gameState, int value) {
             gameState.PlayState.PlayProgression.Score += (int)(value*gameState.PlayState.ScoreMultiplier);
         }

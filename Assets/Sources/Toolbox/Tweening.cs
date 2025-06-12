@@ -11,7 +11,7 @@ namespace Sources.Toolbox {
         public static float InOutSine(float x) => (float)(-(Math.Cos(Math.PI*x) - 1)/2);
     }
     
-    public class Animation {
+    public class FloatTweening {
         private readonly Easing _easing;
         private readonly float _from;
         private readonly float _to;
@@ -22,7 +22,7 @@ namespace Sources.Toolbox {
         
         public bool Completed => _duration == 0 || _timeAmount >= 1;
         
-        public Animation(float from, float to, float duration, Easing easing) {
+        public FloatTweening(float from, float to, float duration, Easing easing) {
             _from = from;
             _to = to;
             _duration = duration;

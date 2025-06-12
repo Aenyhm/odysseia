@@ -22,6 +22,7 @@ namespace Sources.Core {
             ref var boat = ref playState.Boat;
             
             if (boat.XSign == 0) {
+                // Choix de changement de lane
                 var deltaX = boat.CharmedById != 0 ?
                     GetForcedDeltaX(in playState) :
                     Convert.ToInt32(gameState.PlayerActions.SideMove);
@@ -29,6 +30,7 @@ namespace Sources.Core {
                 boat.LaneType = LaneLogic.GetDelta(boat.LaneType, deltaX);
                 boat.XSign = deltaX;
             } else {
+                // Déplacement
                 var targetX = LaneLogic.GetPosition((int)boat.LaneType);
                 
                 var boatConf = Services.Get<GameConf>().BoatConf;
@@ -45,6 +47,7 @@ namespace Sources.Core {
             }
         }
         
+        // Note: Spécifique à la sirène ; devrait être dans son fichier.
         private static int GetForcedDeltaX(in PlayState playState) {
             var result = 0;
             

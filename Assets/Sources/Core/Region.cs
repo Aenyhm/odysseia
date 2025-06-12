@@ -34,7 +34,9 @@ namespace Sources.Core {
             ref var region = ref gameState.PlayState.Region;
             var regionConf = Services.Get<GameConf>().RegionConf;
             
-            // -1 car on ne met pas dans le pool la région actuelle
+            // -1 car on ne met pas dans le pool la région actuelle : on sait dans quelle région on se trouve, donc on
+            // a juste à mélanger les autres et lorsqu'on arrive à la fin, on sait encore une fois dans quelle région
+            // on termine et il suffit de remettre les autres dans le pool.
             _regionTypePool = new SwapbackArray<RegionType>(Enums.Count<RegionType>() - 1);
             
             region.Entities = new SwapbackArray<Entity>();
@@ -59,6 +61,7 @@ namespace Sources.Core {
             region.Coins.Reset();
             region.EntityGrid.Reset();
             
+            // On laisse la distance zen au début et à la fin de la région.
             var filledSegmentsDistance = regionConf.RegionDistance - 2*regionConf.ZenDistance;
             var availableSegments = rendererConf.SegmentsByRegion[regionType];
             var segments = SegmentLogic.GenerateSegments(availableSegments, filledSegmentsDistance);
@@ -78,7 +81,7 @@ namespace Sources.Core {
                             var coinLine = CoinLogic.GenerateCoinLine(in coinConf, entityCell, offsetZ);
                             region.Coins.Append(coinLine);
                         } else {
-                            var e = EntityLogic.GenerateEntity(entityCell, offsetZ);
+                            var e = EntityLogic.CreateEntityFromCell(entityCell, offsetZ);
                             region.Entities.Append(e);
                         }
                     }

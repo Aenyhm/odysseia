@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace Sources.Toolbox {
+    // Service Locator : enregistrer une instance pour pouvoir y accéder de n'importe où.
     public static class Services {
         private static readonly Dictionary<Type, object> _items = new();
         

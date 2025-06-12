@@ -7,20 +7,24 @@ namespace Sources.Core {
             ref var playState = ref gameState.PlayState;
             
             if (playState.Mode == PlayMode.Play && playState.Boat.Health == 0) {
-                playState.Boat.SailWindward = false;
                 playState.Mode = PlayMode.GameOver;
-                
-                ref var globalProg = ref gameState.GlobalProgression;
-                globalProg.CoinCount += playState.CoinCount;
-                FileStorage.Save(globalProg, CoreConfig.GlobalFileName, false);
-            
-                var playProg = playState.PlayProgression;
-                playProg.SaveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                playProg.Distance = (int)playState.Boat.Distance;
-                FileStorage.Save(playProg, CoreConfig.PlayFileName, true);
-                
-                gameState.PlayProgressions.Add(playProg);
+                SaveGame(gameState);
             }
+        }
+        
+        private static void SaveGame(GameState gameState) {
+            ref var playState = ref gameState.PlayState;
+            
+            ref var globalProg = ref gameState.GlobalProgression;
+            globalProg.CoinCount += playState.CoinCount;
+            FileStorage.Save(globalProg, CoreConfig.GlobalFileName, false);
+        
+            var playProg = playState.PlayProgression;
+            playProg.SaveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            playProg.Distance = (int)playState.Boat.Distance;
+            FileStorage.Save(playProg, CoreConfig.PlayFileName, true);
+            
+            gameState.PlayProgressions.Add(playProg);
         }
     }
 }

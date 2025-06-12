@@ -6,11 +6,13 @@ using Sources.Core;
 using Sources.Toolbox;
 using Unity.Collections;
 using Unity.Scripts;
+using Unity.Scripts.Scriptables;
 using UnityEngine;
 using UnityEditor;
 
 namespace Unity.Editor {
     
+    // Interface de création des tronçons de régions.
     [CustomEditor(typeof(SegmentScriptable))]
     public class SegmentLayoutEditor : UnityEditor.Editor {
         private const string _iconsFolder = "Assets/Unity/Editor/Icons/";

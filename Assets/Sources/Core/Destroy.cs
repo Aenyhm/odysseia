@@ -5,6 +5,7 @@ namespace Sources.Core {
             ref var boat = ref playState.Boat;
             var entities = playState.Region.Entities;
             
+            // Note: C'est pas génial ce cas particulier, il faudrait le gérer autrement (dans le fichier de la sirène).
             foreach (var e in entities) {
                 if (e.Destroy) {
                     switch (e.Type) {

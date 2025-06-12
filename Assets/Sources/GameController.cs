@@ -3,6 +3,7 @@ using Sources.Scenes;
 using Sources.Toolbox;
 
 namespace Sources {
+    // Point d'entrée de la logique métier.
     public class GameController {
         public readonly GameState GameState = new();
 

@@ -24,7 +24,7 @@ namespace Unity.Scripts.Views.Gameplay {
             if (gameState.PlayState.Mode == PlayMode.GameOver) {
                 if (!firstPass) {
                     firstPass = true;
-                    _audio.Play();
+                    _audio.PlayOneShot(_audio.clip);
                 }
 
                 var targetAlpha = Maths.MoveTowards(_image.color.a, 1f, dt*_boatSpeed);

@@ -8,6 +8,7 @@ namespace Sources {
     public enum SceneType : byte { Title, Gameplay, Leaderboard }
     public enum PlayMode : byte { Play, Pause, GameOver }
 
+    // Contient toutes les données du jeu mises à jour par le GameController à chaque Fixed Update.
     [Serializable]
     public class GameState {
         public List<PlayProgression> PlayProgressions;
@@ -30,7 +31,9 @@ namespace Sources {
         public int CoinCount;
         public PlayMode Mode;
     }
-
+    
+    #region Données persistentes
+    
     [Serializable]
     public struct GlobalProgression {
         public int CoinCount;
@@ -42,4 +45,6 @@ namespace Sources {
         public int Distance;
         public int Score;
     }
+    
+    #endregion
 }

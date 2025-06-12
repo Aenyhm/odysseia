@@ -2,14 +2,15 @@ using System.Collections.Generic;
 using System.Drawing;
 using Sources.Core;
 
-namespace Sources {
+namespace Unity.Scripts {
     public struct RegionTheme {
         public Color SkyColor;
         public Color WaterColor;
         public Color LightColor;
         public float LightIntensity;
     }
-        
+
+    // Note: J'avais fait cette classe avant d'utiliser des ScriptableObjects mais ça devrait en être un.
     public static class ViewConfig {
         public const float FOG_DENSITY = 0.01f;
         

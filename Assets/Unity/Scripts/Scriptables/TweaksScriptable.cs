@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Unity.Scripts.Scriptables {
     
+    // Configuration dans l'Inspector disponible aux non-développeurs.
     [CreateAssetMenu(fileName = "Tweaks", menuName = "Scriptable Objects/Tweaks")]
     public class TweaksScriptable : ScriptableObject {
         public GameConf GameConf = new() {

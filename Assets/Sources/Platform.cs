@@ -4,7 +4,7 @@ using Sources.Core;
 using Sources.Toolbox;
 
 namespace Sources {
-    // Services that the platform/engine provides to the game.
+    // Services que la plateforme ou le moteur fournit au jeu.
     
     public interface IPlatform {
         string PersistentPath { get; }
@@ -34,7 +34,7 @@ namespace Sources {
         public RegionConf RegionConf;
         public RelicConf RelicConf;
         public WindConf WindConf;
-        public bool EnableBoatCollisions;
+        public bool EnableBoatCollisions; // Pour débugguer uniquement
     }
 
     public struct RendererConf {

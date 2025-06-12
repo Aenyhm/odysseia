@@ -14,14 +14,14 @@ namespace Sources.Core {
 
     [Serializable]
     public struct EntityCell {
+        // Note: J'aurais pu utiliser Vec2I32, mais je ne l'avais pas encore créé et comme il y a déjà
+        // des données enregistrées dans ce format, je ne voudrais pas avoir à refaire tous les tronçons.
         public int X;
         public int Y;
         public EntityType Type;
     }
     
     public static class SegmentLogic {
-        // On génère des tronçons de 100m d'obstacles et 50m d'ennemis
-        // en laissant une zone tranquille entre les portails.
         public static Segment[] GenerateSegments(List<Segment> availableSegments, int filledSegmentsDistance) {
             var result = Array.Empty<Segment>();
             
@@ -38,11 +38,13 @@ namespace Sources.Core {
                     generatedDistance += (int)segment.Length;
                 }
                 
+                #if UNITY_EDITOR
                 if (generatedDistance != filledSegmentsDistance) {
                     throw new Exception(
                         $"Wrong segment distance generated: {generatedDistance}; must be {filledSegmentsDistance}."
                     );
                 }
+                #endif
                 
                 result = segments.ToArray();
                 

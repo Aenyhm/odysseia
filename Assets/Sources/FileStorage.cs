@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 using Sources.Toolbox;
 
-namespace Sources.Core {
+namespace Sources {
+    // Sérialisation + écriture et lecture + désérialisation des données persistantes.
     public static class FileStorage {
+
         public static void Save(in object obj, string fileName, bool append) {
             var platform = Services.Get<IPlatform>();
             

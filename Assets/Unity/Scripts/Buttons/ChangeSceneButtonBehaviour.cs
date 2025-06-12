@@ -16,6 +16,8 @@ namespace Unity.Scripts.Buttons {
             if (audioSource) {
                 audioSource.Play();
                 
+                // On laisse un court délai entre le clic du bouton et le changement de scène
+                // le temps que le son se joue.
                 yield return new WaitForSeconds(audioSource.clip.length);
             }
             
