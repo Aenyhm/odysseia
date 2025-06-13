@@ -3,11 +3,11 @@ using Sources;
 using Sources.Core;
 
 namespace Unity.Scripts.Views.Gameplay {
-    public class TrunkManagerView : AbstractEntityManagerView {
-        private TrunkManagerView() : base("Trunk") { }
+    public class RelicManagerView : AbstractEntityManagerView {
+        private RelicManagerView() : base("Relic") { }
 
         protected override ICollection<Entity> GetElements(GameState gameState) {
-            return gameState.PlayState.Region.EntitiesByType[EntityType.Trunk].ToList();
+            return gameState.PlayState.Region.EntitiesByType[EntityType.Relic].ToList();
         }
     }
 }

@@ -12,18 +12,15 @@ namespace Sources.Core {
     }
     
     [Serializable]
-    public struct Coin {
-        public Vec2I32[] Coords;
-        public Vec3F32 Position;
-        public int Id;
+    public struct CoinData {
         public int LineId;
     }
     
     public static class CoinLogic {
         private static int _currentLineId;
         
-        public static Coin[] GenerateCoinLine(in CoinConf coinConf, EntityCell entityCell, int offsetZ) {
-            var result = new Coin[coinConf.CoinLineCount];
+        public static Entity[] GenerateCoinLine(in CoinConf coinConf, EntityCell entityCell, int offsetZ) {
+            var result = new Entity[coinConf.CoinLineCount];
             
             var x = LaneLogic.GetPosition(entityCell.X);
             var lineId = ++_currentLineId;
@@ -31,11 +28,12 @@ namespace Sources.Core {
             for (var i = 0; i < coinConf.CoinLineCount; i++) {
                 var pos = new Vec3F32(x, 0, (offsetZ + entityCell.Y)*CoreConfig.GridScale + i*coinConf.CoinDistance);
                 
-                var coin = new Coin();
+                var coin = new Entity();
+                coin.Type = EntityType.Coin;
                 coin.Coords = EntityLogic.GetAllEntityCoords(entityCell, offsetZ);
                 coin.Position = pos;
                 coin.Id = EntityLogic.NextId;
-                coin.LineId = lineId;
+                coin.CoinData.LineId = lineId;
                 result[i] = coin;
             }
             
@@ -58,21 +56,19 @@ namespace Sources.Core {
             var boatBox = boxes[EntityType.Boat];
             
             ref var playState = ref gameState.PlayState;
-            ref var region = ref playState.Region;
+            var coins = playState.Region.EntitiesByType[EntityType.Coin];
             var boat = playState.Boat;
             
-            var toRemoveIndices = new List<int>(coinConf.CoinLineCount);
-
-            for (var i = 0; i < region.Coins.Count; i++) {
-                var coin = region.Coins.Items[i];
+            for (var i = 0; i < coins.Count; i++) {
+                ref var e = ref coins.Items[i];
                 
-                if (Collisions.CheckCollisionBoxes(boat.Position, boatBox, coin.Position, coinBox)) {
+                if (Collisions.CheckCollisionBoxes(boat.Position, boatBox, e.Position, coinBox)) {
                     playState.CoinCount++;
                     ScoreLogic.Add(gameState, EntityConf.EntityScoreValues[EntityType.Coin]);
 
-                    if (coin.LineId != _currentLineId) {
+                    if (e.CoinData.LineId != _currentLineId) {
                         _currentLineLooted = 0;
-                        _currentLineId = coin.LineId;
+                        _currentLineId = e.CoinData.LineId;
                     } 
                     
                     _currentLineLooted++;
@@ -81,12 +77,8 @@ namespace Sources.Core {
                         ScoreLogic.Add(gameState, coinConf.CoinLineBonus);
                     }
 
-                    toRemoveIndices.Add(i);
+                    e.Destroy = true;
                 }
-            }
-            
-            foreach (var index in toRemoveIndices) {
-                region.Coins.RemoveAt(index);
             }
         }
     }

@@ -52,8 +52,9 @@ namespace Sources.Core {
             var result = 0;
             
             var boat = playState.Boat;
+            var mermaids = playState.Region.EntitiesByType[EntityType.Mermaid];
         
-            foreach (var e in playState.Region.Entities) {
+            foreach (var e in mermaids) {
                 if (boat.CharmedById == e.Id) {
                     var laneType = (LaneType)e.Coords[0].X;
                     

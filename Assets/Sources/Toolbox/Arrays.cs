@@ -50,20 +50,9 @@ namespace Sources.Toolbox {
             }
         }
         
-        // Note: Je trouvais pratique d'avoir cette méthode mais je ne l'utilise qu'une fois
-        // et je ne l'aime pas trop car elle retourne une copie et pas l'élément original.
-        public T First(Predicate<T> match) {
-            var result = default(T);
-            
-            for (var i = 0; i < Count; i++) {
-                var item = Items[i];
-                
-                if (match(item)) {
-                    result = item;
-                    break;
-                }
-            }
-            
+        public List<T> ToList() {
+            var result = new List<T>(Count);
+            for (var i = 0; i < Count; i++) result.Add(Items[i]);
             return result;
         }
 

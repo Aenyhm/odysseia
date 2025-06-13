@@ -28,6 +28,7 @@ namespace Sources.Core {
         public EntityType Type;
         public bool Destroy;
         
+        public CoinData CoinData;
         public MermaidData MermaidData;
         public JellyfishData JellyfishData;
     }

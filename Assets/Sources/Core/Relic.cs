@@ -29,24 +29,20 @@ namespace Sources.Core {
     public static class RelicSystem {
         public static void Execute(GameState gameState) {
             ref var playState = ref gameState.PlayState;
-            var entities = playState.Region.Entities;
+            var relics = playState.Region.EntitiesByType[EntityType.Relic];
             var boat = playState.Boat;
             
             var boxes = Services.Get<RendererConf>().BoundingBoxesByEntityType;
             var relicConf = Services.Get<GameConf>().RelicConf;
 
-            for (var i = 0; i < entities.Count; i++) {
-                ref var e = ref entities.Items[i];
+            for (var i = 0; i < relics.Count; i++) {
+                ref var e = ref relics.Items[i];
                 
-                if (e.Type != EntityType.Relic) continue;
-                    
                 if (Collisions.CheckCollisionBoxes(e.Position, boxes[e.Type], boat.Position, boxes[EntityType.Boat])) {
                     ScoreLogic.Add(gameState, relicConf.Score);
                     playState.CoinCount += relicConf.CoinValue;
                     e.Destroy = true;
                 }
-                
-                break;
             }
         }
     }

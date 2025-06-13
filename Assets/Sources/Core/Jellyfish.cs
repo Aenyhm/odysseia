@@ -15,13 +15,12 @@ namespace Sources.Core {
     
     public static class JellyfishSystem {
         public static void Execute(GameState gameState) {
-            var entities = gameState.PlayState.Region.Entities;
+            var jellyfishes = gameState.PlayState.Region.EntitiesByType[EntityType.Jellyfish];
             ref var entityGrid = ref gameState.PlayState.Region.EntityGrid;
             var jellyfishConf = Services.Get<GameConf>().JellyfishConf;
             
-            for (var i = 0; i < entities.Count; i++) {
-                ref var e = ref entities.Items[i];
-                if (e.Type != EntityType.Jellyfish) continue;
+            for (var i = 0; i < jellyfishes.Count; i++) {
+                ref var e = ref jellyfishes.Items[i];
                 
                 // La méduse se déplace aléatoirement d'une case libre autour d'elle dans le voisinage de Von Neumann.
                 if (

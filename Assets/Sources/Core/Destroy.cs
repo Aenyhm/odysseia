@@ -3,20 +3,18 @@ namespace Sources.Core {
         public static void Execute(GameState gameState) {
             ref var playState = ref gameState.PlayState;
             ref var boat = ref playState.Boat;
-            var entities = playState.Region.Entities;
+            var entitiesByType = playState.Region.EntitiesByType;
             
             // Note: C'est pas génial ce cas particulier, il faudrait le gérer autrement (dans le fichier de la sirène).
-            foreach (var e in entities) {
-                if (e.Destroy) {
-                    switch (e.Type) {
-                        case EntityType.Mermaid: {
-                            if (boat.CharmedById == e.Id) boat.CharmedById = 0;
-                        } break;
-                    }
+            foreach (var mermaid in entitiesByType[EntityType.Mermaid]) {
+                if (mermaid.Destroy && boat.CharmedById == mermaid.Id) {
+                    boat.CharmedById = 0;
                 }
             }
-            
-            entities.RemoveAll(e => e.Destroy);
+
+            foreach (var entities in entitiesByType.Values) {
+                entities.RemoveAll(e => e.Destroy);
+            }
         }
     }
 }

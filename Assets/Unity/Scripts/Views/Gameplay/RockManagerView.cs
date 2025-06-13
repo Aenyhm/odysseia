@@ -4,23 +4,15 @@ using Sources.Core;
 using UnityEngine;
 
 namespace Unity.Scripts.Views.Gameplay {
-    public class RockManagerView : AbstractManagerView<Entity> {
+    public class RockManagerView : AbstractEntityManagerView {
         private RockManagerView() : base("Rock") { }
-
-        public override void Render(GameState gameState, float dt) {
-            var entitiesById = new Dictionary<int, Entity>();
-            foreach (var e in gameState.PlayState.Region.Entities) {
-                if (e.Type == EntityType.Rock) {
-                    entitiesById[e.Id] = e;
-                }
-            }
-            
-            Sync(entitiesById);
+        
+        protected override ICollection<Entity> GetElements(GameState gameState) {
+            return gameState.PlayState.Region.EntitiesByType[EntityType.Rock].ToList();
         }
 
         protected override void InitChild(GameObject go, Entity data) {
-            go.transform.localPosition = data.Position.ToUnityVector3();
-            
+            base.InitChild(go, data);
             go.transform.GetChild(0).RotateOnAxis(Axis.Z, Random.Range(0, 360));
         }
     }

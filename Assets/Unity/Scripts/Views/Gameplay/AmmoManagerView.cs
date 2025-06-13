@@ -7,19 +7,17 @@ namespace Unity.Scripts.Views.Gameplay {
     public class AmmoManagerView : AbstractManagerView<Cannonball> {
         private AmmoManagerView() : base("Ammo") { }
 
-        public override void Render(GameState gameState, float dt) {
-            var entities = gameState.PlayState.Ammos;
-            
-            var entitiesById = new Dictionary<int, Cannonball>(entities.Count);
-            foreach (var e in entities) {
-                entitiesById.Add(e.Id, e);
-            }
-            
-            Sync(entitiesById);
+        protected override int GetId(Cannonball data) => data.Id;
+
+        protected override ICollection<Cannonball> GetElements(GameState gameState) {
+            return gameState.PlayState.Ammos.ToList();
         }
 
         protected override void InitChild(GameObject go, Cannonball data) {
             go.transform.localPosition = data.Position.ToUnityVector3();
+        }
+
+        protected override void UpdateChild(GameObject go, Cannonball data) {
         }
     }
 }

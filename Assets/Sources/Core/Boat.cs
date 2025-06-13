@@ -97,7 +97,7 @@ namespace Sources.Core {
             checkCollisions = true;
             #endif
             if (checkCollisions) {
-                CheckCollisions(ref boat, playState.Region.Entities);
+                CheckCollisions(ref boat, playState.Region.EntitiesByType);
             }
 
             // Voile
@@ -138,12 +138,14 @@ namespace Sources.Core {
             ScoreLogic.Add(gameState, integer);
         }
 
-        private static void CheckCollisions(ref Boat boat, SwapbackArray<Entity> entities) {
+        private static void CheckCollisions(ref Boat boat, Dictionary<EntityType, SwapbackArray<Entity>> entitiesByType) {
             var boatConf = Services.Get<GameConf>().BoatConf;
             var boxes = Services.Get<RendererConf>().BoundingBoxesByEntityType;
 
-            foreach (var e in entities) {
-                if (EntityConf.ObstacleTypes.Contains(e.Type)) {
+            foreach (var (type, entities) in entitiesByType) {
+                if (!EntityConf.ObstacleTypes.Contains(type)) continue;
+                
+                foreach (var e in entities) {
                     if (Collisions.CheckCollisionBoxes(boat.Position, boxes[EntityType.Boat], e.Position, boxes[e.Type])) {
                         if (boat.CollisionIds.Add(e.Id)) {
                             boat.Health = (byte)Math.Max(0, boat.Health - 1);

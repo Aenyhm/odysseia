@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sources.Toolbox;
 
 namespace Sources.Core {
@@ -13,8 +14,7 @@ namespace Sources.Core {
     
     [Serializable]
     public struct Region {
-        public SwapbackArray<Entity> Entities;
-        public SwapbackArray<Coin> Coins;
+        public Dictionary<EntityType, SwapbackArray<Entity>> EntitiesByType;
         public SimpleGrid<EntityType> EntityGrid;
         public Portal[] Portals;
         public RegionType Type;
@@ -39,8 +39,10 @@ namespace Sources.Core {
             // on termine et il suffit de remettre les autres dans le pool.
             _regionTypePool = new SwapbackArray<RegionType>(Enums.Count<RegionType>() - 1);
             
-            region.Entities = new SwapbackArray<Entity>();
-            region.Coins = new SwapbackArray<Coin>();
+            region.EntitiesByType = new Dictionary<EntityType, SwapbackArray<Entity>>();
+            foreach (var type in Enums.Members<EntityType>()) {
+                region.EntitiesByType.Add(type, new SwapbackArray<Entity>());
+            }
             region.EntityGrid = new SimpleGrid<EntityType>(
                 Enums.Count<LaneType>(),
                 regionConf.RegionDistance/CoreConfig.GridScale
@@ -57,13 +59,21 @@ namespace Sources.Core {
             var coinConf = gameConf.CoinConf;
             var rendererConf = Services.Get<RendererConf>();
 
-            region.Entities.Reset();
-            region.Coins.Reset();
+            foreach (var entry in region.EntitiesByType) {
+                entry.Value.Reset();
+            }
             region.EntityGrid.Reset();
             
             // On laisse la distance zen au début et à la fin de la région.
             var filledSegmentsDistance = regionConf.RegionDistance - 2*regionConf.ZenDistance;
             var availableSegments = rendererConf.SegmentsByRegion[regionType];
+            
+            // Dans le cas où on n'a pas de segment pour une région, on
+            // fallback sur la première pour ne pas avoir de région vide.
+            if (availableSegments.Count == 0) {
+                availableSegments = rendererConf.SegmentsByRegion[RegionType.Aegis];
+            }
+            
             var segments = SegmentLogic.GenerateSegments(availableSegments, filledSegmentsDistance);
             
             var segmentZ = regionConf.ZenDistance;
@@ -79,10 +89,10 @@ namespace Sources.Core {
                     if (Prng.Chance(spawnPct, 100)) {
                         if (entityCell.Type == EntityType.Coin) {
                             var coinLine = CoinLogic.GenerateCoinLine(in coinConf, entityCell, offsetZ);
-                            region.Coins.Append(coinLine);
+                            region.EntitiesByType[EntityType.Coin].Append(coinLine);
                         } else {
                             var e = EntityLogic.CreateEntityFromCell(entityCell, offsetZ);
-                            region.Entities.Append(e);
+                            region.EntitiesByType[e.Type].Append(e);
                         }
                     }
                 }
@@ -90,16 +100,14 @@ namespace Sources.Core {
                 segmentZ += (int)segment.Length;
             }
             
-            region.Entities.Append(RelicLogic.Create());
+            region.EntitiesByType[EntityType.Relic].Append(RelicLogic.Create());
             
-            foreach (var e in region.Entities) {
-                AddEntityToGrid(e.Type, e.Coords, ref region.EntityGrid);
+            foreach (var entities in region.EntitiesByType.Values) {
+                foreach (var e in entities) {
+                    AddEntityToGrid(e.Type, e.Coords, ref region.EntityGrid);
+                }
             }
 
-            foreach (var coin in region.Coins) {
-                AddEntityToGrid(EntityType.Coin, coin.Coords, ref region.EntityGrid);
-            }
-            
             region.Type = regionType;
             region.Portals = GeneratePortals(regionType, regionConf.PortalCount);
 

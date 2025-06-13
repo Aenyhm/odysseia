@@ -17,16 +17,14 @@ namespace Sources.Core {
     
     public static class MermaidSystem {
         public static void Execute(GameState gameState) {
-            var entities = gameState.PlayState.Region.Entities;
+            var mermaids = gameState.PlayState.Region.EntitiesByType[EntityType.Mermaid];
             ref var boat = ref gameState.PlayState.Boat;
             
             var mermaidConf = Services.Get<GameConf>().MermaidConf;
 
-            for (var i = 0; i < entities.Count; i++) {
-                ref var e = ref entities.Items[i];
-                
-                if (e.Type != EntityType.Mermaid) continue;
-                
+            for (var i = 0; i < mermaids.Count; i++) {
+                ref var e = ref mermaids.Items[i];
+ 
                 if (boat.CharmedById == e.Id) {
                     // Désenvoûte une fois le temps de stun passé.
                     e.MermaidData.StunCooldown = Math.Max(0, e.MermaidData.StunCooldown - Clock.DeltaTime);

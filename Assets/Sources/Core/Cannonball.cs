@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sources.Toolbox;
 
 namespace Sources.Core {
@@ -17,7 +18,7 @@ namespace Sources.Core {
             var cannonballs = playState.Cannonballs;
             
             UpdateCannonballs(cannonballs);
-            CheckCollisions(gameState, cannonballs, playState.Region.Entities);
+            CheckCollisions(gameState, cannonballs, playState.Region.EntitiesByType);
         }
         
         private static void UpdateCannonballs(SwapbackArray<Cannonball> cannonballs) {
@@ -34,28 +35,30 @@ namespace Sources.Core {
         }
         
         private static void CheckCollisions(
-            GameState gameState, SwapbackArray<Cannonball> cannonballs, SwapbackArray<Entity> entities
+            GameState gameState, SwapbackArray<Cannonball> cannonballs, Dictionary<EntityType, SwapbackArray<Entity>> entitiesByType
         ) {
             var boxes = Services.Get<RendererConf>().BoundingBoxesByEntityType;
             var cannonballSize = boxes[EntityType.Cannonball];
             
-            for (var index = 0; index < entities.Count; index++) {
-                ref var e = ref entities.Items[index];
-                if (e.Destroy) continue;
-                
-                var entityBox = boxes[e.Type];
+            foreach (var (type, entities) in entitiesByType) {
+                for (var index = 0; index < entities.Count; index++) {
+                    ref var e = ref entities.Items[index];
+                    if (e.Destroy) continue;
+                    
+                    var entityBox = boxes[type];
 
-                for (var i = cannonballs.Count - 1; i >= 0; i--) {
-                    var cannonball = cannonballs.Items[i];
-                 
-                    if (Collisions.CheckCollisionBoxes(cannonball.Position, cannonballSize, e.Position, entityBox)) {
-                        cannonballs.RemoveAt(i);
-                        
-                        if (EntityConf.DestroyableEntityTypes.Contains(e.Type)) {
-                            e.Destroy = true;
+                    for (var i = cannonballs.Count - 1; i >= 0; i--) {
+                        var cannonball = cannonballs.Items[i];
+                     
+                        if (Collisions.CheckCollisionBoxes(cannonball.Position, cannonballSize, e.Position, entityBox)) {
+                            cannonballs.RemoveAt(i);
+                            
+                            if (EntityConf.DestroyableEntityTypes.Contains(type)) {
+                                e.Destroy = true;
 
-                            if (EntityConf.EntityScoreValues.TryGetValue(e.Type, out var score)) {
-                                ScoreLogic.Add(gameState, score);
+                                if (EntityConf.EntityScoreValues.TryGetValue(type, out var score)) {
+                                    ScoreLogic.Add(gameState, score);
+                                }
                             }
                         }
                     }
